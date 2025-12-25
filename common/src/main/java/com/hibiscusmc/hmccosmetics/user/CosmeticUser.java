@@ -26,6 +26,7 @@ import com.hibiscusmc.hmccosmetics.util.packets.HMCCPacketManager;
 import lombok.Getter;
 import me.lojosho.hibiscuscommons.hooks.Hooks;
 import me.lojosho.hibiscuscommons.nms.NMSHandlers;
+import me.lojosho.hibiscuscommons.scheduler.TaskHandle;
 import me.lojosho.hibiscuscommons.util.InventoryUtils;
 import me.lojosho.hibiscuscommons.util.packets.PacketManager;
 import org.bukkit.Bukkit;
@@ -40,22 +41,23 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 public class CosmeticUser implements CosmeticHolder {
     @Getter
     private final UUID uniqueId;
-    private int taskId = -1;
+    private TaskHandle tickTask = TaskHandle.NONE;
     private final HashMap<CosmeticSlot, Cosmetic> playerCosmetics = new HashMap<>();
     private UserWardrobeManager userWardrobeManager;
     private UserBalloonManager userBalloonManager;
     @Getter @Nullable
     private UserBackpackManager userBackpackManager;
+    private final AtomicReference<CosmeticUserSnapshot> packetSnapshot = new AtomicReference<>(CosmeticUserSnapshot.empty(null));
 
     // Cosmetic Settings/Toggles
     private final ArrayList<HiddenReason> hiddenReason = new ArrayList<>();
@@ -74,6 +76,7 @@ public class CosmeticUser implements CosmeticHolder {
 
     public CosmeticUser(@NotNull UUID uuid) {
         this.uniqueId = uuid;
+        this.packetSnapshot.set(CosmeticUserSnapshot.empty(uuid));
     }
 
     /**
@@ -104,6 +107,7 @@ public class CosmeticUser implements CosmeticHolder {
             this.applyHiddenState(userData.getHiddenReasons());
         }
 
+        refreshPacketSnapshot();
         return this;
     }
 
@@ -169,7 +173,7 @@ public class CosmeticUser implements CosmeticHolder {
     /**
      * Start ticking against the {@link CosmeticUser}.
      * @implNote The tick-rate is determined by the tick period specified in the configuration, if it is less-than or equal to 0
-     * there will be no {@link BukkitTask} created, and the {@link CosmeticUser#taskId} will be -1
+     * there will be no scheduled task created, and {@link CosmeticUser#tickTask} will remain {@link TaskHandle#NONE}
      */
     public final void startTicking() {
         int tickPeriod = Settings.getTickPeriod();
@@ -178,8 +182,12 @@ public class CosmeticUser implements CosmeticHolder {
             return;
         }
 
-        final BukkitTask task = Bukkit.getScheduler().runTaskTimer(HMCCosmeticsPlugin.getInstance(), this::tick, 0, tickPeriod);
-        this.taskId = task.getTaskId();
+        Player player = getPlayer();
+        if (player == null) {
+            return;
+        }
+        this.tickTask = HMCCosmeticsPlugin.getInstance().getScheduler()
+            .runAtEntityAtFixedRate(player, this::tick, 0, tickPeriod);
     }
 
     /**
@@ -204,9 +212,8 @@ public class CosmeticUser implements CosmeticHolder {
     }
 
     public void destroy() {
-        if(this.taskId != -1) { // ensure we're actually ticking this user.
-            Bukkit.getScheduler().cancelTask(taskId);
-        }
+        tickTask.cancel();
+        tickTask = TaskHandle.NONE;
 
         despawnBackpack();
         despawnBalloon();
@@ -253,6 +260,7 @@ public class CosmeticUser implements CosmeticHolder {
         // API
         PlayerCosmeticPostEquipEvent postEquipEvent = new PlayerCosmeticPostEquipEvent(this, cosmetic);
         Bukkit.getPluginManager().callEvent(postEquipEvent);
+        refreshPacketSnapshot();
     }
 
     /**
@@ -289,6 +297,7 @@ public class CosmeticUser implements CosmeticHolder {
         colors.remove(slot);
         playerCosmetics.remove(slot);
         removeArmor(slot);
+        refreshPacketSnapshot();
     }
 
     @Override
@@ -313,6 +322,7 @@ public class CosmeticUser implements CosmeticHolder {
         }
 
         behavior.dispatchUpdate(this);
+        refreshPacketSnapshot();
         return true;
     }
 
@@ -370,6 +380,7 @@ public class CosmeticUser implements CosmeticHolder {
             );
             MessagesUtil.sendDebugMessages("updateCosmetic (All) - end - " + items.size());
         }
+        refreshPacketSnapshot();
     }
 
     public ItemStack getUserCosmeticItem(@NotNull CosmeticSlot slot) {
@@ -508,6 +519,7 @@ public class CosmeticUser implements CosmeticHolder {
         if (userWardrobeManager == null) {
             userWardrobeManager = new UserWardrobeManager(this, wardrobe);
             userWardrobeManager.start();
+            refreshPacketSnapshot();
         }
     }
 
@@ -543,13 +555,15 @@ public class CosmeticUser implements CosmeticHolder {
                     WardrobeSettings.getTransitionStay(),
                     WardrobeSettings.getTransitionFadeOut()
             );
-            Bukkit.getScheduler().runTaskLater(HMCCosmeticsPlugin.getInstance(), () -> {
+            HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntityLater(getPlayer(), () -> {
                 userWardrobeManager.end();
                 userWardrobeManager = null;
+                refreshPacketSnapshot();
             }, WardrobeSettings.getTransitionDelay());
         } else {
             userWardrobeManager.end();
             userWardrobeManager = null;
+            refreshPacketSnapshot();
         }
     }
 
@@ -565,12 +579,14 @@ public class CosmeticUser implements CosmeticHolder {
         if (this.userBackpackManager != null) return;
         this.userBackpackManager = new UserBackpackManager(this);
         userBackpackManager.spawnBackpack(cosmeticBackpackType);
+        refreshPacketSnapshot();
     }
 
     public void despawnBackpack() {
         if (userBackpackManager == null) return;
         userBackpackManager.despawnBackpack();
         userBackpackManager = null;
+        refreshPacketSnapshot();
     }
 
     public boolean isBackpackSpawned() {
@@ -587,19 +603,21 @@ public class CosmeticUser implements CosmeticHolder {
         org.bukkit.entity.Entity entity = getEntity();
 
         UserBalloonManager userBalloonManager1 = new UserBalloonManager(this, entity.getLocation());
-        userBalloonManager1.getModelEntity().teleport(entity.getLocation().add(cosmeticBalloonType.getBalloonOffset()));
+        userBalloonManager1.getModelEntity().teleportAsync(entity.getLocation().add(cosmeticBalloonType.getBalloonOffset()));
 
         userBalloonManager1.spawnModel(cosmeticBalloonType, getCosmeticColor(cosmeticBalloonType.getSlot()));
         userBalloonManager1.addPlayerToModel(this, cosmeticBalloonType, getCosmeticColor(cosmeticBalloonType.getSlot()));
 
         this.userBalloonManager = userBalloonManager1;
         //this.userBalloonManager = NMSHandlers.getHandler().spawnBalloon(this, cosmeticBalloonType);
+        refreshPacketSnapshot();
     }
 
     public void despawnBalloon() {
         if (this.userBalloonManager == null) return;
         this.userBalloonManager.remove();
         this.userBalloonManager = null;
+        refreshPacketSnapshot();
     }
 
     public void respawnBackpack() {
@@ -679,19 +697,31 @@ public class CosmeticUser implements CosmeticHolder {
     public void hidePlayer() {
         Player player = getPlayer();
         if (player == null) return;
-        for (final Player p : Bukkit.getOnlinePlayers()) {
-            p.hidePlayer(HMCCosmeticsPlugin.getInstance(), player);
-            player.hidePlayer(HMCCosmeticsPlugin.getInstance(), p);
+        List<Player> players = List.copyOf(Bukkit.getOnlinePlayers());
+        for (final Player viewer : players) {
+            HMCCosmeticsPlugin.getInstance().getScheduler()
+                .runAtEntity(viewer, () -> viewer.hidePlayer(HMCCosmeticsPlugin.getInstance(), player));
         }
+        HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntity(player, () -> {
+            for (final Player viewer : players) {
+                player.hidePlayer(HMCCosmeticsPlugin.getInstance(), viewer);
+            }
+        });
     }
 
     public void showPlayer() {
         Player player = getPlayer();
         if (player == null) return;
-        for (final Player p : Bukkit.getOnlinePlayers()) {
-            p.showPlayer(HMCCosmeticsPlugin.getInstance(), player);
-            player.showPlayer(HMCCosmeticsPlugin.getInstance(), p);
+        List<Player> players = List.copyOf(Bukkit.getOnlinePlayers());
+        for (final Player viewer : players) {
+            HMCCosmeticsPlugin.getInstance().getScheduler()
+                .runAtEntity(viewer, () -> viewer.showPlayer(HMCCosmeticsPlugin.getInstance(), player));
         }
+        HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntity(player, () -> {
+            for (final Player viewer : players) {
+                player.showPlayer(HMCCosmeticsPlugin.getInstance(), viewer);
+            }
+        });
     }
 
     public void hideCosmetics(HiddenReason reason) {
@@ -712,6 +742,7 @@ public class CosmeticUser implements CosmeticHolder {
         }
         updateCosmetic();
         MessagesUtil.sendDebugMessages("HideCosmetics");
+        refreshPacketSnapshot();
     }
 
     /**
@@ -748,6 +779,7 @@ public class CosmeticUser implements CosmeticHolder {
         }
         updateCosmetic();
         MessagesUtil.sendDebugMessages("ShowCosmetics");
+        refreshPacketSnapshot();
     }
 
 
@@ -774,6 +806,15 @@ public class CosmeticUser implements CosmeticHolder {
 
     public void clearHiddenReasons() {
         hiddenReason.clear();
+        refreshPacketSnapshot();
+    }
+
+    public @NotNull CosmeticUserSnapshot getPacketSnapshot() {
+        return packetSnapshot.get();
+    }
+
+    public void refreshPacketSnapshot() {
+        packetSnapshot.set(CosmeticUserSnapshot.fromUser(this));
     }
 
     public enum HiddenReason {

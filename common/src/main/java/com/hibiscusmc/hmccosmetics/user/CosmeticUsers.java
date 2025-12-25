@@ -61,6 +61,20 @@ public class CosmeticUsers {
         return COSMETIC_USERS.get(player.getUniqueId());
     }
 
+    @NotNull
+    public static CosmeticUserSnapshot getSnapshot(@NotNull Player player) {
+        return getSnapshot(player.getUniqueId());
+    }
+
+    @NotNull
+    public static CosmeticUserSnapshot getSnapshot(@NotNull UUID uuid) {
+        CosmeticUser user = COSMETIC_USERS.get(uuid);
+        if (user == null) {
+            return CosmeticUserSnapshot.empty(uuid);
+        }
+        return user.getPacketSnapshot();
+    }
+
     /**
      * This method gets the CosmeticUser from an entity id (said entity must be a player). This is not ideal, as it requires the plugin to go through all entities, but it's a possibility.
      * @param entityId The entity ID in an integer.

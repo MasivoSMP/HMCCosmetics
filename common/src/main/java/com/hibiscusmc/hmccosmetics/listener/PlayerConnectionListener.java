@@ -27,8 +27,8 @@ public class PlayerConnectionListener implements Listener {
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         if (DatabaseSettings.isEnabledDelay()) {
             MessagesUtil.sendDebugMessages("Delay Enabled with " + DatabaseSettings.getDelayLength() + " ticks");
-            Bukkit.getScheduler().runTaskLater(
-                HMCCosmeticsPlugin.getInstance(),
+            HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntityLater(
+                event.getPlayer(),
                 () -> this.loadUserData(event.getPlayer()),
                 DatabaseSettings.getDelayLength()
             );
@@ -46,7 +46,7 @@ public class PlayerConnectionListener implements Listener {
         if (preLoadEvent.isCancelled()) return;
 
         Database.get(playerId).thenAccept(userData -> {
-            Bukkit.getScheduler().runTask(HMCCosmeticsPlugin.getInstance(), () -> {
+            HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntity(player, () -> {
                 CosmeticUser cosmeticUser = CosmeticUsers.getProvider()
                     .createCosmeticUser(playerId)
                     .initialize(userData);
@@ -59,7 +59,7 @@ public class PlayerConnectionListener implements Listener {
                 Bukkit.getPluginManager().callEvent(playerLoadEvent);
 
                 // And finally, launch an update for the cosmetics they have.
-                Bukkit.getScheduler().runTaskLater(HMCCosmeticsPlugin.getInstance(), () -> {
+                HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntityLater(player, () -> {
                     if (cosmeticUser.getPlayer() == null) return;
                     cosmeticUser.updateCosmetic();
                 }, 4);

@@ -13,12 +13,18 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class OctreePlayerSearchEngine extends PlayerSearchEngine {
 
-    private final Map<UUID, Octree<Player>> worldOctrees = new HashMap<>();
-    private final Map<UUID, Octree.Point3D> playerPositions = new HashMap<>();
+    private final Map<UUID, Octree<Player>> worldOctrees = new ConcurrentHashMap<>();
+    private final Map<UUID, Octree.Point3D> playerPositions = new ConcurrentHashMap<>();
+    private final Map<UUID, Object> worldLocks = new ConcurrentHashMap<>();
 
     private final int WORLD_HALF_SIZE;
 
@@ -36,6 +42,10 @@ public class OctreePlayerSearchEngine extends PlayerSearchEngine {
         });
     }
 
+    private Object getWorldLock(World world) {
+        return worldLocks.computeIfAbsent(world.getUID(), $ -> new Object());
+    }
+
     private Octree.Point3D toPoint3D(Location location) {
         return new Octree.Point3D(location.getX(), location.getY(), location.getZ());
     }
@@ -43,10 +53,11 @@ public class OctreePlayerSearchEngine extends PlayerSearchEngine {
     public boolean addPlayer(Player player) {
         Octree<Player> octree = getOrCreateOctree(player.getWorld());
         Octree.Point3D point = toPoint3D(player.getLocation());
-
-        if(octree.insert(point, player)) {
-            playerPositions.put(player.getUniqueId(), point);
-            return true;
+        synchronized (getWorldLock(player.getWorld())) {
+            if (octree.insert(point, player)) {
+                playerPositions.put(player.getUniqueId(), point);
+                return true;
+            }
         }
         return false;
     }
@@ -55,8 +66,10 @@ public class OctreePlayerSearchEngine extends PlayerSearchEngine {
         Octree<Player> octree = worldOctrees.get(player.getWorld().getUID());
         if (octree == null) return false;
 
-        Octree.Point3D point = playerPositions.remove(player.getUniqueId());
-        if (point != null) return octree.remove(point, player);
+        synchronized (getWorldLock(player.getWorld())) {
+            Octree.Point3D point = playerPositions.remove(player.getUniqueId());
+            if (point != null) return octree.remove(point, player);
+        }
 
         return false;
     }
@@ -74,10 +87,12 @@ public class OctreePlayerSearchEngine extends PlayerSearchEngine {
         Octree.Point3D point = toPoint3D(location);
         Octree.BoundingBox searchArea = new Octree.BoundingBox(point, range);
 
-        return octree.queryRange(searchArea)
-                .stream()
-                .filter(Objects::nonNull)
-                .toList();
+        synchronized (getWorldLock(location.getWorld())) {
+            return octree.queryRange(searchArea)
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .toList();
+        }
     }
 
 

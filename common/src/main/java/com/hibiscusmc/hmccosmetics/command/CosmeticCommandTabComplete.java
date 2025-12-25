@@ -50,8 +50,9 @@ public class CosmeticCommandTabComplete implements TabCompleter {
             StringUtil.copyPartialMatches(args[0], completions, finalCompletions);
         }
 
-        if (!(sender instanceof Player)) return completions;
-        CosmeticUser user = CosmeticUsers.getUser(((Player) sender).getUniqueId());
+        if (!(sender instanceof Player senderPlayer)) return completions;
+        if (!Bukkit.isOwnedByCurrentRegion(senderPlayer)) return completions;
+        CosmeticUser user = CosmeticUsers.getUser(senderPlayer.getUniqueId());
         if (user == null) return completions; // User hasn't loaded in yet, can't do proper checks
 
         if (args.length == 2) {

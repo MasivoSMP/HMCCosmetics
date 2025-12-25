@@ -148,12 +148,14 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
     public void onEnd() {
         // Plugin shutdown logic
         for (Player player : Bukkit.getOnlinePlayers()) {
-            CosmeticUser user = CosmeticUsers.getUser(player);
-            if (user == null) continue;
-            if (user.isInWardrobe()) {
-                user.leaveWardrobe(true);
-            }
-            Database.save(user);
+            getScheduler().runAtEntity(player, () -> {
+                CosmeticUser user = CosmeticUsers.getUser(player);
+                if (user == null) return;
+                if (user.isInWardrobe()) {
+                    user.leaveWardrobe(true);
+                }
+                Database.save(user);
+            });
         }
     }
 

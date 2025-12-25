@@ -183,7 +183,7 @@ public class UserBalloonManager {
     }
 
     public void setLocation(Location location) {
-        this.getModelEntity().teleport(location);
+        this.getModelEntity().teleportAsync(location);
     }
 
     public Vector getVelocity() {

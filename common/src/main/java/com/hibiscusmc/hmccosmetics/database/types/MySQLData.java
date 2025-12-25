@@ -37,6 +37,7 @@ public class MySQLData extends SQLData {
 
         HMCCosmeticsPlugin plugin = HMCCosmeticsPlugin.getInstance();
         try {
+            validateConfiguration(plugin);
             openConnection();
             if (connection == null) throw new IllegalStateException("Connection is null");
             try (PreparedStatement preparedStatement =  connection.prepareStatement("CREATE TABLE IF NOT EXISTS `COSMETICDATABASE` " +
@@ -61,7 +62,7 @@ public class MySQLData extends SQLData {
 
     @Override
     public void clear(UUID uniqueId) {
-        Bukkit.getScheduler().runTaskAsynchronously(HMCCosmeticsPlugin.getInstance(), () -> {
+        HMCCosmeticsPlugin.getInstance().getScheduler().runAsync(() -> {
             try (PreparedStatement preparedSt = preparedStatement("DELETE FROM COSMETICDATABASE WHERE UUID=?;")) {
                 preparedSt.setString(1, uniqueId.toString());
                 preparedSt.executeUpdate();
@@ -90,7 +91,7 @@ public class MySQLData extends SQLData {
     }
 
     public void close() {
-        Bukkit.getScheduler().runTaskAsynchronously(HMCCosmeticsPlugin.getInstance(), () -> {
+        HMCCosmeticsPlugin.getInstance().getScheduler().runAsync(() -> {
             try {
                 if (connection == null) throw new IllegalStateException("Connection is null");
                 connection.close();
@@ -103,9 +104,34 @@ public class MySQLData extends SQLData {
     @NotNull
     private Properties setupProperties() {
         Properties props = new Properties();
-        props.setProperty("user", user);
-        props.setProperty("password", password);
+        String username = user == null ? "" : user;
+        String secret = password == null ? "" : password;
+        props.setProperty("user", username);
+        props.setProperty("password", secret);
         return props;
+    }
+
+    private void validateConfiguration(HMCCosmeticsPlugin plugin) {
+        boolean invalid = false;
+        if (host == null || host.isBlank()) {
+            plugin.getLogger().severe("MySQL host is missing in database-settings.");
+            invalid = true;
+        }
+        if (database == null || database.isBlank()) {
+            plugin.getLogger().severe("MySQL database is missing in database-settings.");
+            invalid = true;
+        }
+        if (user == null || user.isBlank()) {
+            plugin.getLogger().severe("MySQL username is missing in database-settings.");
+            invalid = true;
+        }
+        if (invalid) {
+            throw new IllegalStateException("Invalid MySQL configuration");
+        }
+        if (password == null) {
+            plugin.getLogger().warning("MySQL password is missing; using empty string.");
+            password = "";
+        }
     }
 
     private boolean isConnectionOpen() {

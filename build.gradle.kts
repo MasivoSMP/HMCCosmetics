@@ -92,7 +92,7 @@ allprojects {
         compileOnly("io.github.toxicity188:BetterCommand:1.3") //BetterCommand library
         //compileOnly("it.unimi.dsi:fastutil:8.5.14")
         compileOnly("org.projectlombok:lombok:1.18.34")
-        compileOnly("me.lojosho:HibiscusCommons:0.8.1-d9fbae1d")
+        compileOnly("me.lojosho:HibiscusCommons:0.8.3-dd545ed")
 
         // Handled by Spigot Library Loader ~ Deprecated as of Dec 16, 2025
         /*
@@ -183,6 +183,7 @@ bukkit {
     load = BukkitPluginDescription.PluginLoadOrder.POSTWORLD
     main = "com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin"
     apiVersion = "1.20"
+    foliaSupported = true
     authors = listOf("LoJoSho")
     depend = listOf("HibiscusCommons")
     softDepend = listOf("Nexo", "BetterHud", "ModelEngine", "Oraxen", "ItemsAdder", "Geary", "HMCColor", "WorldGuard", "MythicMobs", "PlaceholderAPI", "SuperVanish", "PremiumVanish", "LibsDisguises", "Denizen", "MMOItems", "Eco")

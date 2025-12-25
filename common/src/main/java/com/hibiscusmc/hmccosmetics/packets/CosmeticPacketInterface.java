@@ -2,14 +2,11 @@ package com.hibiscusmc.hmccosmetics.packets;
 
 import com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin;
 import com.hibiscusmc.hmccosmetics.config.Settings;
-import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetic;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
-import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticArmorType;
-import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticBackpackType;
 import com.hibiscusmc.hmccosmetics.gui.Menu;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
+import com.hibiscusmc.hmccosmetics.user.CosmeticUserSnapshot;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
-import com.hibiscusmc.hmccosmetics.user.manager.UserBackpackManager;
 import com.hibiscusmc.hmccosmetics.user.manager.UserWardrobeManager;
 import com.hibiscusmc.hmccosmetics.util.HMCCInventoryUtils;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
@@ -17,13 +14,17 @@ import com.hibiscusmc.hmccosmetics.util.packets.HMCCPacketManager;
 import me.lojosho.hibiscuscommons.packets.PacketAction;
 import me.lojosho.hibiscuscommons.packets.PacketInterface;
 import me.lojosho.hibiscuscommons.packets.wrapper.*;
-import org.bukkit.Bukkit;
+import me.lojosho.hibiscuscommons.util.EntityIdRegistry;
+import me.lojosho.hibiscuscommons.util.PacketThreadGate;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class CosmeticPacketInterface implements PacketInterface {
 
@@ -32,35 +33,24 @@ public class CosmeticPacketInterface implements PacketInterface {
         int windowId = wrapper.getWindowId();
         MessagesUtil.sendDebugMessages("writeContainerContent (windowid: " + windowId + " )");
         if (windowId != 0) return PacketAction.NOTHING;
+
+        CosmeticUserSnapshot snapshot = CosmeticUsers.getSnapshot(player);
+        if (snapshot.isInWardrobe()) return PacketAction.NOTHING;
+
         List<ItemStack> slotData = wrapper.getSlotData();
+        int maxSlots = slotData.size();
 
-        CosmeticUser user = CosmeticUsers.getUser(player);
-        if (user == null) return PacketAction.NOTHING;
-
-        HashMap<Integer, ItemStack> cosmeticItems = new HashMap<>();
-
-        if (!user.isInWardrobe()) {
-            for (Cosmetic cosmetic : user.getCosmetics()) {
-                if (cosmetic instanceof CosmeticArmorType armorType) {
-                    boolean requireEmpty = Settings.getSlotOption(armorType.getEquipSlot()).isRequireEmpty();
-                    boolean isAir = user.getPlayer().getInventory().getItem(armorType.getEquipSlot()).getType().isAir();
-                    MessagesUtil.sendDebugMessages("Menu Fired (Checks) - " + armorType.getId() + " - " + requireEmpty + " - " + isAir);
-                    if (requireEmpty && !isAir) continue;
-                    cosmeticItems.put(HMCCInventoryUtils.getPacketArmorSlot(armorType.getEquipSlot()), user.getUserCosmeticItem(armorType));
-                }
-            }
-        }
-
-        for (int slot = 0; slot < 46; slot++) {
+        for (int slot = 0; slot < maxSlots; slot++) {
             if ((slot >= 5 && slot <= 8) || slot == 45) {
-                if (!cosmeticItems.containsKey(slot)) continue;
-                slotData.set(slot, cosmeticItems.get(slot));
-                if (Settings.isDebugMode()) MessagesUtil.sendDebugMessages("Set " + slot + " as " + cosmeticItems.get(slot));
+                ItemStack override = snapshot.getContainerOverride(slot);
+                if (override == null) continue;
+                slotData.set(slot, override);
+                if (Settings.isDebugMode()) MessagesUtil.sendDebugMessages("Set " + slot + " as " + override);
             }
         }
 
         wrapper.setSlotData(slotData);
-        MessagesUtil.sendDebugMessages("Menu Fired, updated cosmetics " + " on slotdata " + windowId + " with " + slotData.size());
+        MessagesUtil.sendDebugMessages("Menu Fired, updated cosmetics on slotdata " + windowId + " with " + slotData.size());
         return PacketAction.CHANGED;
     }
 
@@ -68,58 +58,43 @@ public class CosmeticPacketInterface implements PacketInterface {
     public @NotNull PacketAction writeSlotContent(@NotNull Player player, @NotNull SlotContentWrapper wrapper) {
         int windowId = wrapper.getWindowId();
         int slot = wrapper.getSlot();
-        ItemStack itemStack = wrapper.getItemStack();
 
         MessagesUtil.sendDebugMessages("SetSlot Initial ");
         if (windowId != 0) return PacketAction.NOTHING;
 
-        CosmeticUser user = CosmeticUsers.getUser(player);
-        if (user == null || user.isInWardrobe()) return PacketAction.NOTHING;
+        CosmeticUserSnapshot snapshot = CosmeticUsers.getSnapshot(player);
+        if (snapshot.isInWardrobe()) return PacketAction.NOTHING;
 
         MessagesUtil.sendDebugMessages("SetSlot Slot " + slot);
         CosmeticSlot cosmeticSlot = HMCCInventoryUtils.NMSCosmeticSlot(slot);
         EquipmentSlot equipmentSlot = HMCCInventoryUtils.getPacketArmorSlot(slot);
         if (cosmeticSlot == null || equipmentSlot == null) return PacketAction.NOTHING;
-        if (!user.hasCosmeticInSlot(cosmeticSlot)) return PacketAction.NOTHING;
-        if (Settings.getSlotOption(equipmentSlot).isRequireEmpty()) {
-            if (!player.getInventory().getItem(equipmentSlot).getType().isAir()) return PacketAction.NOTHING;
-        }
-        wrapper.setItemStack(user.getUserCosmeticItem(cosmeticSlot));
+        if (!snapshot.hasCosmeticInSlot(cosmeticSlot)) return PacketAction.NOTHING;
+
+        ItemStack override = snapshot.getContainerOverride(slot);
+        if (override == null) return PacketAction.NOTHING;
+
+        wrapper.setItemStack(override);
         return PacketAction.CHANGED;
     }
 
     @Override
     public @NotNull PacketAction writeEquipmentContent(@NotNull Player player, @NotNull EntityEquipmentWrapper wrapper) {
         if (player.getEntityId() != wrapper.getEntityId()) return PacketAction.NOTHING;
-        CosmeticUser user = CosmeticUsers.getUser(player);
-        if (user == null || user.isInWardrobe()) return PacketAction.NOTHING;
+
+        CosmeticUserSnapshot snapshot = CosmeticUsers.getSnapshot(player);
+        if (snapshot.isInWardrobe()) return PacketAction.NOTHING;
+
         Map<EquipmentSlot, ItemStack> armor = wrapper.getArmor();
-
-        for (Map.Entry<EquipmentSlot, ItemStack> armorSlot : armor.entrySet()) {
-            EquipmentSlot slot = armorSlot.getKey();
-
-            if (slot == EquipmentSlot.HAND) {
-                if (user.getPlayer().getUniqueId() == player.getUniqueId())
-                    continue; // When a player scrolls real fast, it messes up the mainhand. This fixes it
-                if (user.getPlayer() != null && user.getPlayer().isInvisible())
-                    continue; // Fixes integration with GSit still showing mainhand even when hidden
-                armor.put(slot, player.getInventory().getItemInMainHand());
-            } else {
-                CosmeticSlot cosmeticSlot = HMCCInventoryUtils.BukkitCosmeticSlot(slot);
-                if (cosmeticSlot == null) continue;
-                if (Settings.getSlotOption(slot).isRequireEmpty() && player.getInventory().getItem(slot).getType().isAir())
-                    continue;
-
-                CosmeticArmorType cosmeticArmor = (CosmeticArmorType) user.getCosmetic(cosmeticSlot);
-                if (cosmeticArmor == null) continue;
-                ItemStack item = user.getUserCosmeticItem(cosmeticSlot);
-                if (item == null) continue;
-                armor.put(slot, item);
+        for (EquipmentSlot slot : armor.keySet()) {
+            ItemStack override = snapshot.getEquipmentOverride(slot);
+            if (override != null) {
+                armor.put(slot, override);
             }
         }
 
         wrapper.setArmor(armor);
-        MessagesUtil.sendDebugMessages("Equipment for " + user.getPlayer().getName() + " has been updated for " + player.getName());
+        MessagesUtil.sendDebugMessages("Equipment for " + player.getName() + " has been updated for " + player.getName());
         return PacketAction.CHANGED;
     }
 
@@ -127,51 +102,24 @@ public class CosmeticPacketInterface implements PacketInterface {
     public @NotNull PacketAction writePassengerContent(@NotNull Player player, @NotNull PassengerWrapper wrapper) {
         // TODO: Figure out what to do with this, because with it in, it ruins backpacks (they keep getting thrown to random locations).
         return PacketAction.NOTHING;
-        /*
-        CosmeticUser viewerUser = CosmeticUsers.getUser(player);
-        if (viewerUser == null || viewerUser.isInWardrobe()) return PacketAction.NOTHING;
-
-        int ownerId = wrapper.getOwner();
-
-        Optional<CosmeticUser> optionalCosmeticUser = CosmeticUsers.values().stream().filter(user -> user.getPlayer() != null).filter(user -> ownerId == user.getPlayer().getEntityId()).findFirst();
-        if (optionalCosmeticUser.isEmpty()) return PacketAction.NOTHING;
-        CosmeticUser user = optionalCosmeticUser.get();
-
-        Cosmetic backpackCosmetic = user.getCosmetic(CosmeticSlot.BACKPACK);
-        if (backpackCosmetic == null) return PacketAction.NOTHING;
-        if (!(backpackCosmetic instanceof CosmeticBackpackType cosmeticBackpackType)) return PacketAction.NOTHING;
-        if (user.getUniqueId().equals(viewerUser.getUniqueId())) {
-            if (cosmeticBackpackType.isFirstPersonCompadible()) return PacketAction.NOTHING;
-        }
-
-        if (user.getUserBackpackManager() == null) return PacketAction.NOTHING;
-
-        List<Integer> originalPassengers = wrapper.getPassengers();
-        List<Integer> passengers = new ArrayList<>(user.getUserBackpackManager().getEntityManager().getIds());
-        passengers.addAll(originalPassengers);
-        wrapper.setPassengers(passengers);
-        return PacketAction.CHANGED;
-         */
     }
 
     @Override
     public PacketAction readPlayerScale(@NotNull Player player, @NotNull PlayerScaleWrapper wrapper) {
-        int entityId = wrapper.getEntityId();
-        Player changedPlayer = Bukkit.getOnlinePlayers().stream()
-            .filter(onlinePlayer -> onlinePlayer.getEntityId() == entityId)
-            .findFirst()
-            .orElse(null);
-        if (changedPlayer == null) return PacketAction.NOTHING;
+        UUID uuid = EntityIdRegistry.getUuid(wrapper.getEntityId());
+        if (uuid == null) return PacketAction.NOTHING;
 
-        CosmeticUser cosmeticUser = CosmeticUsers.getUser(changedPlayer.getUniqueId());
-        if (cosmeticUser == null || cosmeticUser.isInWardrobe()) return PacketAction.NOTHING;
+        CosmeticUserSnapshot snapshot = CosmeticUsers.getSnapshot(uuid);
+        if (snapshot.isInWardrobe()) return PacketAction.NOTHING;
 
-        UserBackpackManager backpack = cosmeticUser.getUserBackpackManager();
-        if (backpack != null) {
-            for (int cosmeticId : backpack.getEntityManager().getIds()) {
+        List<Integer> backpackEntityIds = snapshot.getBackpackEntityIds();
+        if (backpackEntityIds.isEmpty()) return PacketAction.NOTHING;
+
+        PacketThreadGate.runOnEntity(HMCCosmeticsPlugin.getInstance(), player, () -> {
+            for (int cosmeticId : backpackEntityIds) {
                 HMCCPacketManager.sendEntityScalePacket(cosmeticId, wrapper.getScale(), Collections.singletonList(player));
             }
-        }
+        });
 
         return PacketAction.NOTHING;
     }
@@ -182,12 +130,17 @@ public class CosmeticPacketInterface implements PacketInterface {
         int slotNumber = wrapper.getSlotNumber();
         if (clickType != 0 || slotNumber == -999) return PacketAction.NOTHING;
 
-        CosmeticUser user = CosmeticUsers.getUser(player);
-        if (user == null || user.isInWardrobe()) return PacketAction.NOTHING;
-        CosmeticSlot cosmeticSlot = HMCCInventoryUtils.NMSCosmeticSlot(slotNumber);
-        if (cosmeticSlot == null || !user.hasCosmeticInSlot(cosmeticSlot)) return PacketAction.NOTHING;
+        CosmeticUserSnapshot snapshot = CosmeticUsers.getSnapshot(player);
+        if (snapshot.isInWardrobe()) return PacketAction.NOTHING;
 
-        Bukkit.getScheduler().runTaskLater(HMCCosmeticsPlugin.getInstance(), () -> user.updateCosmetic(cosmeticSlot), 1);
+        CosmeticSlot cosmeticSlot = HMCCInventoryUtils.NMSCosmeticSlot(slotNumber);
+        if (cosmeticSlot == null || !snapshot.hasCosmeticInSlot(cosmeticSlot)) return PacketAction.NOTHING;
+
+        PacketThreadGate.runOnEntityLater(HMCCosmeticsPlugin.getInstance(), player, () -> {
+            CosmeticUser user = CosmeticUsers.getUser(player);
+            if (user == null) return;
+            user.updateCosmetic(cosmeticSlot);
+        }, 1);
         MessagesUtil.sendDebugMessages("Packet fired, updated cosmetic " + cosmeticSlot);
         return PacketAction.NOTHING;
     }
@@ -200,30 +153,33 @@ public class CosmeticPacketInterface implements PacketInterface {
         // If it's not SWAP_ITEM_WITH_OFFHAND, ignore
         if (!actionType.equalsIgnoreCase("SWAP_ITEM_WITH_OFFHAND")) return PacketAction.NOTHING;
 
-        CosmeticUser user = CosmeticUsers.getUser(player);
-        if (user == null) {
-            MessagesUtil.sendDebugMessages("EntityStatus User is null");
-            return PacketAction.NOTHING;
-        }
-        if (!user.hasCosmeticInSlot(CosmeticSlot.OFFHAND)) return PacketAction.NOTHING;
+        CosmeticUserSnapshot snapshot = CosmeticUsers.getSnapshot(player);
+        if (!snapshot.hasCosmeticInSlot(CosmeticSlot.OFFHAND)) return PacketAction.NOTHING;
         return PacketAction.CANCELLED;
     }
 
     @Override
     public @NotNull PacketAction readPlayerArm(@NotNull Player player, @NotNull PlayerSwingWrapper wrapper) {
-        CosmeticUser user = CosmeticUsers.getUser(player);
-        if (user == null || !user.isInWardrobe() || !user.getWardrobeManager().getWardrobeStatus().equals(UserWardrobeManager.WardrobeStatus.RUNNING)) return PacketAction.NOTHING;
+        CosmeticUserSnapshot snapshot = CosmeticUsers.getSnapshot(player);
+        if (!snapshot.isInWardrobe() || !snapshot.isWardrobeRunning()) return PacketAction.NOTHING;
 
-        Menu menu = user.getWardrobeManager().getLastOpenMenu();
-        if (menu == null) return PacketAction.NOTHING;
-        menu.openMenu(user);
+        PacketThreadGate.runOnEntity(HMCCosmeticsPlugin.getInstance(), player, () -> {
+            CosmeticUser user = CosmeticUsers.getUser(player);
+            if (user == null || !user.isInWardrobe()) return;
+            if (user.getWardrobeManager().getWardrobeStatus() != UserWardrobeManager.WardrobeStatus.RUNNING) return;
+
+            Menu menu = user.getWardrobeManager().getLastOpenMenu();
+            if (menu != null) {
+                menu.openMenu(user);
+            }
+        });
         return PacketAction.CANCELLED;
     }
 
     @Override
     public @NotNull PacketAction readEntityHandle(@NotNull Player player, @NotNull PlayerInteractWrapper wrapper) {
-        CosmeticUser user = CosmeticUsers.getUser(player);
-        if (user == null || !user.isInWardrobe()) return PacketAction.NOTHING;
-        else return PacketAction.CANCELLED;
+        CosmeticUserSnapshot snapshot = CosmeticUsers.getSnapshot(player);
+        if (!snapshot.isInWardrobe()) return PacketAction.NOTHING;
+        return PacketAction.CANCELLED;
     }
 }
