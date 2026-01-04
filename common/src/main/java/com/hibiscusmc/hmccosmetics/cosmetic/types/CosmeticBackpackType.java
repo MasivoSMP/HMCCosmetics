@@ -46,7 +46,7 @@ public class CosmeticBackpackType extends Cosmetic implements CosmeticUpdateBeha
         }
 
         Location entityLocation = entity.getLocation();
-        Location loc = entityLocation.clone().add(0, 2, 0);
+        Location loc = entityLocation.clone().add(Settings.getBackpackOffset());
 
         UserBackpackManager backpackManager = user.getUserBackpackManager();
         if(backpackManager == null) return;
@@ -62,7 +62,7 @@ public class CosmeticBackpackType extends Cosmetic implements CosmeticUpdateBeha
         List<Player> newViewers = entityManager.refreshViewers(loc);
 
         if(!newViewers.isEmpty()) {
-            HMCCPacketManager.spawnInvisibleArmorstand(firstArmorStandId, entityLocation, UUID.randomUUID(), newViewers);
+            HMCCPacketManager.spawnInvisibleArmorstand(firstArmorStandId, loc, UUID.randomUUID(), newViewers);
             PacketManager.equipmentSlotUpdate(firstArmorStandId, EquipmentSlot.HEAD, user.getUserCosmeticItem(this, getItem()), newViewers);
 
             if (user.getPlayer() != null) {
@@ -74,21 +74,28 @@ public class CosmeticBackpackType extends Cosmetic implements CosmeticUpdateBeha
         }
 
         // If true, it will send the riding packet to all players. If false, it will send the riding packet only to new players
-        if (Settings.isBackpackForceRidingEnabled()) HMCCPacketManager.sendRidingPacket(entity.getEntityId(), firstArmorStandId, entityManager.getViewers());
-        else HMCCPacketManager.sendRidingPacket(entity.getEntityId(), firstArmorStandId, newViewers);
+        if (!Settings.isBackpackOffsetEnabled()) {
+            if (Settings.isBackpackForceRidingEnabled()) {
+                HMCCPacketManager.sendRidingPacket(entity.getEntityId(), firstArmorStandId, entityManager.getViewers());
+            } else {
+                HMCCPacketManager.sendRidingPacket(entity.getEntityId(), firstArmorStandId, newViewers);
+            }
+        }
 
         if (isFirstPersonCompadible() && !user.isInWardrobe() && user.getPlayer() != null) {
             List<Player> owner = List.of(user.getPlayer());
 
-            ArrayList<Integer> particleCloud = backpackManager.getAreaEffectEntityId();
-            for (int i = 0; i < particleCloud.size(); i++) {
-                if (i == 0) {
-                    HMCCPacketManager.sendRidingPacket(entity.getEntityId(), particleCloud.get(i), owner);
-                } else {
-                    HMCCPacketManager.sendRidingPacket(particleCloud.get(i - 1), particleCloud.get(i) , owner);
+            if (!Settings.isBackpackOffsetEnabled()) {
+                ArrayList<Integer> particleCloud = backpackManager.getAreaEffectEntityId();
+                for (int i = 0; i < particleCloud.size(); i++) {
+                    if (i == 0) {
+                        HMCCPacketManager.sendRidingPacket(entity.getEntityId(), particleCloud.get(i), owner);
+                    } else {
+                        HMCCPacketManager.sendRidingPacket(particleCloud.get(i - 1), particleCloud.get(i) , owner);
+                    }
                 }
+                HMCCPacketManager.sendRidingPacket(particleCloud.get(particleCloud.size() - 1), firstArmorStandId, owner);
             }
-            HMCCPacketManager.sendRidingPacket(particleCloud.get(particleCloud.size() - 1), firstArmorStandId, owner);
             if (!user.isHidden()) {
                 PacketManager.equipmentSlotUpdate(firstArmorStandId, EquipmentSlot.HEAD, user.getUserCosmeticItem(this, firstPersonBackpack), owner);
             }
@@ -106,7 +113,7 @@ public class CosmeticBackpackType extends Cosmetic implements CosmeticUpdateBeha
         }
 
         Location entityLocation = entity.getLocation();
-        Location loc = entityLocation.clone().add(0, 2, 0);
+        Location loc = entityLocation.clone().add(Settings.getBackpackOffset());
 
         UserBackpackManager backpackManager = user.getUserBackpackManager();
         if(backpackManager == null) return;

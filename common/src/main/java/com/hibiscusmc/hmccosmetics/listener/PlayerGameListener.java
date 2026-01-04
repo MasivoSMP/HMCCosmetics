@@ -9,6 +9,7 @@ import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticBackpackType;
 import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticBalloonType;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
+import com.hibiscusmc.hmccosmetics.user.manager.UserBalloonManager;
 import com.hibiscusmc.hmccosmetics.util.HMCCInventoryUtils;
 import com.hibiscusmc.hmccosmetics.util.HMCCServerUtils;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
@@ -317,10 +318,17 @@ public class PlayerGameListener implements Listener {
             Location npclocation = user.getWardrobeManager().getNpcLocation().clone().add(cosmetic.getBalloonOffset());
             // We know that no other entity besides a regular player will be in the wardrobe
             List<Player> viewer = List.of(user.getPlayer());
-            user.getBalloonManager().getPufferfish().spawnPufferfish(npclocation.clone().add(cosmetic.getBalloonOffset()), viewer);
-            HMCCPacketManager.sendLeashPacket(user.getBalloonManager().getPufferfishBalloonId(), user.getWardrobeManager().getNPC_ID(), viewer);
-            HMCCPacketManager.sendTeleportPacket(user.getBalloonManager().getPufferfishBalloonId(), npclocation, false, viewer);
-            user.getBalloonManager().getModelEntity().teleportAsync(npclocation);
+            if (user.getBalloonManager().getBalloonType() == UserBalloonManager.BalloonType.ITEM) {
+                user.getBalloonManager().spawnDisplay(npclocation, viewer);
+                HMCCPacketManager.sendTeleportPacket(user.getBalloonManager().getDisplayEntityId(), npclocation, false, viewer);
+                user.getBalloonManager().setLocation(npclocation);
+            }
+            if (cosmetic.isShowLead()) {
+                Location leadLocation = user.getBalloonManager().getLeadLocation(npclocation);
+                user.getBalloonManager().getPufferfish().spawnPufferfish(leadLocation, viewer);
+                HMCCPacketManager.sendLeashPacket(user.getBalloonManager().getPufferfishBalloonId(), user.getWardrobeManager().getNPC_ID(), viewer);
+                HMCCPacketManager.sendTeleportPacket(user.getBalloonManager().getPufferfishBalloonId(), leadLocation, false, viewer);
+            }
         }
     }
 

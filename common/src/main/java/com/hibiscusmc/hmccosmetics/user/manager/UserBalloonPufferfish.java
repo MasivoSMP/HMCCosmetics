@@ -31,6 +31,11 @@ public class UserBalloonPufferfish extends UserEntity {
     }
 
     public void spawnPufferfish(Location location, List<Player> sendTo) {
+        for (Player viewer : sendTo) {
+            if (!getViewers().contains(viewer)) {
+                getViewers().add(viewer);
+            }
+        }
         NMSHandlers.getHandler().getPacketHandler().sendInvisibleEntity(pufferFishEntityId, EntityType.PUFFERFISH, location, uuid, sendTo);
         /*
         HMCCPacketManager.sendEntitySpawnPacket(location, pufferFishEntityId, EntityType.PUFFERFISH, uuid, sendTo);

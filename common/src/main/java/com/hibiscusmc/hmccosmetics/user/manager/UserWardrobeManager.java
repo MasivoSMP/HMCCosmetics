@@ -1,6 +1,7 @@
 package com.hibiscusmc.hmccosmetics.user.manager;
 
 import com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin;
+import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.config.section.Wardrobe;
 import com.hibiscusmc.hmccosmetics.config.section.WardrobeLocation;
 import com.hibiscusmc.hmccosmetics.config.WardrobeSettings;
@@ -157,9 +158,11 @@ public class UserWardrobeManager {
                 // Maybe null as backpack maybe despawned before entering
                 if (user.getUserBackpackManager() == null) user.respawnBackpack();
                 if (user.isBackpackSpawned()) {
-                    user.getUserBackpackManager().getEntityManager().teleport(npcLocation.clone().add(0, 2, 0));
+                    user.getUserBackpackManager().getEntityManager().teleport(npcLocation.clone().add(Settings.getBackpackOffset()));
                     PacketManager.equipmentSlotUpdate(user.getUserBackpackManager().getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(user.getCosmetic(CosmeticSlot.BACKPACK)), viewer);
-                    HMCCPacketManager.ridingMountPacket(NPC_ID, user.getUserBackpackManager().getFirstArmorStandId(), viewer);
+                    if (!Settings.isBackpackOffsetEnabled()) {
+                        HMCCPacketManager.ridingMountPacket(NPC_ID, user.getUserBackpackManager().getFirstArmorStandId(), viewer);
+                    }
                 }
             }
 
@@ -168,13 +171,25 @@ public class UserWardrobeManager {
                 if (user.isBalloonSpawned()) {
                     CosmeticBalloonType cosmetic = (CosmeticBalloonType) user.getCosmetic(CosmeticSlot.BALLOON);
                     user.getBalloonManager().sendRemoveLeashPacket(viewer);
-                    user.getBalloonManager().sendLeashPacket(NPC_ID);
-                    //PacketManager.sendLeashPacket(VIEWER.getBalloonEntity().getModelId(), NPC_ID, viewer);
 
                     Location balloonLocation = npcLocation.clone().add(cosmetic.getBalloonOffset());
-                    HMCCPacketManager.sendTeleportPacket(user.getBalloonManager().getPufferfishBalloonId(), balloonLocation, false, viewer);
-                    user.getBalloonManager().getModelEntity().teleportAsync(balloonLocation);
                     user.getBalloonManager().setLocation(balloonLocation);
+
+                    if (user.getBalloonManager().getBalloonType() == UserBalloonManager.BalloonType.ITEM) {
+                        if (!user.getBalloonManager().isDisplayViewer(player)) {
+                            user.getBalloonManager().spawnDisplay(balloonLocation, viewer);
+                        }
+                        HMCCPacketManager.sendTeleportPacket(user.getBalloonManager().getDisplayEntityId(), balloonLocation, false, viewer);
+                    }
+
+                    if (user.getBalloonManager().hasLead()) {
+                        Location leadLocation = user.getBalloonManager().getLeadLocation(balloonLocation);
+                        if (!user.getBalloonManager().isLeadViewer(player)) {
+                            user.getBalloonManager().getPufferfish().spawnPufferfish(leadLocation, viewer);
+                        }
+                        HMCCPacketManager.sendTeleportPacket(user.getBalloonManager().getPufferfishBalloonId(), leadLocation, false, viewer);
+                        HMCCPacketManager.sendLeashPacket(user.getBalloonManager().getPufferfishBalloonId(), NPC_ID, viewer);
+                    }
                 }
             }
 
@@ -340,8 +355,11 @@ public class UserWardrobeManager {
             }
 
             if (user.hasCosmeticInSlot(CosmeticSlot.BACKPACK) && user.getUserBackpackManager() != null) {
-                HMCCPacketManager.sendTeleportPacket(user.getUserBackpackManager().getFirstArmorStandId(), location, false, viewer);
-                HMCCPacketManager.ridingMountPacket(NPC_ID, user.getUserBackpackManager().getFirstArmorStandId(), viewer);
+                Location backpackLocation = location.clone().add(Settings.getBackpackOffset());
+                HMCCPacketManager.sendTeleportPacket(user.getUserBackpackManager().getFirstArmorStandId(), backpackLocation, false, viewer);
+                if (!Settings.isBackpackOffsetEnabled()) {
+                    HMCCPacketManager.ridingMountPacket(NPC_ID, user.getUserBackpackManager().getFirstArmorStandId(), viewer);
+                }
                 user.getUserBackpackManager().getEntityManager().setRotation(nextyaw);
                 HMCCPacketManager.sendEntityDestroyPacket(user.getUserBackpackManager().getFirstArmorStandId(), outsideViewers);
             }
@@ -351,10 +369,12 @@ public class UserWardrobeManager {
                 //PacketManager.sendTeleportPacket(user.getBalloonManager().getPufferfishBalloonId(), npcLocation.add(Settings.getBalloonOffset()), false, viewer);
                 //user.getBalloonManager().getModelEntity().teleport(npcLocation.add(Settings.getBalloonOffset()));
                 user.getBalloonManager().sendRemoveLeashPacket(outsideViewers);
-                if (user.getBalloonManager().getBalloonType() != UserBalloonManager.BalloonType.MODELENGINE) {
-                    HMCCPacketManager.sendEntityDestroyPacket(user.getBalloonManager().getModelId(), outsideViewers);
+                if (user.getBalloonManager().getBalloonType() == UserBalloonManager.BalloonType.ITEM) {
+                    HMCCPacketManager.sendEntityDestroyPacket(user.getBalloonManager().getDisplayEntityId(), outsideViewers);
                 }
-                user.getBalloonManager().sendLeashPacket(NPC_ID);
+                if (user.getBalloonManager().hasLead()) {
+                    HMCCPacketManager.sendLeashPacket(user.getBalloonManager().getPufferfishBalloonId(), NPC_ID, viewer);
+                }
             }
 
             if (WardrobeSettings.isEquipPumpkin()) {

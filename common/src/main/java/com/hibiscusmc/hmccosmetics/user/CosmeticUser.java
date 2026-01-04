@@ -601,12 +601,37 @@ public class CosmeticUser implements CosmeticHolder {
         if (this.userBalloonManager != null) return;
 
         org.bukkit.entity.Entity entity = getEntity();
+        if (entity == null) return;
 
         UserBalloonManager userBalloonManager1 = new UserBalloonManager(this, entity.getLocation());
-        userBalloonManager1.getModelEntity().teleportAsync(entity.getLocation().add(cosmeticBalloonType.getBalloonOffset()));
+        Location balloonLocation = entity.getLocation().clone().add(cosmeticBalloonType.getBalloonOffset());
+        if (Settings.isBalloonHeadForward()) {
+            balloonLocation.setPitch(0);
+        }
+        userBalloonManager1.setLocation(balloonLocation);
 
         userBalloonManager1.spawnModel(cosmeticBalloonType, getCosmeticColor(cosmeticBalloonType.getSlot()));
-        userBalloonManager1.addPlayerToModel(this, cosmeticBalloonType, getCosmeticColor(cosmeticBalloonType.getSlot()));
+        if (userBalloonManager1.getBalloonType() == UserBalloonManager.BalloonType.NONE) {
+            this.userBalloonManager = userBalloonManager1;
+            refreshPacketSnapshot();
+            return;
+        }
+        List<Player> newViewers = userBalloonManager1.refreshDisplayViewers(balloonLocation);
+        if (!newViewers.isEmpty()) {
+            userBalloonManager1.spawnDisplay(balloonLocation, newViewers);
+        }
+        if (!isHidden() && cosmeticBalloonType.isShowLead()) {
+            Location leadLocation = userBalloonManager1.getLeadLocation(balloonLocation);
+            List<Player> leadViewers = userBalloonManager1.refreshLeadViewers(leadLocation);
+            if (!leadViewers.isEmpty()) {
+                userBalloonManager1.getPufferfish().spawnPufferfish(leadLocation, leadViewers);
+            }
+            HMCCPacketManager.sendLeashPacket(
+                userBalloonManager1.getPufferfishBalloonId(),
+                entity.getEntityId(),
+                userBalloonManager1.getPufferfish().getViewers()
+            );
+        }
 
         this.userBalloonManager = userBalloonManager1;
         //this.userBalloonManager = NMSHandlers.getHandler().spawnBalloon(this, cosmeticBalloonType);
@@ -768,8 +793,10 @@ public class CosmeticUser implements CosmeticHolder {
             if (!isBalloonSpawned()) respawnBalloon();
             CosmeticBalloonType balloonType = (CosmeticBalloonType) getCosmetic(CosmeticSlot.BALLOON);
             getBalloonManager().addPlayerToModel(this, balloonType);
-            List<Player> viewer = HMCCPacketManager.getViewers(getEntity().getLocation());
-            HMCCPacketManager.sendLeashPacket(getBalloonManager().getPufferfishBalloonId(), getPlayer().getEntityId(), viewer);
+            if (getBalloonManager().hasLead()) {
+                List<Player> viewer = HMCCPacketManager.getViewers(getEntity().getLocation());
+                HMCCPacketManager.sendLeashPacket(getBalloonManager().getPufferfishBalloonId(), getPlayer().getEntityId(), viewer);
+            }
         }
         if (hasCosmeticInSlot(CosmeticSlot.BACKPACK)) {
             if (!isBackpackSpawned()) respawnBackpack();

@@ -95,6 +95,11 @@ cosmetic-settings:
     x: 0.5
     y: 3
     z: 0.5
+  # how the backpack should be positioned relative to the player
+  backpack-offset:
+    x: 0
+    y: -2
+    z: 0
 
 menu-settings:
   click-cooldown:

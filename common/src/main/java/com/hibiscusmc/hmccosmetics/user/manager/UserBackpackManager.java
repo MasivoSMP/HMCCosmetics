@@ -2,12 +2,14 @@ package com.hibiscusmc.hmccosmetics.user.manager;
 
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
 import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticBackpackType;
+import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
 import com.hibiscusmc.hmccosmetics.util.packets.HMCCPacketManager;
 import lombok.Getter;
 import me.lojosho.hibiscuscommons.util.ServerUtils;
 import me.lojosho.hibiscuscommons.util.packets.PacketManager;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -52,11 +54,12 @@ public class UserBackpackManager {
     }
 
     private void spawn(CosmeticBackpackType cosmeticBackpackType) {
+        Location backpackLocation = user.getEntity().getLocation().clone().add(Settings.getBackpackOffset());
         getEntityManager().setIds(List.of(invisibleArmorStand));
-        getEntityManager().teleport(user.getEntity().getLocation());
+        getEntityManager().teleport(backpackLocation);
         List<Player> outsideViewers = getEntityManager().getViewers();
 
-        HMCCPacketManager.spawnInvisibleArmorstand(getFirstArmorStandId(), user.getEntity().getLocation(), UUID.randomUUID(), outsideViewers);
+        HMCCPacketManager.spawnInvisibleArmorstand(getFirstArmorStandId(), backpackLocation, UUID.randomUUID(), outsideViewers);
 
         if (user.getPlayer() != null) {
             AttributeInstance scaleAttribute = user.getPlayer().getAttribute(Attribute.SCALE);
@@ -78,7 +81,7 @@ public class UserBackpackManager {
         ArrayList<Player> owner = new ArrayList<>();
         if (user.getPlayer() != null) owner.add(user.getPlayer());
 
-        if (cosmeticBackpackType.isFirstPersonCompadible()) {
+        if (cosmeticBackpackType.isFirstPersonCompadible() && !Settings.isBackpackOffsetEnabled()) {
             for (int i = particleCloud.size(); i < cosmeticBackpackType.getHeight(); i++) {
                 int entityId = ServerUtils.getNextEntityId();
                 HMCCPacketManager.spawnCloudAndHandleEffect(entityId, user.getEntity().getLocation(), UUID.randomUUID(), HMCCPacketManager.getViewers(user.getEntity().getLocation()));
@@ -92,8 +95,18 @@ public class UserBackpackManager {
             HMCCPacketManager.sendRidingPacket(particleCloud.getLast(), user.getUserBackpackManager().getFirstArmorStandId(), owner);
             if (!user.isHidden()) PacketManager.equipmentSlotUpdate(user.getUserBackpackManager().getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(cosmeticBackpackType, cosmeticBackpackType.getFirstPersonBackpack()), owner);
         }
+        if (cosmeticBackpackType.isFirstPersonCompadible() && user.getPlayer() != null && !user.isHidden()) {
+            PacketManager.equipmentSlotUpdate(
+                getFirstArmorStandId(),
+                EquipmentSlot.HEAD,
+                user.getUserCosmeticItem(cosmeticBackpackType, cosmeticBackpackType.getFirstPersonBackpack()),
+                List.of(user.getPlayer())
+            );
+        }
         PacketManager.equipmentSlotUpdate(getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(cosmeticBackpackType), outsideViewers);
-        HMCCPacketManager.sendRidingPacket(entity.getEntityId(), passengerIDs, outsideViewers);
+        if (!Settings.isBackpackOffsetEnabled()) {
+            HMCCPacketManager.sendRidingPacket(entity.getEntityId(), passengerIDs, outsideViewers);
+        }
 
         MessagesUtil.sendDebugMessages("spawnBackpack Bukkit - Finish");
     }

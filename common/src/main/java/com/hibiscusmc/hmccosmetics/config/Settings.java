@@ -22,6 +22,7 @@ public class Settings {
     private static final String CONFIG_VERSION = "config-version";
     private static final String COSMETIC_SETTINGS_PATH = "cosmetic-settings";
     private static final String BALLOON_OFFSET = "balloon-offset";
+    private static final String BACKPACK_OFFSET = "backpack-offset";
     private static final String VIEW_DISTANCE_PATH = "view-distance";
     private static final String DYE_MENU_PATH = "dye-menu";
     private static final String DYE_MENU_NAME = "title";
@@ -127,6 +128,8 @@ public class Settings {
     private static boolean menuClickCooldown;
     @Getter
     private static Vector balloonOffset;
+    @Getter
+    private static Vector backpackOffset;
     @Getter
     private static String cosmeticEquipClickType;
     @Getter
@@ -239,6 +242,13 @@ public class Settings {
         final var balloonSection = cosmeticSettings.node(BALLOON_OFFSET);
         balloonOffset = loadVector(balloonSection);
 
+        final var backpackSection = cosmeticSettings.node(BACKPACK_OFFSET);
+        if (backpackSection.virtual()) {
+            backpackOffset = new Vector(0, -2, 0);
+        } else {
+            backpackOffset = loadVector(backpackSection);
+        }
+
         ConfigurationNode dyeMenuSettings = source.node(DYE_MENU_PATH);
 
         dyeMenuName = dyeMenuSettings.node(DYE_MENU_NAME).getString("Dye Menu");
@@ -267,6 +277,10 @@ public class Settings {
 
     public static Vector loadVector(final ConfigurationNode config) {
         return new Vector(config.node("x").getDouble(), config.node("y").getDouble(), config.node("z").getDouble());
+    }
+
+    public static boolean isBackpackOffsetEnabled() {
+        return backpackOffset != null && backpackOffset.lengthSquared() > 0.000001;
     }
 
     public static SlotOptionConfig getSlotOption(EquipmentSlot slot) {
