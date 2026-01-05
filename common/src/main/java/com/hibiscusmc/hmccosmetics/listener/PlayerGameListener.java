@@ -79,6 +79,21 @@ public class PlayerGameListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        CosmeticUser user = CosmeticUsers.getUser(event.getPlayer());
+        if (user == null || !user.isInWardrobe()) return;
+        event.setCancelled(true);
+        MessagesUtil.sendMessage(event.getPlayer(), "wardrobe-command-blocked");
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+        CosmeticUser user = CosmeticUsers.getUser(event.getPlayer());
+        if (user == null || !user.isInWardrobe()) return;
+        event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         CosmeticUser user = CosmeticUsers.getUser(event.getPlayer().getUniqueId());
 

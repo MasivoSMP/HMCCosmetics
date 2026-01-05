@@ -13,6 +13,7 @@ on-click-cooldown: "%prefix% <red>You are on cooldown!"
 
 opened-wardrobe: "%prefix% <gradient:#6D9DC5:#45CDE9>Opened wardrobe!"
 closed-wardrobe: "%prefix% <gradient:#6D9DC5:#45CDE9>Closed wardrobe!"
+wardrobe-command-blocked: "%prefix% <red>You cannot use commands while in the wardrobe!"
 not-near-wardrobe: "%prefix% <red>You are not near the wardrobe!"
 set-wardrobe-location: "%prefix% <gradient:#6D9DC5:#45CDE9>Set new wardrobe location!"
 set-wardrobe-viewing: "%prefix% <gradient:#6D9DC5:#45CDE9>Set new wardrobe viewing location!"
