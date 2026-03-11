@@ -28,6 +28,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -48,6 +49,12 @@ public class PlayerGameListener implements Listener {
         //if (event.getSlotType() != InventoryType.SlotType.ARMOR) return;
         CosmeticUser user = CosmeticUsers.getUser(event.getWhoClicked().getUniqueId());
         if (user == null) return;
+
+        if (user.isInWardrobe() && (event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP)) {
+            event.setCancelled(true);
+            return;
+        }
+
         ItemStack item = event.getCurrentItem();
         if (item == null) return;
 
@@ -244,6 +251,13 @@ public class PlayerGameListener implements Listener {
     public void onPlayerPickupItem(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         CosmeticUser user = CosmeticUsers.getUser(event.getEntity().getUniqueId());
+        if (user == null) return;
+        if (user.isInWardrobe()) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        CosmeticUser user = CosmeticUsers.getUser(event.getPlayer());
         if (user == null) return;
         if (user.isInWardrobe()) event.setCancelled(true);
     }
