@@ -97,6 +97,14 @@ public final class HMCCosmeticsAPI {
         user.addCosmetic(cosmetic, color);
     }
 
+    public static boolean hasPurchasedCosmetic(@NotNull CosmeticUser user, @NotNull Cosmetic cosmetic) {
+        return user.hasPurchasedCosmetic(cosmetic);
+    }
+
+    public static boolean canUseCosmetic(@NotNull CosmeticUser user, @NotNull Cosmetic cosmetic) {
+        return user.canUseCosmetic(cosmetic);
+    }
+
     /**
      * Removes a cosmetic from a specified slot for the given user.
      *

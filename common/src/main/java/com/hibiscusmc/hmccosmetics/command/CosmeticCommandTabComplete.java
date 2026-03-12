@@ -152,7 +152,7 @@ public class CosmeticCommandTabComplete implements TabCompleter {
 
         if (args.length == 2) {
             for (Cosmetic cosmetic : Cosmetics.values()) {
-                if (!user.canEquipCosmetic(cosmetic)) continue;
+                if (!user.canUseCosmetic(cosmetic)) continue;
                 completitions.add(cosmetic.getId());
             }
             //completitions.addAll(Cosmetics.keys());

@@ -157,8 +157,13 @@ public class CosmeticCommand implements CommandExecutor {
                         return;
                     }
 
-                    if (!user.canEquipCosmetic(selectedCosmetic) && !isConsole) {
+                    if (!isConsole && !user.hasCosmeticPermission(selectedCosmetic)) {
                         if (!isSilent) MessagesUtil.sendMessage(target, "no-cosmetic-permission");
+                        return;
+                    }
+
+                    if (!isConsole && !user.canUseCosmetic(selectedCosmetic)) {
+                        if (!isSilent) MessagesUtil.sendMessage(target, "no-cosmetic-purchase");
                         return;
                     }
 

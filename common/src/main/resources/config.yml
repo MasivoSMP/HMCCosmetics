@@ -107,6 +107,9 @@ menu-settings:
     # This is the cooldown in miliseconds for the menu. This is useful for servers that have a lot of players.
     # (So if a user clicks the menu, it won't spam the server with requesting it to refresh itself)
     time: 1000
+  purchase-lore:
+    - "<gray>Precio: <yellow>$%price%"
+    - "<gray>Click para comprar"
   shading:
     # Below is the shading mechanism behind cosmetic items. This is a bit complicated, but it allows for a lot of customization.
     # The shading is done through the title and by shifting textures around. This is done by offsets.

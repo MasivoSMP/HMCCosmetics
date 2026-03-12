@@ -251,7 +251,7 @@ public class UserWardrobeManager {
             // For Wardrobe Temp Cosmetics
             for (Cosmetic cosmetic : user.getCosmetics()) {
                 MessagesUtil.sendDebugMessages("Checking... " + cosmetic.getId());
-                if (!user.canEquipCosmetic(cosmetic)) {
+                if (!user.canUseCosmetic(cosmetic)) {
                     MessagesUtil.sendDebugMessages("Unable to keep " + cosmetic.getId());
                     user.removeCosmeticSlot(cosmetic.getSlot());
                 }

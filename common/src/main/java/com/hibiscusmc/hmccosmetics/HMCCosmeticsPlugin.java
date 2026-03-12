@@ -24,6 +24,7 @@ import com.hibiscusmc.hmccosmetics.packets.CosmeticPacketInterface;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
 import com.hibiscusmc.hmccosmetics.util.search.PlayerSearchManager;
+import com.hibiscusmc.hmccosmetics.util.EconomyUtil;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
 import com.hibiscusmc.hmccosmetics.util.TranslationUtil;
 import lombok.Getter;
@@ -220,6 +221,7 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
 
         // Cosmetics setup
         Cosmetics.setup();
+        EconomyUtil.setup();
 
         // Menus setup
         Menus.setup();

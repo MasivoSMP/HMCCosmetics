@@ -7,19 +7,24 @@ import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
 import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetics;
 import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticArmorType;
 import com.hibiscusmc.hmccosmetics.gui.action.Actions;
-import com.hibiscusmc.hmccosmetics.gui.special.DyeMenu;
 import com.hibiscusmc.hmccosmetics.gui.special.DyeMenuProvider;
 import com.hibiscusmc.hmccosmetics.gui.type.Type;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
+import com.hibiscusmc.hmccosmetics.util.EconomyUtil;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
+import me.lojosho.hibiscuscommons.HibiscusCommonsPlugin;
 import me.lojosho.hibiscuscommons.config.serializer.ItemSerializer;
 import me.lojosho.hibiscuscommons.hooks.Hooks;
 import me.lojosho.shaded.configurate.ConfigurationNode;
 import me.lojosho.shaded.configurate.serialize.SerializationException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -50,7 +55,8 @@ public class TypeCosmetic extends Type {
             return;
         }
 
-        if (!cosmeticHolder.canEquipCosmetic(cosmetic)) {
+        CosmeticUser user = CosmeticHolder.ensureSingleCosmeticUser(viewer, cosmeticHolder);
+        if (!user.hasCosmeticPermission(cosmetic) && !cosmeticHolder.canEquipCosmetic(cosmetic)) {
             MessagesUtil.sendDebugMessages("No Cosmetic Permission");
             MessagesUtil.sendMessage(viewer, "no-cosmetic-permission");
             return;
@@ -69,6 +75,7 @@ public class TypeCosmetic extends Type {
 
         final boolean isRequiredClick = requiredClick.equalsIgnoreCase("ANY") || requiredClick.equalsIgnoreCase(clickType.name());
         final boolean isDyeClick = dyeClick.equalsIgnoreCase("ANY") || dyeClick.equalsIgnoreCase(clickType.name());
+        final boolean opensDyeMenu = cosmetic.isDyeable() && isDyeClick && DyeMenuProvider.hasMenuProvider();
 
         if (!isRequiredClick) isUnEquippingCosmetic = false;
 
@@ -100,12 +107,20 @@ public class TypeCosmetic extends Type {
                 MessagesUtil.sendDebugMessages("on-unequip");
                 cosmeticHolder.removeCosmeticSlot(cosmetic);
             } else {
+                if (!user.canUseCosmetic(cosmetic)) {
+                    if ((isRequiredClick || opensDyeMenu) && cosmetic.requiresPurchase() && user.hasCosmeticPermission(cosmetic)) {
+                        if (!user.purchaseCosmetic(cosmetic, getMenuCosmeticName(viewer, config, cosmetic))) return;
+                    } else {
+                        return;
+                    }
+                }
+
                 if (!actionConfig.node("on-equip").virtual()) actionStrings.addAll(actionConfig.node("on-equip").getList(String.class));
                 MessagesUtil.sendDebugMessages("on-equip");
                 MessagesUtil.sendDebugMessages("Preparing for on-equip with the following checks:");
                 MessagesUtil.sendDebugMessages("CosmeticDyeable? " + cosmetic.isDyeable() + " / isDyeClick? " + isDyeClick + " / isHMCColorActive? " + Hooks.isActiveHook("HMCColor"));
                 // TODO: Redo this
-                if (cosmetic.isDyeable() && isDyeClick && DyeMenuProvider.hasMenuProvider()) {
+                if (opensDyeMenu) {
                     DyeMenuProvider.openMenu(viewer, cosmeticHolder, cosmetic);
                 } else if (isRequiredClick) {
                     cosmeticHolder.addCosmetic(cosmetic);
@@ -140,16 +155,13 @@ public class TypeCosmetic extends Type {
 
     @Override
     public ItemStack setItem(@NotNull Player viewer, @NotNull CosmeticHolder cosmeticHolder, @NotNull ConfigurationNode config, @NotNull ItemStack itemStack, int slot) {
-        if (itemStack.hasItemMeta()) itemStack.setItemMeta(processItemMeta(viewer, itemStack.getItemMeta()));
-        else MessagesUtil.sendDebugMessages("ItemStack has no ItemMeta?");
-
         if (config.node("cosmetic").virtual()) {
-            return itemStack;
+            return finalizeItem(viewer, cosmeticHolder, null, itemStack);
         }
         String cosmeticName = config.node("cosmetic").getString();
         Cosmetic cosmetic = Cosmetics.getCosmetic(cosmeticName);
         if (cosmetic == null) {
-            return itemStack;
+            return finalizeItem(viewer, cosmeticHolder, null, itemStack);
         }
 
         if (cosmeticHolder.hasCosmeticInSlot(cosmetic) && (!config.node("equipped-item").virtual() || !config.node("locked-equipped-item").virtual())) {
@@ -165,9 +177,7 @@ public class TypeCosmetic extends Type {
             } catch (SerializationException e) {
                 throw new RuntimeException(e);
             }
-            if (itemStack.hasItemMeta()) itemStack.setItemMeta(processItemMeta(viewer, itemStack.getItemMeta()));
-            else MessagesUtil.sendDebugMessages("ItemStack has no ItemMeta in equipped item?");
-            return itemStack;
+            return finalizeItem(viewer, cosmeticHolder, cosmetic, itemStack);
         }
 
         if (!cosmeticHolder.canEquipCosmetic(cosmetic, true) && !config.node("locked-item").virtual()) {
@@ -183,10 +193,62 @@ public class TypeCosmetic extends Type {
             } catch (SerializationException e) {
                 throw new RuntimeException(e);
             }
-            if (itemStack.hasItemMeta()) itemStack.setItemMeta(processItemMeta(viewer, itemStack.getItemMeta()));
-            else MessagesUtil.sendDebugMessages("ItemStack has no ItemMeta in locked item?");
+            return finalizeItem(viewer, cosmeticHolder, cosmetic, itemStack);
+        }
+        return finalizeItem(viewer, cosmeticHolder, cosmetic, itemStack);
+    }
+
+    private @NotNull ItemStack finalizeItem(@NotNull Player viewer, @NotNull CosmeticHolder cosmeticHolder, Cosmetic cosmetic, @NotNull ItemStack itemStack) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) {
+            MessagesUtil.sendDebugMessages("ItemStack has no ItemMeta?");
             return itemStack;
         }
+
+        if (cosmetic != null && cosmeticHolder instanceof CosmeticUser user && shouldAppendPurchaseLore(user, cosmetic)) {
+            appendPurchaseLore(itemMeta, cosmetic.getPrice());
+        }
+
+        itemStack.setItemMeta(processItemMeta(viewer, itemMeta));
         return itemStack;
+    }
+
+    private boolean shouldAppendPurchaseLore(@NotNull CosmeticUser user, @NotNull Cosmetic cosmetic) {
+        return cosmetic.requiresPurchase()
+            && user.hasCosmeticPermission(cosmetic)
+            && !user.hasPurchasedCosmetic(cosmetic);
+    }
+
+    private void appendPurchaseLore(@NotNull ItemMeta itemMeta, double price) {
+        List<String> purchaseLore = Settings.getPurchaseLore();
+        if (purchaseLore.isEmpty()) return;
+
+        String formattedPrice = EconomyUtil.formatPrice(price);
+        if (HibiscusCommonsPlugin.isOnPaper()) {
+            List<Component> lore = itemMeta.hasLore() && itemMeta.lore() != null
+                ? new ArrayList<>(itemMeta.lore())
+                : new ArrayList<>();
+            for (String line : purchaseLore) {
+                lore.add(MiniMessage.miniMessage()
+                    .deserialize(line.replace("%price%", formattedPrice))
+                    .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+            }
+            itemMeta.lore(lore);
+            return;
+        }
+
+        List<String> lore = itemMeta.hasLore() && itemMeta.getLore() != null
+            ? new ArrayList<>(itemMeta.getLore())
+            : new ArrayList<>();
+        for (String line : purchaseLore) {
+            lore.add(line.replace("%price%", formattedPrice));
+        }
+        itemMeta.setLore(lore);
+    }
+
+    private @NotNull String getMenuCosmeticName(@NotNull Player viewer, @NotNull ConfigurationNode config, @NotNull Cosmetic cosmetic) {
+        String rawName = config.node("item", "name").getString();
+        if (rawName == null || rawName.isBlank()) return cosmetic.getId();
+        return MessagesUtil.processStringNoKeyString(viewer, rawName);
     }
 }

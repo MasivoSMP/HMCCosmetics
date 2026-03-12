@@ -3,6 +3,7 @@ package com.hibiscusmc.hmccosmetics.gui;
 import com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin;
 import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
+import dev.triumphteam.gui.guis.Gui;
 import me.lojosho.shaded.configurate.CommentedConfigurationNode;
 import me.lojosho.shaded.configurate.ConfigurateException;
 import me.lojosho.shaded.configurate.yaml.YamlConfigurationLoader;
@@ -23,6 +24,7 @@ public class Menus {
 
     private static final HashMap<String, Menu> MENUS = new HashMap<>();
     private static final Map<UUID, Long> COOLDOWNS = new ConcurrentHashMap<>();
+    private static final Map<UUID, MenuSession> SESSIONS = new ConcurrentHashMap<>();
 
     public static void addMenu(@NotNull Menu menu) {
         MENUS.put(menu.getId().toUpperCase(), menu);
@@ -83,9 +85,23 @@ public class Menus {
         COOLDOWNS.remove(uuid);
     }
 
+    public static void setSession(@NotNull UUID uuid, @NotNull MenuSession session) {
+        SESSIONS.put(uuid, session);
+    }
+
+    @Nullable
+    public static MenuSession getSession(@NotNull UUID uuid) {
+        return SESSIONS.get(uuid);
+    }
+
+    public static void removeSession(@NotNull UUID uuid, @NotNull Gui gui) {
+        SESSIONS.computeIfPresent(uuid, (ignored, session) -> session.getGui() == gui ? null : session);
+    }
+
     public static void setup() {
         MENUS.clear();
         COOLDOWNS.clear();
+        SESSIONS.clear();
 
         File cosmeticFolder = new File(HMCCosmeticsPlugin.getInstance().getDataFolder() + "/menus");
         if (!cosmeticFolder.exists()) cosmeticFolder.mkdir();

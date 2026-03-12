@@ -1,16 +1,12 @@
 package com.hibiscusmc.hmccosmetics.database.types;
 
 import com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin;
-import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetic;
-import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
 import com.hibiscusmc.hmccosmetics.database.UserData;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,8 +22,7 @@ public abstract class SQLData extends Data {
                 try (ResultSet rs = preparedStatement.executeQuery()) {
                     if (rs.next()) {
                         String rawData = rs.getString("COSMETICS");
-                        HashMap<CosmeticSlot, Map.Entry<Cosmetic, Integer>> cosmetics = deserializeData(rawData);
-                        data.setCosmetics(cosmetics);
+                        deserializeData(data, rawData);
                     }
                 }
             } catch (SQLException e) {

@@ -6,6 +6,7 @@ import com.hibiscusmc.hmccosmetics.api.events.PlayerMenuOpenEvent;
 import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetic;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
+import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
 import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetics;
 import com.hibiscusmc.hmccosmetics.gui.type.Type;
 import com.hibiscusmc.hmccosmetics.gui.type.Types;
@@ -22,7 +23,6 @@ import me.lojosho.hibiscuscommons.hooks.Hooks;
 import me.lojosho.hibiscuscommons.scheduler.TaskHandle;
 import me.lojosho.hibiscuscommons.util.AdventureUtils;
 import me.lojosho.shaded.configurate.ConfigurationNode;
-import me.lojosho.shaded.configurate.serialize.SerializationException;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -30,9 +30,11 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 public class Menu {
 
@@ -49,6 +51,13 @@ public class Menu {
     @Getter
     private final String permissionNode;
     private final HashMap<Integer, List<MenuItem>> items;
+    private final List<MenuItem> cosmeticItems;
+    @Nullable
+    private final CosmeticSlot cosmeticType;
+    private final boolean cosmeticTypeConfigured;
+    private final List<Integer> configuredCosmeticSlots;
+    private final List<Integer> cosmeticSlots;
+    private final HashMap<Integer, Integer> cosmeticSlotIndexes;
     @Getter
     private final int refreshRate;
     @Getter
@@ -66,36 +75,35 @@ public class Menu {
         shading = config.node("shading").getBoolean(Settings.isDefaultShading());
 
         items = new HashMap<>();
+        cosmeticItems = new ArrayList<>();
+        String configuredCosmeticType = config.node("cosmetic-type").getString("");
+        cosmeticTypeConfigured = !configuredCosmeticType.isBlank();
+        cosmeticType = resolveCosmeticType(configuredCosmeticType);
+        configuredCosmeticSlots = getSlots(config.node("cosmetic-slots"));
+        cosmeticSlots = new ArrayList<>();
+        cosmeticSlotIndexes = new HashMap<>();
         setupItems();
+        setupCosmeticSlots();
 
         Menus.addMenu(this);
     }
 
     private void setupItems() {
         for (ConfigurationNode config : config.node("items").childrenMap().values()) {
+            int priority = config.node("priority").getInt(1);
 
-            List<String> slotString;
-            try {
-                slotString = config.node("slots").getList(String.class);
-            } catch (SerializationException e) {
-                continue;
-            }
-            if (slotString == null) {
-                MessagesUtil.sendDebugMessages("Unable to get valid slot for " + config.key().toString());
-                continue;
+            Type type = Types.getDefaultType();
+            if (!config.node("type").virtual()) {
+                String typeId = config.node("type").getString("");
+                if (Types.isType(typeId)) type = Types.getType(typeId);
             }
 
-            List<Integer> slots = getSlots(slotString);
-
-            if (slots.isEmpty()) {
-                MessagesUtil.sendDebugMessages("Slot is empty for " + config.key().toString());
-                continue;
-            }
+            List<Integer> slots = getSlots(config.node("slots"));
 
             ItemStack item;
             try {
                 item = ItemSerializer.INSTANCE.deserialize(ItemStack.class, config.node("item"));
-            } catch (SerializationException e) {
+            } catch (Exception e) {
                 MessagesUtil.sendDebugMessages("Unable to get valid item for " + config.key().toString() + " " + e.getMessage());
                 continue;
             }
@@ -105,16 +113,22 @@ public class Menu {
                 continue;
             }
 
-            int priority = config.node("priority").getInt(1);
+            MenuItem menuItem = new MenuItem(slots, item, type, priority, config);
 
-            Type type = Types.getDefaultType();
-            if (!config.node("type").virtual()) {
-                String typeId = config.node("type").getString("");
-                if (Types.isType(typeId)) type = Types.getType(typeId);
+            if (type instanceof TypeCosmetic && slots.isEmpty() && !configuredCosmeticSlots.isEmpty()) {
+                if (!matchesCosmeticType(menuItem)) {
+                    continue;
+                }
+                cosmeticItems.add(menuItem);
+                continue;
+            }
+
+            if (slots.isEmpty()) {
+                MessagesUtil.sendDebugMessages("Slot is empty for " + config.key().toString());
+                continue;
             }
 
             for (Integer slot : slots) {
-                MenuItem menuItem = new MenuItem(slots, item, type, priority, config);
                 if (items.containsKey(slot)) {
                     List<MenuItem> menuItems = items.get(slot);
                     menuItems.add(menuItem);
@@ -124,6 +138,29 @@ public class Menu {
                     items.put(slot, new ArrayList<>(List.of(menuItem)));
                 }
             }
+        }
+    }
+
+    private void setupCosmeticSlots() {
+        cosmeticSlots.clear();
+        cosmeticSlotIndexes.clear();
+
+        int menuSize = rows * 9;
+        for (Integer slot : configuredCosmeticSlots) {
+            if (slot < 0 || slot >= menuSize) {
+                MessagesUtil.sendDebugMessages("Ignoring cosmetic slot " + slot + " in menu " + getId() + " because it is outside the menu size.", Level.WARNING);
+                continue;
+            }
+
+            if (items.containsKey(slot)) {
+                MessagesUtil.sendDebugMessages("Ignoring cosmetic slot " + slot + " in menu " + getId() + " because a normal menu item already uses it.", Level.WARNING);
+                continue;
+            }
+
+            if (cosmeticSlotIndexes.containsKey(slot)) continue;
+
+            cosmeticSlotIndexes.put(slot, cosmeticSlots.size());
+            cosmeticSlots.add(slot);
         }
     }
 
@@ -151,21 +188,24 @@ public class Menu {
         final Component component = AdventureUtils.MINI_MESSAGE.deserialize(Hooks.processPlaceholders(viewer, this.title));
         Gui gui = Gui.gui()
                 .title(component)
+                .rows(rows)
                 .type(GuiType.CHEST)
                 .inventory((title, owner, type) -> Bukkit.createInventory(owner, rows * 9, title))
                 .create();
+        MenuSession session = new MenuSession(this, gui, cosmeticHolder);
 
         gui.setDefaultClickAction(event -> event.setCancelled(true));
 
         AtomicReference<TaskHandle> refreshTask = new AtomicReference<>(TaskHandle.NONE);
         gui.setOpenGuiAction(event -> {
+            Menus.setSession(viewer.getUniqueId(), session);
             Runnable run = () -> {
                 if (gui.getInventory().getViewers().isEmpty()) {
                     TaskHandle task = refreshTask.getAndSet(TaskHandle.NONE);
                     task.cancel();
                 }
 
-                updateMenu(viewer, cosmeticHolder, gui);
+                updateMenu(viewer, cosmeticHolder, gui, session);
             };
 
             if (refreshRate != -1) {
@@ -185,13 +225,15 @@ public class Menu {
                     .runAtEntity(viewer, () -> Bukkit.getPluginManager().callEvent(closeEvent));
             }
 
+            Menus.removeSession(viewer.getUniqueId(), gui);
             TaskHandle task = refreshTask.getAndSet(TaskHandle.NONE);
             task.cancel();
         });
 
         Runnable openGuiTask = () -> {
+            Menus.setSession(viewer.getUniqueId(), session);
             gui.open(viewer);
-            updateMenu(viewer, cosmeticHolder, gui); // fixes shading? I know I do this twice but it's easier than writing a whole new class to deal with this shit
+            updateMenu(viewer, cosmeticHolder, gui, session); // fixes shading? I know I do this twice but it's easier than writing a whole new class to deal with this shit
         };
 
         // API
@@ -210,7 +252,58 @@ public class Menu {
         }
     }
 
-    private void updateMenu(Player viewer, CosmeticHolder cosmeticHolder, Gui gui) {
+    public void refresh(@NotNull Player viewer, @NotNull MenuSession session) {
+        updateMenu(viewer, session.getCosmeticHolder(), session.getGui(), session);
+    }
+
+    public int getTotalPages() {
+        if (cosmeticSlots.isEmpty() || cosmeticItems.isEmpty()) return 1;
+        return Math.max(1, (int) Math.ceil((double) cosmeticItems.size() / cosmeticSlots.size()));
+    }
+
+    private boolean matchesCosmeticType(@NotNull MenuItem item) {
+        if (!cosmeticTypeConfigured) return true;
+        if (cosmeticType == null) return false;
+
+        String cosmeticId = item.itemConfig().node("cosmetic").getString("");
+        Cosmetic cosmetic = Cosmetics.getCosmetic(cosmeticId);
+        if (cosmetic == null) {
+            MessagesUtil.sendDebugMessages("Unable to resolve cosmetic '" + cosmeticId + "' for type filtering in menu " + getId(), Level.WARNING);
+            return false;
+        }
+
+        return cosmeticType.equals(cosmetic.getSlot());
+    }
+
+    @Nullable
+    private CosmeticSlot resolveCosmeticType(@Nullable String rawType) {
+        if (rawType == null || rawType.isBlank()) return null;
+
+        String normalized = rawType.trim().toUpperCase(Locale.ROOT);
+        CosmeticSlot exact = CosmeticSlot.valueOf(normalized);
+        if (exact != null) return exact;
+
+        CosmeticSlot alias = switch (normalized) {
+            case "HAT", "HATS", "HELMET", "HELMETS" -> CosmeticSlot.HELMET;
+            case "CHESTPLATE", "CHESTPLATES", "CHEST", "CHESTS" -> CosmeticSlot.CHESTPLATE;
+            case "LEGGING", "LEGGINGS", "PANTS", "PANT", "TROUSERS" -> CosmeticSlot.LEGGINGS;
+            case "BOOT", "BOOTS", "SHOE", "SHOES" -> CosmeticSlot.BOOTS;
+            case "HAND", "HANDS", "OFFHAND", "OFFHANDS" -> CosmeticSlot.OFFHAND;
+            case "MAINHAND", "MAINHANDS" -> CosmeticSlot.MAINHAND;
+            case "BACKPACK", "BACKPACKS" -> CosmeticSlot.BACKPACK;
+            case "BALLOON", "BALLOONS" -> CosmeticSlot.BALLOON;
+            default -> null;
+        };
+
+        if (alias == null) {
+            MessagesUtil.sendDebugMessages("Invalid cosmetic-type '" + rawType + "' in menu " + getId() + ". Valid values are cosmetic slot names or aliases such as hats, hands, backpacks, or balloons.", Level.WARNING);
+        }
+
+        return alias;
+    }
+
+    private void updateMenu(Player viewer, CosmeticHolder cosmeticHolder, Gui gui, MenuSession session) {
+        session.setPage(session.getPage());
         StringBuilder title = new StringBuilder(this.title);
 
         int row = 0;
@@ -229,12 +322,9 @@ public class Menu {
                 }
 
                 boolean occupied = false;
-
-                if (items.containsKey(i)) {
-                    // Handles the items
-                    List<MenuItem> menuItems = items.get(i);
-                    MenuItem item = menuItems.get(0);
-                    updateItem(viewer, cosmeticHolder, gui, i);
+                MenuItem item = getPrimaryMenuItem(i, session);
+                if (item != null) {
+                    updateItem(viewer, cosmeticHolder, gui, session, i);
 
                     if (item.type() instanceof TypeCosmetic) {
                         Cosmetic cosmetic = Cosmetics.getCosmetic(item.itemConfig().node("cosmetic").getString(""));
@@ -250,6 +340,8 @@ public class Menu {
                         }
                         occupied = true;
                     }
+                } else {
+                    clearSlot(gui, i);
                 }
                 if (occupied) {
                     title.append(Settings.getBackground().replaceAll("<row>", String.valueOf(row)));
@@ -261,17 +353,17 @@ public class Menu {
             gui.updateTitle(AdventureUtils.MINI_MESSAGE.deserialize(Hooks.processPlaceholders(viewer, title.toString())));
         } else {
             for (int i = 0; i < gui.getInventory().getSize(); i++) {
-                if (items.containsKey(i)) {
-                    updateItem(viewer, cosmeticHolder, gui, i);
-                }
+                updateItem(viewer, cosmeticHolder, gui, session, i);
             }
         }
     }
 
-    private void updateItem(Player viewer, CosmeticHolder cosmeticHolder, Gui gui, int slot) {
-        if (!items.containsKey(slot)) return;
-        List<MenuItem> menuItems = items.get(slot);
-        if (menuItems.isEmpty()) return;
+    private void updateItem(Player viewer, CosmeticHolder cosmeticHolder, Gui gui, MenuSession session, int slot) {
+        List<MenuItem> menuItems = getMenuItems(slot, session);
+        if (menuItems.isEmpty()) {
+            clearSlot(gui, slot);
+            return;
+        }
 
         for (MenuItem item : menuItems) {
             Type type = item.type();
@@ -293,13 +385,68 @@ public class Menu {
                 MessagesUtil.sendDebugMessages("Updated Menu Item in slot number " + slot);
                 final ClickType clickType = event.getClick();
                 if (type != null) type.run(viewer, cosmeticHolder, item.itemConfig(), clickType);
-                updateMenu(viewer, cosmeticHolder, gui);
+                updateMenu(viewer, cosmeticHolder, gui, session);
             });
 
             MessagesUtil.sendDebugMessages("Set an item in slot " + slot + " in the menu of " + getId());
             gui.updateItem(slot, guiItem);
-            break;
+            return;
         }
+
+        clearSlot(gui, slot);
+    }
+
+    private void clearSlot(@NotNull Gui gui, int slot) {
+        if (slot < 0 || slot >= gui.getInventory().getSize()) {
+            return;
+        }
+
+        gui.getGuiItems().remove(slot);
+        gui.getInventory().setItem(slot, null);
+    }
+
+    @NotNull
+    private List<MenuItem> getMenuItems(int slot, @NotNull MenuSession session) {
+        if (items.containsKey(slot)) return items.get(slot);
+
+        MenuItem cosmeticItem = getCosmeticMenuItem(slot, session.getPage());
+        if (cosmeticItem == null) return Collections.emptyList();
+        return Collections.singletonList(cosmeticItem);
+    }
+
+    private MenuItem getPrimaryMenuItem(int slot, @NotNull MenuSession session) {
+        List<MenuItem> menuItems = getMenuItems(slot, session);
+        if (menuItems.isEmpty()) return null;
+        return menuItems.get(0);
+    }
+
+    private MenuItem getCosmeticMenuItem(int slot, int page) {
+        Integer slotIndex = cosmeticSlotIndexes.get(slot);
+        if (slotIndex == null || cosmeticSlots.isEmpty()) return null;
+
+        int cosmeticIndex = (page * cosmeticSlots.size()) + slotIndex;
+        if (cosmeticIndex < 0 || cosmeticIndex >= cosmeticItems.size()) return null;
+        return cosmeticItems.get(cosmeticIndex);
+    }
+
+    @NotNull
+    private List<Integer> getSlots(@NotNull ConfigurationNode slotNode) {
+        if (slotNode.virtual()) return new ArrayList<>();
+
+        List<String> slotStrings = new ArrayList<>();
+        if (!slotNode.childrenList().isEmpty()) {
+            for (ConfigurationNode child : slotNode.childrenList()) {
+                Object valueObject = child.raw();
+                String value = valueObject == null ? null : String.valueOf(valueObject);
+                if (value != null) slotStrings.add(value);
+            }
+        } else {
+            Object valueObject = slotNode.raw();
+            String value = valueObject == null ? null : String.valueOf(valueObject);
+            if (value != null) slotStrings.add(value);
+        }
+
+        return getSlots(slotStrings);
     }
 
     @NotNull
@@ -307,13 +454,22 @@ public class Menu {
         List<Integer> slots = new ArrayList<>();
 
         for (String a : slotString) {
-            if (a.contains("-")) {
-                String[] split = a.split("-");
-                int min = Integer.parseInt(split[0]);
-                int max = Integer.parseInt(split[1]);
-                slots.addAll(getSlots(min, max));
-            } else {
-                slots.add(Integer.valueOf(a));
+            if (a == null) continue;
+
+            String slotValue = a.replace(" ", "");
+            if (slotValue.isEmpty()) continue;
+
+            try {
+                if (slotValue.contains("-")) {
+                    String[] split = slotValue.split("-", 2);
+                    int min = Integer.parseInt(split[0]);
+                    int max = Integer.parseInt(split[1]);
+                    slots.addAll(getSlots(min, max));
+                } else {
+                    slots.add(Integer.valueOf(slotValue));
+                }
+            } catch (NumberFormatException e) {
+                MessagesUtil.sendDebugMessages("Invalid slot value '" + a + "' in menu " + getId(), Level.WARNING);
             }
         }
 

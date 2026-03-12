@@ -15,8 +15,10 @@ import com.hibiscusmc.hmccosmetics.cosmetic.behavior.CosmeticUpdateBehavior;
 import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticArmorType;
 import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticBackpackType;
 import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticBalloonType;
+import com.hibiscusmc.hmccosmetics.database.Database;
 import com.hibiscusmc.hmccosmetics.database.UserData;
 import com.hibiscusmc.hmccosmetics.gui.Menus;
+import com.hibiscusmc.hmccosmetics.util.EconomyUtil;
 import com.hibiscusmc.hmccosmetics.user.manager.UserBackpackManager;
 import com.hibiscusmc.hmccosmetics.user.manager.UserBalloonManager;
 import com.hibiscusmc.hmccosmetics.user.manager.UserWardrobeManager;
@@ -29,6 +31,9 @@ import me.lojosho.hibiscuscommons.nms.NMSHandlers;
 import me.lojosho.hibiscuscommons.scheduler.TaskHandle;
 import me.lojosho.hibiscuscommons.util.InventoryUtils;
 import me.lojosho.hibiscuscommons.util.packets.PacketManager;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -62,6 +67,7 @@ public class CosmeticUser implements CosmeticHolder {
     // Cosmetic Settings/Toggles
     private final ArrayList<HiddenReason> hiddenReason = new ArrayList<>();
     private final HashMap<CosmeticSlot, Color> colors = new HashMap<>();
+    private final Set<String> purchasedCosmetics = new HashSet<>();
 
     /**
      * Use {@link #CosmeticUser(UUID)} instead and use {@link #initialize(UserData)} to populate the user with data.
@@ -89,6 +95,8 @@ public class CosmeticUser implements CosmeticHolder {
      */
     public CosmeticUser initialize(final @Nullable UserData userData) {
         if(userData != null) {
+            purchasedCosmetics.clear();
+            purchasedCosmetics.addAll(userData.getPurchasedCosmetics());
             // CosmeticSlot -> Entry<Cosmetic, Integer>
             for(final Map.Entry<CosmeticSlot, Map.Entry<Cosmetic, Integer>> entry : userData.getCosmetics().entrySet()) {
                 final Cosmetic cosmetic = entry.getValue().getKey();
@@ -125,7 +133,7 @@ public class CosmeticUser implements CosmeticHolder {
      * This is used to help hooking plugins apply custom logic to the user.
      */
     protected boolean canApplyCosmetic(@NotNull Cosmetic cosmetic) {
-        return canEquipCosmetic(cosmetic, false);
+        return canUseCosmetic(cosmetic, true);
     }
 
     /**
@@ -705,18 +713,99 @@ public class CosmeticUser implements CosmeticHolder {
         return dyeableSlots;
     }
 
-    @Override
-    public boolean canEquipCosmetic(@NotNull Cosmetic cosmetic, boolean ignoreWardrobe) {
+    public boolean hasCosmeticPermission(@NotNull Cosmetic cosmetic) {
         if (!cosmetic.requiresPermission()) return true;
-        if (isInWardrobe() && !ignoreWardrobe) {
-            if (WardrobeSettings.isTryCosmeticsInWardrobe() && userWardrobeManager.getWardrobeStatus().equals(UserWardrobeManager.WardrobeStatus.RUNNING)) return true;
-        }
+
         final Player player = getPlayer();
         if (player != null) return player.hasPermission(cosmetic.getPermission());
-        // This sucks, but basically if we can find a player, use that. If not, try to find the entity. If it can't find the entity, just return false.
+
         final Entity entity = getEntity();
         if (entity != null) return entity.hasPermission(cosmetic.getPermission());
         return false;
+    }
+
+    public boolean hasPurchasedCosmetic(@NotNull Cosmetic cosmetic) {
+        return hasPurchasedCosmetic(cosmetic.getId());
+    }
+
+    public boolean hasPurchasedCosmetic(@NotNull String cosmeticId) {
+        return purchasedCosmetics.contains(cosmeticId);
+    }
+
+    public boolean markPurchasedCosmetic(@NotNull Cosmetic cosmetic) {
+        return markPurchasedCosmetic(cosmetic.getId());
+    }
+
+    public boolean markPurchasedCosmetic(@NotNull String cosmeticId) {
+        boolean purchased = purchasedCosmetics.add(cosmeticId);
+        if (purchased) refreshPacketSnapshot();
+        return purchased;
+    }
+
+    public @NotNull Set<String> getPurchasedCosmetics() {
+        return Set.copyOf(purchasedCosmetics);
+    }
+
+    public boolean canUseCosmetic(@NotNull Cosmetic cosmetic) {
+        return canUseCosmetic(cosmetic, false);
+    }
+
+    public boolean canUseCosmetic(@NotNull Cosmetic cosmetic, boolean ignoreWardrobe) {
+        if (!canEquipCosmetic(cosmetic, ignoreWardrobe)) return false;
+        if (!cosmetic.requiresPurchase()) return true;
+        if (hasPurchasedCosmetic(cosmetic)) return true;
+        return canBypassWardrobeRequirements(ignoreWardrobe);
+    }
+
+    public boolean purchaseCosmetic(@NotNull Cosmetic cosmetic) {
+        return purchaseCosmetic(cosmetic, cosmetic.getId());
+    }
+
+    public boolean purchaseCosmetic(@NotNull Cosmetic cosmetic, @NotNull String cosmeticName) {
+        if (!cosmetic.requiresPurchase() || hasPurchasedCosmetic(cosmetic)) return true;
+
+        Player player = getPlayer();
+        if (player == null || !hasCosmeticPermission(cosmetic)) return false;
+
+        if (!EconomyUtil.isAvailable()) {
+            MessagesUtil.sendMessage(player, "purchase-cosmetic-economy-unavailable");
+            return false;
+        }
+
+        if (!EconomyUtil.has(player, cosmetic.getPrice())) {
+            MessagesUtil.sendMessage(player, "purchase-cosmetic-insufficient-funds");
+            return false;
+        }
+
+        EconomyResponse response = EconomyUtil.withdraw(player, cosmetic.getPrice());
+        if (response == null || !response.transactionSuccess()) {
+            MessagesUtil.sendMessage(player, "purchase-cosmetic-economy-unavailable");
+            return false;
+        }
+
+        markPurchasedCosmetic(cosmetic);
+        Database.save(this);
+
+        TagResolver placeholders = TagResolver.resolver(
+            Placeholder.parsed("cosmetic", cosmeticName),
+            Placeholder.parsed("price", EconomyUtil.formatPrice(cosmetic.getPrice()))
+        );
+        MessagesUtil.sendMessage(player, "purchase-cosmetic", placeholders);
+        return true;
+    }
+
+    @Override
+    public boolean canEquipCosmetic(@NotNull Cosmetic cosmetic, boolean ignoreWardrobe) {
+        if (!cosmetic.requiresPermission()) return true;
+        if (canBypassWardrobeRequirements(ignoreWardrobe)) return true;
+        return hasCosmeticPermission(cosmetic);
+    }
+
+    private boolean canBypassWardrobeRequirements(boolean ignoreWardrobe) {
+        return isInWardrobe()
+            && !ignoreWardrobe
+            && WardrobeSettings.isTryCosmeticsInWardrobe()
+            && userWardrobeManager.getWardrobeStatus().equals(UserWardrobeManager.WardrobeStatus.RUNNING);
     }
 
     public void hidePlayer() {

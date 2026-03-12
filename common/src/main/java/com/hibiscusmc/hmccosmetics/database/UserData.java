@@ -7,8 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class UserData {
@@ -20,11 +22,15 @@ public class UserData {
     private HashMap<CosmeticSlot, Map.Entry<Cosmetic, Integer>> cosmetics;
     @Getter
     private ArrayList<CosmeticUser.HiddenReason> hiddenReasons;
+    @Setter
+    @Getter
+    private Set<String> purchasedCosmetics;
 
     public UserData(UUID owner) {
         this.owner = owner;
         this.cosmetics = new HashMap<>();
         this.hiddenReasons = new ArrayList<>();
+        this.purchasedCosmetics = new HashSet<>();
     }
 
     public void addCosmetic(CosmeticSlot slot, Cosmetic cosmetic, Integer color) {
@@ -33,5 +39,9 @@ public class UserData {
 
     public void addHiddenReason(CosmeticUser.HiddenReason reason) {
         hiddenReasons.add(reason);
+    }
+
+    public void addPurchasedCosmetic(String cosmeticId) {
+        purchasedCosmetics.add(cosmeticId);
     }
 }

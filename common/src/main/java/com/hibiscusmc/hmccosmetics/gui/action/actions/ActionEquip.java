@@ -17,6 +17,7 @@ public class ActionEquip extends Action {
     public void run(Player viewer, CosmeticHolder cosmeticHolder, String raw) {
         Cosmetic cosmetic = Cosmetics.getCosmetic(raw);
         if (cosmetic == null) return;
+        if (cosmeticHolder instanceof CosmeticUser user && !user.canUseCosmetic(cosmetic)) return;
 
         cosmeticHolder.addCosmetic(cosmetic);
     }

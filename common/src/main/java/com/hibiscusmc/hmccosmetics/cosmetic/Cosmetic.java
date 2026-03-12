@@ -61,6 +61,9 @@ public abstract class Cosmetic {
     /** The config for the cosmetic */
     private ConfigurationNode config;
 
+    /** The one-time purchase price for the cosmetic. Non-positive values mean no purchase is required. */
+    private double price;
+
     protected Cosmetic(@NotNull String id, @NotNull ConfigurationNode config) {
         this.id = id;
         this.config = config;
@@ -85,6 +88,7 @@ public abstract class Cosmetic {
         this.slot = CosmeticSlot.valueOf(config.node("slot").getString());
 
         this.dyeable = config.node("dyeable").getBoolean(false);
+        this.price = Math.max(0, config.node("price").getDouble(0));
         MessagesUtil.sendDebugMessages("Dyeable " + dyeable);
     }
 
@@ -99,6 +103,10 @@ public abstract class Cosmetic {
 
     public boolean requiresPermission() {
         return permission != null;
+    }
+
+    public boolean requiresPurchase() {
+        return price > 0;
     }
 
     /**

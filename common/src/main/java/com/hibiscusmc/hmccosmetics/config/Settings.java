@@ -53,6 +53,7 @@ public class Settings {
     private static final String MENU_SETTINGS_PATH = "menu-settings";
     private static final String MENU_CLICK_COOLDOWN_PATH = "click-cooldown";
     private static final String MENU_CLICK_COOLDOWN_TIME_PATH = "time";
+    private static final String PURCHASE_LORE_PATH = "purchase-lore";
     private static final String COSMETIC_TYPE_SETTINGS_PATH = "cosmetic-type";
     private static final String EQUIP_CLICK_TYPE = "equip-click";
     private static final String UNEQUIP_CLICK_TYPE = "unequip-click";
@@ -126,6 +127,8 @@ public class Settings {
     private static Long defaultMenuCooldown;
     @Getter
     private static boolean menuClickCooldown;
+    @Getter
+    private static List<String> purchaseLore;
     @Getter
     private static Vector balloonOffset;
     @Getter
@@ -222,6 +225,11 @@ public class Settings {
         ConfigurationNode clickCooldownSettings = menuSettings.node(MENU_CLICK_COOLDOWN_PATH);
         menuClickCooldown = clickCooldownSettings.node(ENABLED_PATH).getBoolean(true);
         defaultMenuCooldown = clickCooldownSettings.node(MENU_CLICK_COOLDOWN_TIME_PATH).getLong(1000L);
+        try {
+            purchaseLore = menuSettings.node(PURCHASE_LORE_PATH).getList(String.class);
+        } catch (Exception e) {
+            purchaseLore = new ArrayList<>();
+        }
 
         ConfigurationNode shadingSettings = menuSettings.node(SHADING_PATH);
         defaultShading = shadingSettings.node(ENABLED_PATH).getBoolean();
