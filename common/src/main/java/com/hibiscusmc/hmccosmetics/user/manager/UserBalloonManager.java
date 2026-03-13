@@ -22,6 +22,7 @@ import java.util.UUID;
 public class UserBalloonManager {
 
     private static final Vector LEAD_OFFSET = new Vector(0, 0.8, 0);
+    private static final int VIEWER_REFRESH_INTERVAL_TICKS = 4;
 
     private final CosmeticUser user;
     @Getter
@@ -34,6 +35,11 @@ public class UserBalloonManager {
     private final UUID displayUuid;
     private Location location;
     private Vector velocity = new Vector();
+    private double pitchRotationRadians;
+    private double angularPitchVelocity;
+    private double lastSentPitchRotationRadians = Double.NaN;
+    private int viewerRefreshTick = VIEWER_REFRESH_INTERVAL_TICKS;
+    private boolean viewerRefreshRequired = true;
 
     public UserBalloonManager(CosmeticUser user, @NotNull Location location) {
         this.user = user;
@@ -64,6 +70,12 @@ public class UserBalloonManager {
 
         pufferfish.destroyPufferfish();
         cosmeticBalloonType = null;
+        velocity.zero();
+        pitchRotationRadians = 0.0D;
+        angularPitchVelocity = 0.0D;
+        lastSentPitchRotationRadians = Double.NaN;
+        viewerRefreshRequired = true;
+        viewerRefreshTick = VIEWER_REFRESH_INTERVAL_TICKS;
         MessagesUtil.sendDebugMessages("Balloon Entity Removed");
     }
 
@@ -157,6 +169,104 @@ public class UserBalloonManager {
 
     public void setVelocity(@NotNull Vector vector) {
         this.velocity = vector.clone();
+    }
+
+    public double getPitchRotationRadians() {
+        return pitchRotationRadians;
+    }
+
+    public void setPitchRotationRadians(double pitchRotationRadians) {
+        this.pitchRotationRadians = pitchRotationRadians;
+    }
+
+    public double getAngularPitchVelocity() {
+        return angularPitchVelocity;
+    }
+
+    public void setAngularPitchVelocity(double angularPitchVelocity) {
+        this.angularPitchVelocity = angularPitchVelocity;
+    }
+
+    public void resetPhysicsState(@NotNull Location location) {
+        this.location = location.clone();
+        this.velocity.zero();
+        this.pitchRotationRadians = 0.0D;
+        this.angularPitchVelocity = 0.0D;
+        this.lastSentPitchRotationRadians = Double.NaN;
+        forceViewerRefresh();
+    }
+
+    public void forceViewerRefresh() {
+        viewerRefreshRequired = true;
+        viewerRefreshTick = VIEWER_REFRESH_INTERVAL_TICKS;
+    }
+
+    public boolean shouldRefreshPhysicsViewers() {
+        if (viewerRefreshRequired || displayEntity.getViewers().isEmpty() || (hasLead() && pufferfish.getViewers().isEmpty())) {
+            viewerRefreshRequired = false;
+            viewerRefreshTick = 0;
+            return true;
+        }
+
+        viewerRefreshTick++;
+        if (viewerRefreshTick >= VIEWER_REFRESH_INTERVAL_TICKS) {
+            viewerRefreshTick = 0;
+            return true;
+        }
+        return false;
+    }
+
+    public void syncPackets(@NotNull Location displayLocation, int holderEntityId, boolean hidden, boolean refreshViewers) {
+        setLocation(displayLocation);
+
+        List<Player> newViewers = List.of();
+        if (refreshViewers) {
+            newViewers = refreshDisplayViewers(displayLocation);
+            if (!newViewers.isEmpty()) {
+                spawnDisplay(displayLocation, newViewers);
+            }
+        }
+        if (!displayEntity.getViewers().isEmpty()) {
+            teleportDisplay(displayLocation);
+            if (shouldSendHeadPose(newViewers)) {
+                HMCCPacketManager.sendArmorStandHeadPose(displayEntityId, pitchRotationRadians, displayEntity.getViewers());
+                lastSentPitchRotationRadians = pitchRotationRadians;
+            }
+        }
+
+        if (!hasLead()) {
+            return;
+        }
+
+        Location leadLocation = getLeadLocation(displayLocation);
+        if (hidden) {
+            if (!pufferfish.getViewers().isEmpty()) {
+                pufferfish.hidePufferfish();
+            }
+            return;
+        }
+
+        if (refreshViewers) {
+            List<Player> newLeadViewers = refreshLeadViewers(leadLocation);
+            if (!newLeadViewers.isEmpty()) {
+                pufferfish.spawnPufferfish(leadLocation, newLeadViewers);
+            }
+        }
+
+        if (!pufferfish.getViewers().isEmpty()) {
+            pufferfish.teleport(leadLocation);
+            HMCCPacketManager.sendLeashPacket(getPufferfishBalloonId(), holderEntityId, pufferfish.getViewers());
+        }
+    }
+
+    private boolean shouldSendHeadPose(List<Player> newViewers) {
+        if (!newViewers.isEmpty()) {
+            return true;
+        }
+        if (Double.isNaN(lastSentPitchRotationRadians)) {
+            return true;
+        }
+        return Math.abs(lastSentPitchRotationRadians - pitchRotationRadians) >= 0.01D;
     }
 
     public void sendRemoveLeashPacket(List<Player> viewer) {

@@ -1,5 +1,6 @@
 package com.hibiscusmc.hmccosmetics.listener;
 
+import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
@@ -42,6 +43,9 @@ public class PlayerMovementListener implements Listener {
         }
 
         for(final CosmeticSlot slot : MOVEMENT_COSMETICS) {
+            if (slot == CosmeticSlot.BALLOON && Settings.isBalloonPhysics()) {
+                continue;
+            }
             user.updateMovementCosmetic(slot, ev.getFrom(), ev.getTo());
         }
     }

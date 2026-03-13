@@ -90,6 +90,31 @@ cosmetic-settings:
   # If the plugin should set the pitch of balloons to always be 0, to prevent players looking up affecting the balloon.
   # This only applies to models that have a "head" section to them. THIS DOES NOT IMPACT THE REST OF THE ENTITY.
   balloon-head-unmoving: false
+  # If the plugin should use realistic physics for balloons. This is packet-based and experimental.
+  balloon-physics: false
+  balloon-physics-settings:
+    # Approximate offset from player feet to the hand anchor used by the rope simulation.
+    hand-offset:
+      x: 0.35
+      y: 1.20
+      z: 0.18
+    # Constant upward force applied to the balloon each tick.
+    buoyancy: 2.35
+    # Spring strength applied only when the rope is stretched past its resting length.
+    string-stiffness: 10.0
+    # Higher values make motion settle faster.
+    linear-damping-per-second: 4.5
+    # Forward/downward offset from the balloon center to the rope attachment point used for tilt torque.
+    pitch-attachment-forward-offset: 0.22
+    pitch-attachment-down-offset: 0.82
+    # Scales how strongly rope tension turns into pitch torque.
+    pitch-torque-scale: 1.55
+    # Pulls the balloon back toward neutral pitch.
+    pitch-restore-stiffness: 52.0
+    # Higher values make tilt settle faster.
+    pitch-damping-per-second: 9.5
+    # Maximum visual head tilt in degrees.
+    max-pitch-degrees: 32.0
   # how the balloon should be positioned relative to the player
   balloon-offset:
     x: 0.5

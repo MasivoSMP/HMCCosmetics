@@ -18,6 +18,7 @@ import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticBalloonType;
 import com.hibiscusmc.hmccosmetics.database.Database;
 import com.hibiscusmc.hmccosmetics.database.UserData;
 import com.hibiscusmc.hmccosmetics.gui.Menus;
+import com.hibiscusmc.hmccosmetics.task.BalloonPhysicsTask;
 import com.hibiscusmc.hmccosmetics.util.EconomyUtil;
 import com.hibiscusmc.hmccosmetics.user.manager.UserBackpackManager;
 import com.hibiscusmc.hmccosmetics.user.manager.UserBalloonManager;
@@ -525,6 +526,7 @@ public class CosmeticUser implements CosmeticHolder {
         wardrobe = event.getWardrobe();
 
         if (userWardrobeManager == null) {
+            BalloonPhysicsTask.INSTANCE.unregister(this);
             userWardrobeManager = new UserWardrobeManager(this, wardrobe);
             userWardrobeManager.start();
             refreshPacketSnapshot();
@@ -566,11 +568,13 @@ public class CosmeticUser implements CosmeticHolder {
             HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntityLater(getPlayer(), () -> {
                 userWardrobeManager.end();
                 userWardrobeManager = null;
+                restoreBalloonAfterWardrobe();
                 refreshPacketSnapshot();
             }, WardrobeSettings.getTransitionDelay());
         } else {
             userWardrobeManager.end();
             userWardrobeManager = null;
+            restoreBalloonAfterWardrobe();
             refreshPacketSnapshot();
         }
     }
@@ -612,11 +616,11 @@ public class CosmeticUser implements CosmeticHolder {
         if (entity == null) return;
 
         UserBalloonManager userBalloonManager1 = new UserBalloonManager(this, entity.getLocation());
-        Location balloonLocation = entity.getLocation().clone().add(cosmeticBalloonType.getBalloonOffset());
-        if (Settings.isBalloonHeadForward()) {
-            balloonLocation.setPitch(0);
-        }
-        userBalloonManager1.setLocation(balloonLocation);
+        Location balloonLocation = cosmeticBalloonType.getInitialBalloonLocation(
+            entity.getLocation(),
+            entity instanceof Player player ? player : null
+        );
+        userBalloonManager1.resetPhysicsState(balloonLocation);
 
         userBalloonManager1.spawnModel(cosmeticBalloonType, getCosmeticColor(cosmeticBalloonType.getSlot()));
         if (userBalloonManager1.getBalloonType() == UserBalloonManager.BalloonType.NONE) {
@@ -642,12 +646,14 @@ public class CosmeticUser implements CosmeticHolder {
         }
 
         this.userBalloonManager = userBalloonManager1;
+        BalloonPhysicsTask.INSTANCE.register(this);
         //this.userBalloonManager = NMSHandlers.getHandler().spawnBalloon(this, cosmeticBalloonType);
         refreshPacketSnapshot();
     }
 
     public void despawnBalloon() {
         if (this.userBalloonManager == null) return;
+        BalloonPhysicsTask.INSTANCE.unregister(this);
         this.userBalloonManager.remove();
         this.userBalloonManager = null;
         refreshPacketSnapshot();
@@ -923,6 +929,18 @@ public class CosmeticUser implements CosmeticHolder {
     public void clearHiddenReasons() {
         hiddenReason.clear();
         refreshPacketSnapshot();
+    }
+
+    private void restoreBalloonAfterWardrobe() {
+        if (isHidden() || !hasCosmeticInSlot(CosmeticSlot.BALLOON)) return;
+
+        Player player = getPlayer();
+        if (player == null) return;
+
+        HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntityLater(player, () -> {
+            if (isInWardrobe() || isHidden() || !hasCosmeticInSlot(CosmeticSlot.BALLOON)) return;
+            respawnBalloon();
+        }, 4);
     }
 
     public @NotNull CosmeticUserSnapshot getPacketSnapshot() {

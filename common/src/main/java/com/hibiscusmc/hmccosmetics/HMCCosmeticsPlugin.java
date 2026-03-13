@@ -21,6 +21,7 @@ import com.hibiscusmc.hmccosmetics.hooks.worldguard.WGHook;
 import com.hibiscusmc.hmccosmetics.hooks.worldguard.WGListener;
 import com.hibiscusmc.hmccosmetics.listener.*;
 import com.hibiscusmc.hmccosmetics.packets.CosmeticPacketInterface;
+import com.hibiscusmc.hmccosmetics.task.BalloonPhysicsTask;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
 import com.hibiscusmc.hmccosmetics.util.search.PlayerSearchManager;
@@ -148,6 +149,7 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
     @Override
     public void onEnd() {
         // Plugin shutdown logic
+        BalloonPhysicsTask.INSTANCE.stop();
         for (Player player : Bukkit.getOnlinePlayers()) {
             getScheduler().runAtEntity(player, () -> {
                 CosmeticUser user = CosmeticUsers.getUser(player);
@@ -254,6 +256,8 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
                 getInstance().getServer().getPluginManager().addPermission(new Permission(menu.getPermissionNode()));
             }
         }
+
+        BalloonPhysicsTask.INSTANCE.reload();
 
         getInstance().getLogger().info("Successfully Enabled HMCCosmetics");
         getInstance().getLogger().info(Cosmetics.values().size() + " Cosmetics Successfully Setup");
