@@ -22,6 +22,18 @@ public class Settings {
     private static final String CONFIG_VERSION = "config-version";
     private static final String COSMETIC_SETTINGS_PATH = "cosmetic-settings";
     private static final String BALLOON_OFFSET = "balloon-offset";
+    private static final String BALLOON_PHYSICS = "balloon-physics";
+    private static final String BALLOON_PHYSICS_SETTINGS = "balloon-physics-settings";
+    private static final String BALLOON_PHYSICS_HAND_OFFSET = "hand-offset";
+    private static final String BALLOON_PHYSICS_BUOYANCY = "buoyancy";
+    private static final String BALLOON_PHYSICS_STRING_STIFFNESS = "string-stiffness";
+    private static final String BALLOON_PHYSICS_LINEAR_DAMPING = "linear-damping-per-second";
+    private static final String BALLOON_PHYSICS_PITCH_ATTACHMENT_FORWARD_OFFSET = "pitch-attachment-forward-offset";
+    private static final String BALLOON_PHYSICS_PITCH_ATTACHMENT_DOWN_OFFSET = "pitch-attachment-down-offset";
+    private static final String BALLOON_PHYSICS_PITCH_TORQUE_SCALE = "pitch-torque-scale";
+    private static final String BALLOON_PHYSICS_PITCH_RESTORE_STIFFNESS = "pitch-restore-stiffness";
+    private static final String BALLOON_PHYSICS_PITCH_DAMPING = "pitch-damping-per-second";
+    private static final String BALLOON_PHYSICS_MAX_PITCH_DEGREES = "max-pitch-degrees";
     private static final String BACKPACK_OFFSET = "backpack-offset";
     private static final String VIEW_DISTANCE_PATH = "view-distance";
     private static final String DYE_MENU_PATH = "dye-menu";
@@ -114,6 +126,8 @@ public class Settings {
     @Getter
     private static boolean balloonHeadForward;
     @Getter
+    private static boolean balloonPhysics;
+    @Getter
     private static boolean backpackPreventDarkness;
     @Getter
     private static List<String> disabledGamemodes;
@@ -131,6 +145,26 @@ public class Settings {
     private static List<String> purchaseLore;
     @Getter
     private static Vector balloonOffset;
+    @Getter
+    private static Vector balloonPhysicsHandOffset;
+    @Getter
+    private static double balloonPhysicsBuoyancy;
+    @Getter
+    private static double balloonPhysicsStringStiffness;
+    @Getter
+    private static double balloonPhysicsLinearDampingPerSecond;
+    @Getter
+    private static double balloonPhysicsPitchAttachmentForwardOffset;
+    @Getter
+    private static double balloonPhysicsPitchAttachmentDownOffset;
+    @Getter
+    private static double balloonPhysicsPitchTorqueScale;
+    @Getter
+    private static double balloonPhysicsPitchRestoreStiffness;
+    @Getter
+    private static double balloonPhysicsPitchDampingPerSecond;
+    @Getter
+    private static double balloonPhysicsMaxPitchDegrees;
     @Getter
     private static Vector backpackOffset;
     @Getter
@@ -218,7 +252,23 @@ public class Settings {
         engine = PlayerSearchManager.SearchEngine.valueOf(cosmeticSettings.node(PLAYER_SEARCH_IMPLEMENTATION).getString("BUKKIT").toUpperCase());
         viewDistance = cosmeticSettings.node(VIEW_DISTANCE_PATH).getInt(-3);
         balloonHeadForward = cosmeticSettings.node(COSMETIC_BALLOON_HEAD_FORWARD_PATH).getBoolean(false);
+        balloonPhysics = cosmeticSettings.node(BALLOON_PHYSICS).getBoolean(false);
         backpackPreventDarkness = cosmeticSettings.node(BACKPACK_PREVENT_DARKNESS_PATH).getBoolean(true);
+        final var balloonPhysicsSettings = cosmeticSettings.node(BALLOON_PHYSICS_SETTINGS);
+        if (balloonPhysicsSettings.node(BALLOON_PHYSICS_HAND_OFFSET).virtual()) {
+            balloonPhysicsHandOffset = new Vector(0.35D, 1.20D, 0.18D);
+        } else {
+            balloonPhysicsHandOffset = loadVector(balloonPhysicsSettings.node(BALLOON_PHYSICS_HAND_OFFSET));
+        }
+        balloonPhysicsBuoyancy = balloonPhysicsSettings.node(BALLOON_PHYSICS_BUOYANCY).getDouble(2.35D);
+        balloonPhysicsStringStiffness = balloonPhysicsSettings.node(BALLOON_PHYSICS_STRING_STIFFNESS).getDouble(10.0D);
+        balloonPhysicsLinearDampingPerSecond = balloonPhysicsSettings.node(BALLOON_PHYSICS_LINEAR_DAMPING).getDouble(4.5D);
+        balloonPhysicsPitchAttachmentForwardOffset = balloonPhysicsSettings.node(BALLOON_PHYSICS_PITCH_ATTACHMENT_FORWARD_OFFSET).getDouble(0.22D);
+        balloonPhysicsPitchAttachmentDownOffset = balloonPhysicsSettings.node(BALLOON_PHYSICS_PITCH_ATTACHMENT_DOWN_OFFSET).getDouble(0.82D);
+        balloonPhysicsPitchTorqueScale = balloonPhysicsSettings.node(BALLOON_PHYSICS_PITCH_TORQUE_SCALE).getDouble(1.55D);
+        balloonPhysicsPitchRestoreStiffness = balloonPhysicsSettings.node(BALLOON_PHYSICS_PITCH_RESTORE_STIFFNESS).getDouble(52.0D);
+        balloonPhysicsPitchDampingPerSecond = balloonPhysicsSettings.node(BALLOON_PHYSICS_PITCH_DAMPING).getDouble(9.5D);
+        balloonPhysicsMaxPitchDegrees = balloonPhysicsSettings.node(BALLOON_PHYSICS_MAX_PITCH_DEGREES).getDouble(32.0D);
 
         ConfigurationNode menuSettings = source.node(MENU_SETTINGS_PATH);
 

@@ -7,6 +7,7 @@ import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
 import com.hibiscusmc.hmccosmetics.util.HMCCInventoryUtils;
 import me.lojosho.hibiscuscommons.nms.MinecraftVersion;
 import me.lojosho.hibiscuscommons.nms.NMSHandlers;
+import me.lojosho.hibiscuscommons.util.MessagesUtil;
 import me.lojosho.hibiscuscommons.util.packets.PacketManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,6 +27,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public class HMCCPacketManager extends PacketManager {
+
+    private static final float RADIANS_TO_DEGREES = (float) (180.0D / Math.PI);
+    private static boolean missingHeadPoseSupportLogged = false;
 
     // The cloud effect map, in case it gets lost: Map<Integer, Number> dataValues = Map.of(0, (byte) 0x20, 8, 0f);
     private static final List<CosmeticSlot> EQUIPMENT_SLOTS = List.of(CosmeticSlot.HELMET, CosmeticSlot.CHESTPLATE, CosmeticSlot.LEGGINGS, CosmeticSlot.BOOTS, CosmeticSlot.MAINHAND, CosmeticSlot.OFFHAND);
@@ -133,6 +137,24 @@ public class HMCCPacketManager extends PacketManager {
         byte mask = getMask();
         Map<Integer, Number> dataValues = Map.of(0, mask, 15, (byte) 0x10);
         NMSHandlers.getHandler().getPacketHandler().sendSharedEntityData(entityId, dataValues, sendTo);
+    }
+
+    public static void sendArmorStandHeadPose(
+            int entityId,
+            double pitchRadians,
+            List<Player> sendTo
+    ) {
+        Object packetHandler = NMSHandlers.getHandler().getPacketHandler();
+        try {
+            packetHandler.getClass()
+                .getMethod("sendArmorStandHeadPosePacket", int.class, float.class, float.class, float.class, List.class)
+                .invoke(packetHandler, entityId, (float) (pitchRadians * RADIANS_TO_DEGREES), 0.0F, 0.0F, sendTo);
+        } catch (ReflectiveOperationException ex) {
+            if (!missingHeadPoseSupportLogged) {
+                missingHeadPoseSupportLogged = true;
+                MessagesUtil.sendDebugMessages("Armor stand head pose packets are unavailable on the current HibiscusCommons build.");
+            }
+        }
     }
 
     private static byte getMask() {
