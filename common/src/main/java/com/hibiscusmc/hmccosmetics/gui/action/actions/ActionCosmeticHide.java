@@ -1,5 +1,6 @@
 package com.hibiscusmc.hmccosmetics.gui.action.actions;
 
+import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
 import com.hibiscusmc.hmccosmetics.gui.action.Action;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
@@ -17,6 +18,7 @@ public class ActionCosmeticHide extends Action {
         if (!(cosmeticHolder instanceof CosmeticUser user)) return;
         if (user.isHidden()) return;
         user.hideCosmetics(CosmeticUser.HiddenReason.ACTION);
+        Settings.playCosmeticToggleSound(viewer, false);
     }
 
     @Override

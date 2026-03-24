@@ -1,5 +1,6 @@
 package com.hibiscusmc.hmccosmetics.gui.action.actions;
 
+import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetic;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
 import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetics;
@@ -20,6 +21,7 @@ public class ActionEquip extends Action {
         if (cosmeticHolder instanceof CosmeticUser user && !user.canUseCosmetic(cosmetic)) return;
 
         cosmeticHolder.addCosmetic(cosmetic);
+        Settings.playCosmeticToggleSound(viewer, true);
     }
 
     @Override

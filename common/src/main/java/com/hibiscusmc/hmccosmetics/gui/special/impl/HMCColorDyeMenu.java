@@ -50,7 +50,12 @@ public class HMCColorDyeMenu implements DyeMenu {
         if (cosmeticHolder instanceof com.hibiscusmc.hmccosmetics.user.CosmeticUser user && !user.canUseCosmetic(cosmetic)) {
             return;
         }
+        Cosmetic existing = cosmeticHolder.getCosmetic(cosmetic.getSlot());
+        boolean isNewEquip = existing == null || !existing.getId().equals(cosmetic.getId());
         cosmeticHolder.addCosmetic(cosmetic, color);
+        if (isNewEquip) {
+            Settings.playCosmeticToggleSound(viewer, true);
+        }
         viewer.setItemOnCursor(new ItemStack(Material.AIR));
         HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntityLater(viewer, () -> {
             viewer.closeInventory();

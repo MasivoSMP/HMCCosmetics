@@ -1,5 +1,6 @@
 package com.hibiscusmc.hmccosmetics.gui.action.actions;
 
+import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
 import com.hibiscusmc.hmccosmetics.gui.action.Action;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
@@ -20,6 +21,7 @@ public class ActionCosmeticShow extends Action {
         // Do not hide if it's already off for WG
         if (!user.isHidden(CosmeticUser.HiddenReason.ACTION) && !user.isHidden(CosmeticUser.HiddenReason.COMMAND)) return;
         user.showCosmetics(CosmeticUser.HiddenReason.ACTION);
+        Settings.playCosmeticToggleSound(viewer, true);
     }
 
     @Override
