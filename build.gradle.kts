@@ -64,9 +64,6 @@ allprojects {
         // Eco-Suite/Auxilor Repo
         maven("https://repo.auxilor.io/repository/maven-public/")
 
-        // Triumph GUI
-        maven("https://repo.triumphteam.dev/snapshots")
-
         // Hibiscus Commons
         maven("https://repo.hibiscusmc.com/releases")
     }
@@ -106,9 +103,7 @@ allprojects {
         testCompileOnly("org.projectlombok:lombok:1.18.36")
         testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
 
-        implementation("dev.triumphteam:triumph-gui:3.2.0-SNAPSHOT") {
-            exclude("net.kyori") // Already have adventure API
-        }
+        compileOnly("me.rockyhawk:CommandPanels:SNAPSHOT:api")
         implementation("com.owen1212055:particlehelper:1.0.0-SNAPSHOT")
     }
 
@@ -156,7 +151,6 @@ tasks {
     shadowJar {
         mergeServiceFiles()
 
-        relocate("dev.triumphteam.gui", "com.hibiscusmc.hmccosmetics.shaded.gui")
         relocate("com.owen1212055.particlehelper", "com.hibiscusmc.hmccosmetics.shaded.particlehelper")
         relocate("com.ticxo.playeranimator", "com.hibiscusmc.hmccosmetics.shaded.playeranimator")
         archiveFileName.set("HMCCosmeticsRemapped-${project.version}.jar")
@@ -186,7 +180,7 @@ bukkit {
     apiVersion = "1.20"
     foliaSupported = true
     authors = listOf("LoJoSho")
-    depend = listOf("HibiscusCommons")
+    depend = listOf("HibiscusCommons", "CommandPanels")
     softDepend = listOf("Vault", "Nexo", "BetterHud", "ModelEngine", "Oraxen", "ItemsAdder", "Geary", "HMCColor", "WorldGuard", "MythicMobs", "PlaceholderAPI", "SuperVanish", "PremiumVanish", "LibsDisguises", "Denizen", "MMOItems", "Eco")
     version = "${project.version}"
     loadBefore = listOf(

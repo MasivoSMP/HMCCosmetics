@@ -1,20 +1,20 @@
 package com.hibiscusmc.hmccosmetics.gui;
 
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
-import dev.triumphteam.gui.guis.Gui;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public class MenuSession {
 
     private final Menu menu;
-    private final Gui gui;
     private final CosmeticHolder cosmeticHolder;
+    private UUID externalSessionId;
     private int page;
 
-    public MenuSession(@NotNull Menu menu, @NotNull Gui gui, @NotNull CosmeticHolder cosmeticHolder) {
+    public MenuSession(@NotNull Menu menu, @NotNull CosmeticHolder cosmeticHolder) {
         this.menu = menu;
-        this.gui = gui;
         this.cosmeticHolder = cosmeticHolder;
     }
 
@@ -24,13 +24,16 @@ public class MenuSession {
     }
 
     @NotNull
-    public Gui getGui() {
-        return gui;
-    }
-
-    @NotNull
     public CosmeticHolder getCosmeticHolder() {
         return cosmeticHolder;
+    }
+
+    public UUID getExternalSessionId() {
+        return externalSessionId;
+    }
+
+    public void setExternalSessionId(UUID externalSessionId) {
+        this.externalSessionId = externalSessionId;
     }
 
     public int getPage() {
