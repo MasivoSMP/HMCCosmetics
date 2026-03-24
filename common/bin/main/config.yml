@@ -35,6 +35,19 @@ cosmetic-settings:
   # If the plugin should attempt to force show a player's cosmetics when they join the server by removing all hidden flags.
   force-show-join: false
 
+  # Global sounds used when players toggle cosmetics on/off.
+  # Used by cosmetic equip/unequip (menus + /cosmetic apply|unapply) and hide/show visibility toggles.
+  toggle-sounds:
+    enabled: false
+    on-sound:
+      sound: "minecraft:block.note_block.pling"
+      volume: 1.0
+      pitch: 1.2
+    off-sound:
+      sound: "minecraft:block.note_block.bass"
+      volume: 1.0
+      pitch: 0.8
+
   # This determines what to process what areas to process placeholders when displaying the item to the user.
   # This can be heavy on servers with a lot of players, so if experiencing lag issues relating to setting display/lores of items, disable this.
   item-processing:

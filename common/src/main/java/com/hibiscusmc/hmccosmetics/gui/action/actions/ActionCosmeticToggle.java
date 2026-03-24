@@ -1,5 +1,6 @@
 package com.hibiscusmc.hmccosmetics.gui.action.actions;
 
+import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
 import com.hibiscusmc.hmccosmetics.gui.action.Action;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
@@ -18,10 +19,12 @@ public class ActionCosmeticToggle extends Action {
         if (user.isHidden()) {
             if (!user.isHidden(CosmeticUser.HiddenReason.ACTION) && !user.isHidden(CosmeticUser.HiddenReason.COMMAND)) return;
             user.showCosmetics(CosmeticUser.HiddenReason.ACTION);
+            Settings.playCosmeticToggleSound(viewer, true);
             return;
         }
 
         user.hideCosmetics(CosmeticUser.HiddenReason.ACTION);
+        Settings.playCosmeticToggleSound(viewer, false);
     }
 
     @Override

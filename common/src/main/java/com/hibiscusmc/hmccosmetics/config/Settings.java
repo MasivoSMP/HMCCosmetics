@@ -7,8 +7,10 @@ import com.hibiscusmc.hmccosmetics.util.search.PlayerSearchManager;
 import lombok.Getter;
 import lombok.Setter;
 import me.lojosho.shaded.configurate.ConfigurationNode;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +64,14 @@ public class Settings {
     private static final String COSMETIC_DESTROY_LOOSE_COSMETIC_PATH = "destroy-loose-cosmetics";
     private static final String COSMETIC_BALLOON_HEAD_FORWARD_PATH = "balloon-head-forward";
     private static final String COSMETIC_OFFHAND_PREVENT_SWAPPING = "offhand-prevent-swapping";
+    private static final String COSMETIC_TOGGLE_SOUNDS_PATH = "toggle-sounds";
+    private static final String COSMETIC_TOGGLE_SOUNDS_ON_PATH = "on-sound";
+    private static final String COSMETIC_TOGGLE_SOUNDS_OFF_PATH = "off-sound";
+    private static final String COSMETIC_TOGGLE_SOUNDS_ON_PATH_LEGACY = "on";
+    private static final String COSMETIC_TOGGLE_SOUNDS_OFF_PATH_LEGACY = "off";
+    private static final String COSMETIC_TOGGLE_SOUNDS_SOUND_PATH = "sound";
+    private static final String COSMETIC_TOGGLE_SOUNDS_VOLUME_PATH = "volume";
+    private static final String COSMETIC_TOGGLE_SOUNDS_PITCH_PATH = "pitch";
     private static final String MENU_SETTINGS_PATH = "menu-settings";
     private static final String MENU_CLICK_COOLDOWN_PATH = "click-cooldown";
     private static final String MENU_CLICK_COOLDOWN_TIME_PATH = "time";
@@ -121,6 +131,8 @@ public class Settings {
     private static boolean preventOffhandSwapping;
     @Getter
     private static boolean backpackForceRidingEnabled;
+    @Getter
+    private static boolean toggleSoundsEnabled;
     @Getter
     private static boolean disabledGamemodesEnabled;
     @Getter
@@ -196,6 +208,18 @@ public class Settings {
     @Getter
     private static boolean wardrobeHideHud;
     @Getter
+    private static String toggleOnSound;
+    @Getter
+    private static float toggleOnSoundVolume;
+    @Getter
+    private static float toggleOnSoundPitch;
+    @Getter
+    private static String toggleOffSound;
+    @Getter
+    private static float toggleOffSoundVolume;
+    @Getter
+    private static float toggleOffSoundPitch;
+    @Getter
     private static PlayerSearchManager.SearchEngine engine;
 
 
@@ -236,6 +260,19 @@ public class Settings {
         destroyLooseCosmetics = cosmeticSettings.node(COSMETIC_DESTROY_LOOSE_COSMETIC_PATH).getBoolean(false);
         backpackForceRidingEnabled = cosmeticSettings.node(COSMETIC_BACKPACK_FORCE_RIDING_PACKET_PATH).getBoolean(false);
         preventOffhandSwapping = cosmeticSettings.node(COSMETIC_OFFHAND_PREVENT_SWAPPING).getBoolean(false);
+        ConfigurationNode toggleSoundsSettings = cosmeticSettings.node(COSMETIC_TOGGLE_SOUNDS_PATH);
+        toggleSoundsEnabled = toggleSoundsSettings.node(ENABLED_PATH).getBoolean(false);
+        ConfigurationNode toggleOnSettings = getToggleSoundSettingsNode(toggleSoundsSettings, COSMETIC_TOGGLE_SOUNDS_ON_PATH, COSMETIC_TOGGLE_SOUNDS_ON_PATH_LEGACY, true);
+        toggleOnSound = toggleOnSettings.node(COSMETIC_TOGGLE_SOUNDS_SOUND_PATH).getString("minecraft:block.note_block.pling");
+        toggleOnSoundVolume = (float) toggleOnSettings.node(COSMETIC_TOGGLE_SOUNDS_VOLUME_PATH).getDouble(1.0D);
+        toggleOnSoundPitch = (float) toggleOnSettings.node(COSMETIC_TOGGLE_SOUNDS_PITCH_PATH).getDouble(1.2D);
+        ConfigurationNode toggleOffSettings = getToggleSoundSettingsNode(toggleSoundsSettings, COSMETIC_TOGGLE_SOUNDS_OFF_PATH, COSMETIC_TOGGLE_SOUNDS_OFF_PATH_LEGACY, false);
+        toggleOffSound = toggleOffSettings.node(COSMETIC_TOGGLE_SOUNDS_SOUND_PATH).getString("minecraft:block.note_block.bass");
+        toggleOffSoundVolume = (float) toggleOffSettings.node(COSMETIC_TOGGLE_SOUNDS_VOLUME_PATH).getDouble(1.0D);
+        toggleOffSoundPitch = (float) toggleOffSettings.node(COSMETIC_TOGGLE_SOUNDS_PITCH_PATH).getDouble(0.8D);
+        MessagesUtil.sendDebugMessages("Toggle sounds loaded: enabled=" + toggleSoundsEnabled
+                + ", on=" + toggleOnSound + " (" + toggleOnSoundVolume + ", " + toggleOnSoundPitch + ")"
+                + ", off=" + toggleOffSound + " (" + toggleOffSoundVolume + ", " + toggleOffSoundPitch + ")");
 
         cosmeticSettings.node(SLOT_OPTIONS_PATH).childrenMap().forEach((key, value) -> {
             EquipmentSlot slot = convertConfigToEquipment(key.toString().toLowerCase());
@@ -354,6 +391,37 @@ public class Settings {
         plugin.getConfig().set("debug-mode", newSetting);
 
         plugin.saveConfig();
+    }
+
+    public static void playCosmeticToggleSound(Player player, boolean enabled) {
+        if (player == null || !toggleSoundsEnabled) return;
+        String sound = enabled ? toggleOnSound : toggleOffSound;
+        if (sound == null || sound.isBlank()) return;
+
+        float volume = enabled ? toggleOnSoundVolume : toggleOffSoundVolume;
+        float pitch = enabled ? toggleOnSoundPitch : toggleOffSoundPitch;
+
+        try {
+            player.playSound(player.getLocation(), sound, volume, pitch);
+        } catch (Exception e) {
+            MessagesUtil.sendDebugMessages("Unable to play toggle sound '" + sound + "'.", Level.WARNING);
+        }
+    }
+
+    private static @NotNull ConfigurationNode getToggleSoundSettingsNode(
+            @NotNull ConfigurationNode parent,
+            @NotNull String primaryPath,
+            @NotNull String legacyPath,
+            boolean legacyBooleanPath
+    ) {
+        ConfigurationNode node = parent.node(primaryPath);
+        if (!node.virtual()) return node;
+
+        node = parent.node(legacyPath);
+        if (!node.virtual()) return node;
+
+        node = parent.node(legacyBooleanPath);
+        return node;
     }
 
     private static EquipmentSlot convertConfigToEquipment(String slot) {

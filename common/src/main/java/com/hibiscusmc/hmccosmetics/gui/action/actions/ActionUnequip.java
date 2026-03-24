@@ -1,5 +1,6 @@
 package com.hibiscusmc.hmccosmetics.gui.action.actions;
 
+import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
 import com.hibiscusmc.hmccosmetics.gui.action.Action;
@@ -17,7 +18,9 @@ public class ActionUnequip extends Action {
         if (!CosmeticSlot.contains(raw)) return;
 
         CosmeticSlot slot = CosmeticSlot.valueOf(raw);
+        if (!cosmeticHolder.hasCosmeticInSlot(slot)) return;
         cosmeticHolder.removeCosmeticSlot(slot);
+        Settings.playCosmeticToggleSound(viewer, false);
     }
 
     @Override

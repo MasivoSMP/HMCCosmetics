@@ -106,6 +106,7 @@ public class TypeCosmetic extends Type {
                 if (!actionConfig.node("on-unequip").virtual()) actionStrings.addAll(actionConfig.node("on-unequip").getList(String.class));
                 MessagesUtil.sendDebugMessages("on-unequip");
                 cosmeticHolder.removeCosmeticSlot(cosmetic);
+                Settings.playCosmeticToggleSound(viewer, false);
             } else {
                 if (!user.canUseCosmetic(cosmetic)) {
                     if ((isRequiredClick || opensDyeMenu) && cosmetic.requiresPurchase() && user.hasCosmeticPermission(cosmetic)) {
@@ -124,6 +125,7 @@ public class TypeCosmetic extends Type {
                     DyeMenuProvider.openMenu(viewer, cosmeticHolder, cosmetic);
                 } else if (isRequiredClick) {
                     cosmeticHolder.addCosmetic(cosmetic);
+                    Settings.playCosmeticToggleSound(viewer, true);
                 }
             }
 

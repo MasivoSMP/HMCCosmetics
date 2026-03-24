@@ -176,6 +176,7 @@ public class CosmeticCommand implements CommandExecutor {
 
                     user.addCosmetic(selectedCosmetic, selectedColor);
                     user.updateCosmetic(selectedCosmetic.getSlot());
+                    Settings.playCosmeticToggleSound(target, true);
                 });
                 return true;
             }
@@ -236,6 +237,7 @@ public class CosmeticCommand implements CommandExecutor {
 
                         user.removeCosmeticSlot(cosmeticSlot);
                         user.updateCosmetic(cosmeticSlot);
+                        Settings.playCosmeticToggleSound(target, false);
                     }
                 });
                 return true;
@@ -479,6 +481,7 @@ public class CosmeticCommand implements CommandExecutor {
                         return;
                     }
                     user.hideCosmetics(CosmeticUser.HiddenReason.COMMAND);
+                    Settings.playCosmeticToggleSound(target, false);
                 });
                 return true;
             }
@@ -508,6 +511,7 @@ public class CosmeticCommand implements CommandExecutor {
                         return;
                     }
                     user.showCosmetics(CosmeticUser.HiddenReason.COMMAND);
+                    Settings.playCosmeticToggleSound(target, true);
                 });
                 return true;
             }
