@@ -245,16 +245,11 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
         }
          */
         for (Cosmetic cosmetic : Cosmetics.values()) {
-            if (cosmetic.getPermission() != null) {
-                if (getInstance().getServer().getPluginManager().getPermission(cosmetic.getPermission()) != null) continue;
-                getInstance().getServer().getPluginManager().addPermission(new Permission(cosmetic.getPermission()));
-            }
+            registerPermissionNode(cosmetic.getPermission());
+            registerPermissionNode(cosmetic.getPermissionGroup());
         }
         for (Menu menu : Menus.values()) {
-            if (menu.getPermissionNode() != null) {
-                if (getInstance().getServer().getPluginManager().getPermission(menu.getPermissionNode()) != null) continue;
-                getInstance().getServer().getPluginManager().addPermission(new Permission(menu.getPermissionNode()));
-            }
+            registerPermissionNode(menu.getPermissionNode());
         }
 
         BalloonPhysicsTask.INSTANCE.reload();
@@ -266,5 +261,11 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
         getInstance().getLogger().info("Data storage is set to " + DatabaseSettings.getDatabaseType());
 
         Bukkit.getPluginManager().callEvent(new HMCCosmeticSetupEvent());
+    }
+
+    private static void registerPermissionNode(String permissionNode) {
+        if (permissionNode == null || permissionNode.isBlank()) return;
+        if (getInstance().getServer().getPluginManager().getPermission(permissionNode) != null) return;
+        getInstance().getServer().getPluginManager().addPermission(new Permission(permissionNode));
     }
 }

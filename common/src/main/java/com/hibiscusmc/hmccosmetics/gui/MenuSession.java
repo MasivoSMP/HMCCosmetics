@@ -41,16 +41,32 @@ public class MenuSession {
         return menu.getTotalPages();
     }
 
+    public int getTotalPages(@NotNull Player viewer) {
+        return menu.getTotalPages(viewer, cosmeticHolder);
+    }
+
     public boolean nextPage() {
         return setPage(page + 1);
+    }
+
+    public boolean nextPage(@NotNull Player viewer) {
+        return setPage(page + 1, getTotalPages(viewer));
     }
 
     public boolean previousPage() {
         return setPage(page - 1);
     }
 
+    public boolean previousPage(@NotNull Player viewer) {
+        return setPage(page - 1, getTotalPages(viewer));
+    }
+
     public boolean setPage(int page) {
-        int maxPage = Math.max(0, getTotalPages() - 1);
+        return setPage(page, getTotalPages());
+    }
+
+    public boolean setPage(int page, int totalPages) {
+        int maxPage = Math.max(0, totalPages - 1);
         int clampedPage = Math.max(0, Math.min(page, maxPage));
         boolean changed = this.page != clampedPage;
         this.page = clampedPage;

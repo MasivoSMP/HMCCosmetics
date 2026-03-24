@@ -257,8 +257,16 @@ public class Menu {
     }
 
     public int getTotalPages() {
-        if (cosmeticSlots.isEmpty() || cosmeticItems.isEmpty()) return 1;
-        return Math.max(1, (int) Math.ceil((double) cosmeticItems.size() / cosmeticSlots.size()));
+        return getTotalPages(cosmeticItems);
+    }
+
+    public int getTotalPages(@NotNull Player viewer, @NotNull CosmeticHolder cosmeticHolder) {
+        return getTotalPages(getVisibleCosmeticItems(viewer));
+    }
+
+    private int getTotalPages(@NotNull List<MenuItem> cosmeticMenuItems) {
+        if (cosmeticSlots.isEmpty() || cosmeticMenuItems.isEmpty()) return 1;
+        return Math.max(1, (int) Math.ceil((double) cosmeticMenuItems.size() / cosmeticSlots.size()));
     }
 
     private boolean matchesCosmeticType(@NotNull MenuItem item) {
@@ -303,7 +311,8 @@ public class Menu {
     }
 
     private void updateMenu(Player viewer, CosmeticHolder cosmeticHolder, Gui gui, MenuSession session) {
-        session.setPage(session.getPage());
+        List<MenuItem> visibleCosmeticItems = getVisibleCosmeticItems(viewer);
+        session.setPage(session.getPage(), getTotalPages(visibleCosmeticItems));
         StringBuilder title = new StringBuilder(this.title);
 
         int row = 0;
@@ -322,9 +331,9 @@ public class Menu {
                 }
 
                 boolean occupied = false;
-                MenuItem item = getPrimaryMenuItem(i, session);
+                MenuItem item = getPrimaryMenuItem(viewer, i, session, visibleCosmeticItems);
                 if (item != null) {
-                    updateItem(viewer, cosmeticHolder, gui, session, i);
+                    updateItem(viewer, cosmeticHolder, gui, session, i, visibleCosmeticItems);
 
                     if (item.type() instanceof TypeCosmetic) {
                         Cosmetic cosmetic = Cosmetics.getCosmetic(item.itemConfig().node("cosmetic").getString(""));
@@ -353,13 +362,13 @@ public class Menu {
             gui.updateTitle(AdventureUtils.MINI_MESSAGE.deserialize(Hooks.processPlaceholders(viewer, title.toString())));
         } else {
             for (int i = 0; i < gui.getInventory().getSize(); i++) {
-                updateItem(viewer, cosmeticHolder, gui, session, i);
+                updateItem(viewer, cosmeticHolder, gui, session, i, visibleCosmeticItems);
             }
         }
     }
 
-    private void updateItem(Player viewer, CosmeticHolder cosmeticHolder, Gui gui, MenuSession session, int slot) {
-        List<MenuItem> menuItems = getMenuItems(slot, session);
+    private void updateItem(Player viewer, CosmeticHolder cosmeticHolder, Gui gui, MenuSession session, int slot, @NotNull List<MenuItem> visibleCosmeticItems) {
+        List<MenuItem> menuItems = getMenuItems(viewer, slot, session, visibleCosmeticItems);
         if (menuItems.isEmpty()) {
             clearSlot(gui, slot);
             return;
@@ -406,27 +415,68 @@ public class Menu {
     }
 
     @NotNull
-    private List<MenuItem> getMenuItems(int slot, @NotNull MenuSession session) {
-        if (items.containsKey(slot)) return items.get(slot);
+    private List<MenuItem> getMenuItems(@NotNull Player viewer, int slot, @NotNull MenuSession session, @NotNull List<MenuItem> visibleCosmeticItems) {
+        if (items.containsKey(slot)) {
+            List<MenuItem> slotItems = items.get(slot);
+            if (slotItems == null || slotItems.isEmpty()) return Collections.emptyList();
 
-        MenuItem cosmeticItem = getCosmeticMenuItem(slot, session.getPage());
+            List<MenuItem> visibleItems = null;
+            for (MenuItem item : slotItems) {
+                if (!shouldShowMenuItem(viewer, item)) continue;
+                if (visibleItems == null) visibleItems = new ArrayList<>();
+                visibleItems.add(item);
+            }
+
+            if (visibleItems == null) return Collections.emptyList();
+            return visibleItems;
+        }
+
+        MenuItem cosmeticItem = getCosmeticMenuItem(slot, session.getPage(), visibleCosmeticItems);
         if (cosmeticItem == null) return Collections.emptyList();
         return Collections.singletonList(cosmeticItem);
     }
 
-    private MenuItem getPrimaryMenuItem(int slot, @NotNull MenuSession session) {
-        List<MenuItem> menuItems = getMenuItems(slot, session);
+    private MenuItem getPrimaryMenuItem(@NotNull Player viewer, int slot, @NotNull MenuSession session, @NotNull List<MenuItem> visibleCosmeticItems) {
+        List<MenuItem> menuItems = getMenuItems(viewer, slot, session, visibleCosmeticItems);
         if (menuItems.isEmpty()) return null;
         return menuItems.get(0);
     }
 
-    private MenuItem getCosmeticMenuItem(int slot, int page) {
+    private MenuItem getCosmeticMenuItem(int slot, int page, @NotNull List<MenuItem> visibleCosmeticItems) {
         Integer slotIndex = cosmeticSlotIndexes.get(slot);
         if (slotIndex == null || cosmeticSlots.isEmpty()) return null;
 
         int cosmeticIndex = (page * cosmeticSlots.size()) + slotIndex;
-        if (cosmeticIndex < 0 || cosmeticIndex >= cosmeticItems.size()) return null;
-        return cosmeticItems.get(cosmeticIndex);
+        if (cosmeticIndex < 0 || cosmeticIndex >= visibleCosmeticItems.size()) return null;
+        return visibleCosmeticItems.get(cosmeticIndex);
+    }
+
+    @NotNull
+    private List<MenuItem> getVisibleCosmeticItems(@NotNull Player viewer) {
+        if (cosmeticItems.isEmpty()) return Collections.emptyList();
+
+        List<MenuItem> visibleItems = new ArrayList<>();
+        for (MenuItem item : cosmeticItems) {
+            if (shouldShowMenuItem(viewer, item)) {
+                visibleItems.add(item);
+            }
+        }
+        return visibleItems;
+    }
+
+    private boolean shouldShowMenuItem(@NotNull Player viewer, @NotNull MenuItem item) {
+        if (!(item.type() instanceof TypeCosmetic)) return true;
+
+        ConfigurationNode itemConfig = item.itemConfig();
+        if (itemConfig.node("visible").getBoolean(true)) return true;
+
+        String cosmeticId = itemConfig.node("cosmetic").getString("");
+        if (cosmeticId.isBlank()) return true;
+
+        Cosmetic cosmetic = Cosmetics.getCosmetic(cosmeticId);
+        if (cosmetic == null) return true;
+        if (!cosmetic.requiresPermission()) return true;
+        return cosmetic.hasPermission(viewer::hasPermission);
     }
 
     @NotNull

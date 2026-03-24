@@ -723,10 +723,10 @@ public class CosmeticUser implements CosmeticHolder {
         if (!cosmetic.requiresPermission()) return true;
 
         final Player player = getPlayer();
-        if (player != null) return player.hasPermission(cosmetic.getPermission());
+        if (player != null) return cosmetic.hasPermission(player::hasPermission);
 
         final Entity entity = getEntity();
-        if (entity != null) return entity.hasPermission(cosmetic.getPermission());
+        if (entity != null) return cosmetic.hasPermission(entity::hasPermission);
         return false;
     }
 
