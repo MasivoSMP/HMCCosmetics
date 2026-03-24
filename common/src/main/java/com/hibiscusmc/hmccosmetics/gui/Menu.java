@@ -12,28 +12,45 @@ import com.hibiscusmc.hmccosmetics.gui.type.Type;
 import com.hibiscusmc.hmccosmetics.gui.type.Types;
 import com.hibiscusmc.hmccosmetics.gui.type.types.TypeCosmetic;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
+import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
-import dev.triumphteam.gui.builder.item.ItemBuilder;
-import dev.triumphteam.gui.components.GuiType;
-import dev.triumphteam.gui.guis.Gui;
-import dev.triumphteam.gui.guis.GuiItem;
 import lombok.Getter;
+import lombok.Setter;
+import me.lojosho.hibiscuscommons.HibiscusCommonsPlugin;
 import me.lojosho.hibiscuscommons.config.serializer.ItemSerializer;
-import me.lojosho.hibiscuscommons.hooks.Hooks;
-import me.lojosho.hibiscuscommons.scheduler.TaskHandle;
-import me.lojosho.hibiscuscommons.util.AdventureUtils;
 import me.lojosho.shaded.configurate.ConfigurationNode;
+import me.rockyhawk.commandpanels.api.v1.CommandPanelsApi;
+import me.rockyhawk.commandpanels.api.v1.MenuCloseContext;
+import me.rockyhawk.commandpanels.api.v1.MenuDefinitionContext;
+import me.rockyhawk.commandpanels.api.v1.MenuKey;
+import me.rockyhawk.commandpanels.api.v1.MenuListener;
+import me.rockyhawk.commandpanels.api.v1.OpenRequest;
+import me.rockyhawk.commandpanels.api.v1.OpenResult;
+import me.rockyhawk.commandpanels.api.v1.OpenStatus;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class Menu {
@@ -62,6 +79,11 @@ public class Menu {
     private final int refreshRate;
     @Getter
     private final boolean shading;
+
+    @Getter
+    @Setter
+    @Nullable
+    private MenuKey commandPanelsKey;
 
     public Menu(String id, @NotNull ConfigurationNode config) {
         this.id = config.node("id").getString(id);
@@ -116,9 +138,7 @@ public class Menu {
             MenuItem menuItem = new MenuItem(slots, item, type, priority, config);
 
             if (type instanceof TypeCosmetic && slots.isEmpty() && !configuredCosmeticSlots.isEmpty()) {
-                if (!matchesCosmeticType(menuItem)) {
-                    continue;
-                }
+                if (!matchesCosmeticType(menuItem)) continue;
                 cosmeticItems.add(menuItem);
                 continue;
             }
@@ -185,75 +205,70 @@ public class Menu {
                 return;
             }
         }
-        final Component component = AdventureUtils.MINI_MESSAGE.deserialize(Hooks.processPlaceholders(viewer, this.title));
-        Gui gui = Gui.gui()
-                .title(component)
-                .rows(rows)
-                .type(GuiType.CHEST)
-                .inventory((title, owner, type) -> Bukkit.createInventory(owner, rows * 9, title))
-                .create();
-        MenuSession session = new MenuSession(this, gui, cosmeticHolder);
 
-        gui.setDefaultClickAction(event -> event.setCancelled(true));
+        CommandPanelsApi api = Menus.getCommandPanelsApi();
+        if (api == null || commandPanelsKey == null) {
+            MessagesUtil.sendDebugMessages("CommandPanels is not initialized for menu " + getId(), Level.WARNING);
+            MessagesUtil.sendMessage(viewer, "invalid-menu");
+            return;
+        }
 
-        AtomicReference<TaskHandle> refreshTask = new AtomicReference<>(TaskHandle.NONE);
-        gui.setOpenGuiAction(event -> {
+        Menus.markMenuOpenRequested();
+
+        Runnable openTask = () -> {
+            MenuSession session = new MenuSession(this, cosmeticHolder);
             Menus.setSession(viewer.getUniqueId(), session);
-            Runnable run = () -> {
-                if (gui.getInventory().getViewers().isEmpty()) {
-                    TaskHandle task = refreshTask.getAndSet(TaskHandle.NONE);
-                    task.cancel();
-                }
 
-                updateMenu(viewer, cosmeticHolder, gui, session);
-            };
+            OpenRequest request = OpenRequest.builder()
+                    .sessionValue("page", String.valueOf(session.getPage()))
+                    .listener(new MenuListener() {
+                        @Override
+                        public void onOpen(me.rockyhawk.commandpanels.api.v1.MenuSession openedSession) {
+                            session.setExternalSessionId(openedSession.id());
+                        }
 
-            if (refreshRate != -1) {
-                TaskHandle task = HMCCosmeticsPlugin.getInstance().getScheduler()
-                    .runAtEntityAtFixedRate(viewer, run, 0, refreshRate);
-                TaskHandle previous = refreshTask.getAndSet(task);
-                previous.cancel();
-            } else {
-                HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntity(viewer, run);
+                        @Override
+                        public void onClose(MenuCloseContext closeContext) {
+                            if (cosmeticHolder instanceof CosmeticUser user) {
+                                PlayerMenuCloseEvent closeEvent = new PlayerMenuCloseEvent(user, Menu.this, Menus.mapCloseReason(closeContext.reason()));
+                                HMCCosmeticsPlugin.getInstance().getScheduler()
+                                        .runAtEntity(viewer, () -> Bukkit.getPluginManager().callEvent(closeEvent));
+                            }
+
+                            Menus.removeSession(viewer.getUniqueId(), closeContext.session().id());
+                        }
+                    })
+                    .build();
+
+            OpenResult result = api.open(commandPanelsKey, viewer, request);
+            if (result.sessionId() != null) {
+                session.setExternalSessionId(result.sessionId());
             }
-        });
 
-        gui.setCloseGuiAction(event -> {
-            if (cosmeticHolder instanceof CosmeticUser user) {
-                PlayerMenuCloseEvent closeEvent = new PlayerMenuCloseEvent(user, this, event.getReason());
-                HMCCosmeticsPlugin.getInstance().getScheduler()
-                    .runAtEntity(viewer, () -> Bukkit.getPluginManager().callEvent(closeEvent));
+            if (result.successful()) return;
+
+            MessagesUtil.sendDebugMessages("Failed to open CommandPanels menu " + getId() + " for " + viewer.getName()
+                    + " (status=" + result.status() + ", message='" + result.message() + "')", Level.WARNING);
+            Menus.removeSession(viewer.getUniqueId(), session);
+            if (result.status() == OpenStatus.MENU_NOT_FOUND || result.status() == OpenStatus.FAILED) {
+                MessagesUtil.sendMessage(viewer, "invalid-menu");
             }
-
-            Menus.removeSession(viewer.getUniqueId(), gui);
-            TaskHandle task = refreshTask.getAndSet(TaskHandle.NONE);
-            task.cancel();
-        });
-
-        Runnable openGuiTask = () -> {
-            Menus.setSession(viewer.getUniqueId(), session);
-            gui.open(viewer);
-            updateMenu(viewer, cosmeticHolder, gui, session); // fixes shading? I know I do this twice but it's easier than writing a whole new class to deal with this shit
         };
 
-        // API
         if (cosmeticHolder instanceof CosmeticUser user) {
             PlayerMenuOpenEvent event = new PlayerMenuOpenEvent(user, this);
             HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntity(viewer, () -> {
                 Bukkit.getPluginManager().callEvent(event);
-                if (!event.isCancelled()) {
-                    openGuiTask.run();
-                }
+                if (!event.isCancelled()) openTask.run();
             });
+            return;
         }
-        // Internal
-        else {
-            HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntity(viewer, openGuiTask);
-        }
+
+        HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntity(viewer, openTask);
     }
 
     public void refresh(@NotNull Player viewer, @NotNull MenuSession session) {
-        updateMenu(viewer, session.getCosmeticHolder(), session.getGui(), session);
+        Menus.refresh(viewer, session);
     }
 
     public int getTotalPages() {
@@ -267,6 +282,251 @@ public class Menu {
     private int getTotalPages(@NotNull List<MenuItem> cosmeticMenuItems) {
         if (cosmeticSlots.isEmpty() || cosmeticMenuItems.isEmpty()) return 1;
         return Math.max(1, (int) Math.ceil((double) cosmeticMenuItems.size() / cosmeticSlots.size()));
+    }
+
+    public boolean handleMenuClick(@NotNull Player viewer, @NotNull MenuSession session, int slot, @NotNull ClickType clickType) {
+        CosmeticHolder cosmeticHolder = session.getCosmeticHolder();
+        List<MenuItem> visibleCosmeticItems = getVisibleCosmeticItems(viewer);
+        session.setPage(session.getPage(), getTotalPages(visibleCosmeticItems));
+
+        RenderedSlot renderedSlot = resolveRenderedSlot(viewer, cosmeticHolder, session, slot, visibleCosmeticItems);
+        if (renderedSlot == null) return false;
+
+        if (Settings.isMenuClickCooldown()) {
+            UUID uuid = viewer.getUniqueId();
+            Long userCooldown = Menus.getCooldown(uuid);
+            if (userCooldown != 0 && (System.currentTimeMillis() - userCooldown <= getCooldown())) {
+                MessagesUtil.sendDebugMessages("Cooldown for " + viewer.getUniqueId() + " System time: " + System.currentTimeMillis() + " Cooldown: " + userCooldown + " Difference: " + (System.currentTimeMillis() - userCooldown));
+                MessagesUtil.sendMessage(viewer, "on-click-cooldown");
+                return false;
+            }
+            Menus.addCooldown(uuid, System.currentTimeMillis());
+        }
+
+        Type type = renderedSlot.menuItem().type();
+        if (type != null) {
+            type.run(viewer, cosmeticHolder, renderedSlot.menuItem().itemConfig(), clickType);
+        }
+
+        return true;
+    }
+
+    public @NotNull YamlConfiguration buildCommandPanelsConfiguration(@NotNull MenuDefinitionContext context) throws IOException {
+        Player viewer = context.player();
+        if (viewer == null) {
+            return createBaseCommandPanelsConfiguration();
+        }
+
+        MenuSession session = Menus.getSession(viewer.getUniqueId());
+        if (session == null || session.getMenu() != this) {
+            CosmeticUser user = CosmeticUsers.getUser(viewer);
+            if (user == null) throw new IOException("Cosmetic user is unavailable for " + viewer.getName());
+            session = new MenuSession(this, user);
+            Menus.setSession(viewer.getUniqueId(), session);
+        }
+
+        RenderData renderData = buildRenderData(viewer, session.getCosmeticHolder(), session);
+
+        YamlConfiguration generated = createBaseCommandPanelsConfiguration();
+        generated.set("title", renderData.title());
+
+        ConfigurationSection layoutSection = generated.getConfigurationSection("layout");
+        ConfigurationSection itemsSection = generated.getConfigurationSection("items");
+        if (layoutSection == null || itemsSection == null) {
+            throw new IOException("Unable to initialize CommandPanels layout/items sections for menu " + getId());
+        }
+
+        for (Map.Entry<Integer, RenderedSlot> entry : renderData.renderedSlots().entrySet()) {
+            int slot = entry.getKey();
+            RenderedSlot renderedSlot = entry.getValue();
+
+            String itemId = "slot_" + slot;
+            layoutSection.set(String.valueOf(slot), List.of(itemId));
+
+            ConfigurationSection itemSection = itemsSection.createSection(itemId);
+            writeInventoryItem(itemSection, renderedSlot.itemStack());
+            writeClickActions(itemSection, slot);
+        }
+
+        return generated;
+    }
+
+    private @NotNull YamlConfiguration createBaseCommandPanelsConfiguration() {
+        YamlConfiguration generated = new YamlConfiguration();
+        generated.set("type", "inventory");
+        generated.set("rows", String.valueOf(rows));
+        generated.set("title", title);
+        generated.set("update-delay", String.valueOf(Math.max(0, refreshRate)));
+        generated.createSection("layout");
+        generated.createSection("items");
+        return generated;
+    }
+
+    private @NotNull RenderData buildRenderData(@NotNull Player viewer, @NotNull CosmeticHolder cosmeticHolder, @NotNull MenuSession session) {
+        List<MenuItem> visibleCosmeticItems = getVisibleCosmeticItems(viewer);
+        session.setPage(session.getPage(), getTotalPages(visibleCosmeticItems));
+
+        String finalTitle = shading
+                ? buildShadedTitle(viewer, cosmeticHolder, session, visibleCosmeticItems)
+                : title;
+
+        int menuSize = rows * 9;
+        Map<Integer, RenderedSlot> renderedSlots = new HashMap<>();
+        for (int slot = 0; slot < menuSize; slot++) {
+            RenderedSlot renderedSlot = resolveRenderedSlot(viewer, cosmeticHolder, session, slot, visibleCosmeticItems);
+            if (renderedSlot != null) renderedSlots.put(slot, renderedSlot);
+        }
+
+        return new RenderData(finalTitle, renderedSlots);
+    }
+
+    private @NotNull String buildShadedTitle(@NotNull Player viewer,
+                                             @NotNull CosmeticHolder cosmeticHolder,
+                                             @NotNull MenuSession session,
+                                             @NotNull List<MenuItem> visibleCosmeticItems) {
+        StringBuilder shadedTitle = new StringBuilder(this.title);
+        int row = 0;
+
+        for (int slot = 0; slot < rows * 9; slot++) {
+            if (slot % 9 == 0) {
+                if (row == 0) {
+                    shadedTitle.append(Settings.getFirstRowShift());
+                } else {
+                    shadedTitle.append(Settings.getSequentRowShift());
+                }
+                row += 1;
+            } else {
+                shadedTitle.append(Settings.getIndividualColumnShift());
+            }
+
+            boolean occupied = false;
+            MenuItem primaryItem = getPrimaryMenuItem(viewer, slot, session, visibleCosmeticItems);
+            if (primaryItem != null && primaryItem.type() instanceof TypeCosmetic) {
+                Cosmetic cosmetic = Cosmetics.getCosmetic(primaryItem.itemConfig().node("cosmetic").getString(""));
+                if (cosmetic != null) {
+                    if (cosmeticHolder.hasCosmeticInSlot(cosmetic)) {
+                        shadedTitle.append(Settings.getEquippedCosmeticColor());
+                    } else if (cosmeticHolder.canEquipCosmetic(cosmetic, true)) {
+                        shadedTitle.append(Settings.getEquipableCosmeticColor());
+                    } else {
+                        shadedTitle.append(Settings.getLockedCosmeticColor());
+                    }
+                    occupied = true;
+                }
+            }
+
+            if (occupied) {
+                shadedTitle.append(Settings.getBackground().replace("<row>", String.valueOf(row)));
+            } else {
+                shadedTitle.append(Settings.getClearBackground().replace("<row>", String.valueOf(row)));
+            }
+        }
+
+        return shadedTitle.toString();
+    }
+
+    @Nullable
+    private RenderedSlot resolveRenderedSlot(@NotNull Player viewer,
+                                             @NotNull CosmeticHolder cosmeticHolder,
+                                             @NotNull MenuSession session,
+                                             int slot,
+                                             @NotNull List<MenuItem> visibleCosmeticItems) {
+        List<MenuItem> menuItems = getMenuItems(viewer, slot, session, visibleCosmeticItems);
+        if (menuItems.isEmpty()) return null;
+
+        for (MenuItem item : menuItems) {
+            Type type = item.type();
+            ItemStack modifiedItem = getMenuItem(viewer, cosmeticHolder, type, item.itemConfig(), item.item().clone(), slot);
+            if (modifiedItem.getType().isAir()) continue;
+            return new RenderedSlot(item, modifiedItem);
+        }
+
+        return null;
+    }
+
+    private void writeClickActions(@NotNull ConfigurationSection itemSection, int slot) {
+        writeClickAction(itemSection, "left-click", slot, ClickType.LEFT);
+        writeClickAction(itemSection, "right-click", slot, ClickType.RIGHT);
+        writeClickAction(itemSection, "shift-left-click", slot, ClickType.SHIFT_LEFT);
+        writeClickAction(itemSection, "shift-right-click", slot, ClickType.SHIFT_RIGHT);
+    }
+
+    private void writeClickAction(@NotNull ConfigurationSection section, @NotNull String key, int slot, @NotNull ClickType clickType) {
+        ConfigurationSection clickSection = section.createSection(key);
+        clickSection.set("commands", List.of(buildClickActionCommand(slot, clickType)));
+    }
+
+    @NotNull
+    private String buildClickActionCommand(int slot, @NotNull ClickType clickType) {
+        return "[" + Menus.getCommandPanelsNamespace() + ":" + Menus.getMenuClickActionId() + "] slot=" + slot + " click=" + clickType.name();
+    }
+
+    private void writeInventoryItem(@NotNull ConfigurationSection section, @NotNull ItemStack itemStack) {
+        section.set("material", itemStack.getType().name());
+
+        if (itemStack.getAmount() != 1) {
+            section.set("stack", String.valueOf(itemStack.getAmount()));
+        }
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) return;
+
+        if (HibiscusCommonsPlugin.isOnPaper()) {
+            if (itemMeta.hasDisplayName() && itemMeta.displayName() != null) {
+                section.set("name", MiniMessage.miniMessage().serialize(itemMeta.displayName()));
+            }
+
+            if (itemMeta.hasLore() && itemMeta.lore() != null) {
+                List<String> lore = new ArrayList<>();
+                for (Component line : itemMeta.lore()) {
+                    lore.add(MiniMessage.miniMessage().serialize(line));
+                }
+                section.set("lore", lore);
+            }
+        } else {
+            if (itemMeta.hasDisplayName()) {
+                section.set("name", itemMeta.getDisplayName());
+            }
+
+            if (itemMeta.hasLore() && itemMeta.getLore() != null) {
+                section.set("lore", new ArrayList<>(itemMeta.getLore()));
+            }
+        }
+
+        if (itemMeta.hasCustomModelData()) {
+            section.set("custom-model-data", String.valueOf(itemMeta.getCustomModelData()));
+        }
+
+        if (itemMeta.hasEnchants()) {
+            List<String> enchantments = new ArrayList<>();
+            itemMeta.getEnchants().forEach((enchantment, level) ->
+                    enchantments.add(enchantment.getKey().asString() + " " + level));
+            section.set("enchantments", enchantments);
+        }
+
+        if (itemMeta instanceof Damageable damageable && damageable.getDamage() > 0) {
+            section.set("damage", String.valueOf(damageable.getDamage()));
+        }
+
+        String itemModel = readMetaMethodAsString(itemMeta, "hasItemModel", "getItemModel");
+        if (itemModel != null && !itemModel.isBlank()) {
+            section.set("item-model", itemModel);
+        }
+    }
+
+    @Nullable
+    private String readMetaMethodAsString(@NotNull ItemMeta itemMeta, @NotNull String hasMethod, @NotNull String getMethod) {
+        try {
+            Method has = itemMeta.getClass().getMethod(hasMethod);
+            Object hasValue = has.invoke(itemMeta);
+            if (!(hasValue instanceof Boolean boolValue) || !boolValue) return null;
+
+            Method get = itemMeta.getClass().getMethod(getMethod);
+            Object value = get.invoke(itemMeta);
+            return value == null ? null : String.valueOf(value);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private boolean matchesCosmeticType(@NotNull MenuItem item) {
@@ -310,110 +570,6 @@ public class Menu {
         return alias;
     }
 
-    private void updateMenu(Player viewer, CosmeticHolder cosmeticHolder, Gui gui, MenuSession session) {
-        List<MenuItem> visibleCosmeticItems = getVisibleCosmeticItems(viewer);
-        session.setPage(session.getPage(), getTotalPages(visibleCosmeticItems));
-        StringBuilder title = new StringBuilder(this.title);
-
-        int row = 0;
-        if (shading) {
-            for (int i = 0; i < gui.getInventory().getSize(); i++) {
-                // Handles the title
-                if (i % 9 == 0) {
-                    if (row == 0) {
-                        title.append(Settings.getFirstRowShift()); // Goes back to the start of the gui
-                    } else {
-                        title.append(Settings.getSequentRowShift());
-                    }
-                    row += 1;
-                } else {
-                    title.append(Settings.getIndividualColumnShift()); // Goes to the next slot
-                }
-
-                boolean occupied = false;
-                MenuItem item = getPrimaryMenuItem(viewer, i, session, visibleCosmeticItems);
-                if (item != null) {
-                    updateItem(viewer, cosmeticHolder, gui, session, i, visibleCosmeticItems);
-
-                    if (item.type() instanceof TypeCosmetic) {
-                        Cosmetic cosmetic = Cosmetics.getCosmetic(item.itemConfig().node("cosmetic").getString(""));
-                        if (cosmetic == null) continue;
-                        if (cosmeticHolder.hasCosmeticInSlot(cosmetic)) {
-                            title.append(Settings.getEquippedCosmeticColor());
-                        } else {
-                            if (cosmeticHolder.canEquipCosmetic(cosmetic, true)) {
-                                title.append(Settings.getEquipableCosmeticColor());
-                            } else {
-                                title.append(Settings.getLockedCosmeticColor());
-                            }
-                        }
-                        occupied = true;
-                    }
-                } else {
-                    clearSlot(gui, i);
-                }
-                if (occupied) {
-                    title.append(Settings.getBackground().replaceAll("<row>", String.valueOf(row)));
-                } else {
-                    title.append(Settings.getClearBackground().replaceAll("<row>", String.valueOf(row)));
-                }
-            }
-            MessagesUtil.sendDebugMessages("Updated menu with title " + title);
-            gui.updateTitle(AdventureUtils.MINI_MESSAGE.deserialize(Hooks.processPlaceholders(viewer, title.toString())));
-        } else {
-            for (int i = 0; i < gui.getInventory().getSize(); i++) {
-                updateItem(viewer, cosmeticHolder, gui, session, i, visibleCosmeticItems);
-            }
-        }
-    }
-
-    private void updateItem(Player viewer, CosmeticHolder cosmeticHolder, Gui gui, MenuSession session, int slot, @NotNull List<MenuItem> visibleCosmeticItems) {
-        List<MenuItem> menuItems = getMenuItems(viewer, slot, session, visibleCosmeticItems);
-        if (menuItems.isEmpty()) {
-            clearSlot(gui, slot);
-            return;
-        }
-
-        for (MenuItem item : menuItems) {
-            Type type = item.type();
-            ItemStack modifiedItem = getMenuItem(viewer, cosmeticHolder, type, item.itemConfig(), item.item().clone(), slot);
-            if (modifiedItem.getType().isAir()) continue;
-            GuiItem guiItem = ItemBuilder.from(modifiedItem).asGuiItem();
-            guiItem.setAction(event -> {
-                UUID uuid = viewer.getUniqueId();
-                if (Settings.isMenuClickCooldown()) {
-                    Long userCooldown = Menus.getCooldown(uuid);
-                    if (userCooldown != 0 && (System.currentTimeMillis() - Menus.getCooldown(uuid) <= getCooldown())) {
-                        MessagesUtil.sendDebugMessages("Cooldown for " + viewer.getUniqueId() + " System time: " + System.currentTimeMillis() + " Cooldown: " + Menus.getCooldown(viewer.getUniqueId()) + " Difference: " + (System.currentTimeMillis() - Menus.getCooldown(viewer.getUniqueId())));
-                        MessagesUtil.sendMessage(viewer, "on-click-cooldown");
-                        return;
-                    } else {
-                        Menus.addCooldown(uuid, System.currentTimeMillis());
-                    }
-                }
-                MessagesUtil.sendDebugMessages("Updated Menu Item in slot number " + slot);
-                final ClickType clickType = event.getClick();
-                if (type != null) type.run(viewer, cosmeticHolder, item.itemConfig(), clickType);
-                updateMenu(viewer, cosmeticHolder, gui, session);
-            });
-
-            MessagesUtil.sendDebugMessages("Set an item in slot " + slot + " in the menu of " + getId());
-            gui.updateItem(slot, guiItem);
-            return;
-        }
-
-        clearSlot(gui, slot);
-    }
-
-    private void clearSlot(@NotNull Gui gui, int slot) {
-        if (slot < 0 || slot >= gui.getInventory().getSize()) {
-            return;
-        }
-
-        gui.getGuiItems().remove(slot);
-        gui.getInventory().setItem(slot, null);
-    }
-
     @NotNull
     private List<MenuItem> getMenuItems(@NotNull Player viewer, int slot, @NotNull MenuSession session, @NotNull List<MenuItem> visibleCosmeticItems) {
         if (items.containsKey(slot)) {
@@ -436,12 +592,14 @@ public class Menu {
         return Collections.singletonList(cosmeticItem);
     }
 
+    @Nullable
     private MenuItem getPrimaryMenuItem(@NotNull Player viewer, int slot, @NotNull MenuSession session, @NotNull List<MenuItem> visibleCosmeticItems) {
         List<MenuItem> menuItems = getMenuItems(viewer, slot, session, visibleCosmeticItems);
         if (menuItems.isEmpty()) return null;
         return menuItems.get(0);
     }
 
+    @Nullable
     private MenuItem getCosmeticMenuItem(int slot, int page, @NotNull List<MenuItem> visibleCosmeticItems) {
         Integer slotIndex = cosmeticSlotIndexes.get(slot);
         if (slotIndex == null || cosmeticSlots.isEmpty()) return null;
@@ -529,7 +687,6 @@ public class Menu {
     @NotNull
     private List<Integer> getSlots(int small, int max) {
         List<Integer> slots = new ArrayList<>();
-
         for (int i = small; i <= max; i++) slots.add(i);
         return slots;
     }
@@ -537,7 +694,7 @@ public class Menu {
     @Contract("_, _, _, _, _, _ -> param4")
     @NotNull
     private ItemStack getMenuItem(Player viewer, CosmeticHolder cosmeticHolder, Type type, ConfigurationNode config, ItemStack itemStack, int slot) {
-        if (!itemStack.hasItemMeta()) return itemStack;
+        if (type == null || !itemStack.hasItemMeta()) return itemStack;
         return type.setItem(viewer, cosmeticHolder, config, itemStack, slot);
     }
 
@@ -547,4 +704,10 @@ public class Menu {
     }
 
     public static Comparator<MenuItem> priorityCompare = Comparator.comparing(MenuItem::priority).reversed();
+
+    private record RenderedSlot(@NotNull MenuItem menuItem, @NotNull ItemStack itemStack) {
+    }
+
+    private record RenderData(@NotNull String title, @NotNull Map<Integer, RenderedSlot> renderedSlots) {
+    }
 }
