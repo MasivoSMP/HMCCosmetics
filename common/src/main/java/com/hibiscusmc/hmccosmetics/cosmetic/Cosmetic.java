@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 
 @Getter
@@ -44,6 +45,8 @@ public abstract class Cosmetic {
 
     /** Permission to use the cosmetic. */
     private String permission;
+    /** Shared permission group to use the cosmetic. */
+    private String permissionGroup;
 
     /** The display {@link ItemStack} of the cosmetic. */
     @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
@@ -74,6 +77,12 @@ public abstract class Cosmetic {
             this.permission = null;
         }
 
+        if (!config.node("permission-group").virtual()) {
+            this.permissionGroup = config.node("permission-group").getString();
+        } else {
+            this.permissionGroup = null;
+        }
+
         if (!config.node("item").virtual()) {
             this.material = config.node("item", "material").getString();
             try {
@@ -93,8 +102,13 @@ public abstract class Cosmetic {
     }
 
     protected Cosmetic(String id, String permission, ItemStack item, String material, CosmeticSlot slot, boolean dyeable) {
+        this(id, permission, null, item, material, slot, dyeable);
+    }
+
+    protected Cosmetic(String id, String permission, String permissionGroup, ItemStack item, String material, CosmeticSlot slot, boolean dyeable) {
         this.id = id;
         this.permission = permission;
+        this.permissionGroup = permissionGroup;
         this.item = item;
         this.material = material;
         this.slot = slot;
@@ -102,7 +116,13 @@ public abstract class Cosmetic {
     }
 
     public boolean requiresPermission() {
-        return permission != null;
+        return permission != null || permissionGroup != null;
+    }
+
+    public boolean hasPermission(@NotNull Predicate<String> permissionCheck) {
+        if (!requiresPermission()) return true;
+        if (permission != null && permissionCheck.test(permission)) return true;
+        return permissionGroup != null && permissionCheck.test(permissionGroup);
     }
 
     public boolean requiresPurchase() {

@@ -18,7 +18,7 @@ public class ActionNextPage extends Action {
         MenuSession session = Menus.getSession(viewer.getUniqueId());
         if (session == null) return;
 
-        if (session.nextPage()) {
+        if (session.nextPage(viewer)) {
             session.refresh(viewer);
         }
     }
