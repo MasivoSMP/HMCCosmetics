@@ -15,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 
 public class Settings {
@@ -76,6 +78,9 @@ public class Settings {
     private static final String MENU_CLICK_COOLDOWN_PATH = "click-cooldown";
     private static final String MENU_CLICK_COOLDOWN_TIME_PATH = "time";
     private static final String PURCHASE_LORE_PATH = "purchase-lore";
+    private static final String COSMETIC_LORE_PATH = "cosmetic-lore";
+    private static final String COSMETIC_LORE_LINES_PATH = "lines";
+    private static final String COSMETIC_LORE_ALLOWED_WITH_MAPPINGS_PATH = "allowed-with-mappings";
     private static final String COSMETIC_TYPE_SETTINGS_PATH = "cosmetic-type";
     private static final String EQUIP_CLICK_TYPE = "equip-click";
     private static final String UNEQUIP_CLICK_TYPE = "unequip-click";
@@ -155,6 +160,12 @@ public class Settings {
     private static boolean menuClickCooldown;
     @Getter
     private static List<String> purchaseLore;
+    @Getter
+    private static boolean cosmeticLoreEnabled;
+    @Getter
+    private static List<String> cosmeticLoreLines;
+    @Getter
+    private static Map<String, String> cosmeticLoreAllowedWithMappings;
     @Getter
     private static Vector balloonOffset;
     @Getter
@@ -317,6 +328,21 @@ public class Settings {
         } catch (Exception e) {
             purchaseLore = new ArrayList<>();
         }
+        ConfigurationNode cosmeticLoreSettings = menuSettings.node(COSMETIC_LORE_PATH);
+        cosmeticLoreEnabled = cosmeticLoreSettings.node(ENABLED_PATH).getBoolean(false);
+        try {
+            cosmeticLoreLines = cosmeticLoreSettings.node(COSMETIC_LORE_LINES_PATH).getList(String.class);
+        } catch (Exception e) {
+            cosmeticLoreLines = new ArrayList<>();
+        }
+        cosmeticLoreAllowedWithMappings = new HashMap<>();
+        ConfigurationNode allowedWithMappings = cosmeticLoreSettings.node(COSMETIC_LORE_ALLOWED_WITH_MAPPINGS_PATH);
+        allowedWithMappings.childrenMap().forEach((key, value) -> {
+            String mappingKey = key.toString();
+            String mappingValue = value.getString();
+            if (mappingKey == null || mappingKey.isBlank() || mappingValue == null || mappingValue.isBlank()) return;
+            cosmeticLoreAllowedWithMappings.put(mappingKey.toLowerCase(Locale.ROOT), mappingValue);
+        });
 
         ConfigurationNode shadingSettings = menuSettings.node(SHADING_PATH);
         defaultShading = shadingSettings.node(ENABLED_PATH).getBoolean();
@@ -406,6 +432,13 @@ public class Settings {
         } catch (Exception e) {
             MessagesUtil.sendDebugMessages("Unable to play toggle sound '" + sound + "'.", Level.WARNING);
         }
+    }
+
+    public static @NotNull String resolveAllowedWithDisplay(@NotNull String value) {
+        if (value.isBlank()) return value;
+        String mapped = cosmeticLoreAllowedWithMappings.get(value.toLowerCase(Locale.ROOT));
+        if (mapped == null || mapped.isBlank()) return value;
+        return mapped;
     }
 
     private static @NotNull ConfigurationNode getToggleSoundSettingsNode(

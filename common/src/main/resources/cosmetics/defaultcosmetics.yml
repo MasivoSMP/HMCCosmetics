@@ -1,3 +1,14 @@
+# Optional lore metadata per cosmetic:
+# allowed-with: "<rank-or-group-key>" # Example: masivo (resolved via config.yml cosmetic-lore.allowed-with-mappings)
+# made-by: "<creator>"
+# custom-lore:
+#   - ""
+#   - "<gray>Enabled: <#6D9DC5>%HMCCosmetics_equipped_{cosmetic}%"
+#   - "<gray>Allowed: <#6D9DC5>%HMCCosmetics_unlocked_{cosmetic}%"
+#   - "<gray>Available with: <white>{allowed-with}"
+#   - "<gray>Made by: <yellow>{made-by}"
+#
+# custom-lore fully overrides menu-settings.cosmetic-lore.lines for that cosmetic.
 beanie:
   slot: HELMET
   permission: "hmccosmetics.beanie"

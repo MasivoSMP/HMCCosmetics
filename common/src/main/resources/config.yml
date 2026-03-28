@@ -148,6 +148,25 @@ menu-settings:
   purchase-lore:
     - "<gray>Precio: <yellow>$%price%"
     - "<gray>Click para comprar"
+  cosmetic-lore:
+    # Enables global auto-generated lore for menu items with type: cosmetic.
+    # Lore order is: cosmetic-lore/custom-lore -> menu item lore -> purchase-lore.
+    enabled: false
+    # Maps readable rank keys to in-game display glyphs for {allowed-with}.
+    # Cosmetic example: allowed-with: "masivo"
+    # Lore output example: "<gray>Available with: <#6D9DC5>"
+    allowed-with-mappings:
+      masivo: ""
+    # Supported placeholders:
+    # {cosmetic}, {allowed-with}, {made-by}
+    # If a line contains {allowed-with} or {made-by} and the cosmetic does not define
+    # that value, the line is omitted.
+    lines:
+      - ""
+      - "<gray>Enabled: <#6D9DC5>%HMCCosmetics_equipped_{cosmetic}%"
+      - "<gray>Allowed: <#6D9DC5>%HMCCosmetics_unlocked_{cosmetic}%"
+      - "<gray>Available with: <#6D9DC5>{allowed-with}"
+      - "<gray>Made by: <yellow>{made-by}"
   shading:
     # Below is the shading mechanism behind cosmetic items. This is a bit complicated, but it allows for a lot of customization.
     # The shading is done through the title and by shifting textures around. This is done by offsets.

@@ -26,6 +26,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -207,6 +208,8 @@ public class TypeCosmetic extends Type {
             return itemStack;
         }
 
+        applyConfiguredCosmeticLore(itemMeta, cosmetic);
+
         if (cosmetic != null && cosmeticHolder instanceof CosmeticUser user && shouldAppendPurchaseLore(user, cosmetic)) {
             appendPurchaseLore(itemMeta, cosmetic.getPrice());
         }
@@ -246,6 +249,95 @@ public class TypeCosmetic extends Type {
             lore.add(line.replace("%price%", formattedPrice));
         }
         itemMeta.setLore(lore);
+    }
+
+    private void applyConfiguredCosmeticLore(@NotNull ItemMeta itemMeta, @Nullable Cosmetic cosmetic) {
+        if (cosmetic == null) return;
+
+        List<String> templateLore = resolveConfiguredCosmeticLore(cosmetic);
+        if (templateLore.isEmpty()) return;
+
+        List<String> existingLore = getRawLore(itemMeta);
+        List<String> combinedLore = new ArrayList<>(templateLore);
+        combinedLore.addAll(existingLore);
+        setRawLore(itemMeta, combinedLore);
+    }
+
+    private @NotNull List<String> resolveConfiguredCosmeticLore(@NotNull Cosmetic cosmetic) {
+        ConfigurationNode cosmeticConfig = cosmetic.getConfig();
+
+        if (cosmeticConfig != null && !cosmeticConfig.node("custom-lore").virtual()) {
+            try {
+                return renderCosmeticLoreLines(cosmetic, cosmeticConfig.node("custom-lore").getList(String.class), cosmeticConfig);
+            } catch (Exception ignored) {
+                return new ArrayList<>();
+            }
+        }
+
+        if (!Settings.isCosmeticLoreEnabled()) return new ArrayList<>();
+        return renderCosmeticLoreLines(cosmetic, Settings.getCosmeticLoreLines(), cosmeticConfig);
+    }
+
+    private @NotNull List<String> renderCosmeticLoreLines(@NotNull Cosmetic cosmetic,
+                                                           @Nullable List<String> lines,
+                                                           @Nullable ConfigurationNode cosmeticConfig) {
+        if (lines == null || lines.isEmpty()) return new ArrayList<>();
+
+        String allowedWith = getMetadataValue(cosmeticConfig, "allowed-with");
+        String madeBy = getMetadataValue(cosmeticConfig, "made-by");
+        if (allowedWith != null) {
+            allowedWith = Settings.resolveAllowedWithDisplay(allowedWith);
+        }
+
+        List<String> renderedLines = new ArrayList<>();
+        for (String line : lines) {
+            if (line == null) continue;
+            if (line.contains("{allowed-with}") && (allowedWith == null || allowedWith.isBlank())) continue;
+            if (line.contains("{made-by}") && (madeBy == null || madeBy.isBlank())) continue;
+
+            renderedLines.add(line
+                .replace("{cosmetic}", cosmetic.getId())
+                .replace("{allowed-with}", allowedWith == null ? "" : allowedWith)
+                .replace("{made-by}", madeBy == null ? "" : madeBy)
+            );
+        }
+        return renderedLines;
+    }
+
+    private @Nullable String getMetadataValue(@Nullable ConfigurationNode cosmeticConfig, @NotNull String path) {
+        if (cosmeticConfig == null) return null;
+        String value = cosmeticConfig.node(path).getString();
+        if (value == null || value.isBlank()) return null;
+        return value;
+    }
+
+    private @NotNull List<String> getRawLore(@NotNull ItemMeta itemMeta) {
+        if (HibiscusCommonsPlugin.isOnPaper()) {
+            if (!itemMeta.hasLore() || itemMeta.lore() == null) return new ArrayList<>();
+            List<String> lore = new ArrayList<>();
+            for (Component line : itemMeta.lore()) {
+                lore.add(MiniMessage.miniMessage().serialize(line));
+            }
+            return lore;
+        }
+
+        if (!itemMeta.hasLore() || itemMeta.getLore() == null) return new ArrayList<>();
+        return new ArrayList<>(itemMeta.getLore());
+    }
+
+    private void setRawLore(@NotNull ItemMeta itemMeta, @NotNull List<String> loreLines) {
+        if (HibiscusCommonsPlugin.isOnPaper()) {
+            List<Component> lore = new ArrayList<>();
+            for (String line : loreLines) {
+                lore.add(MiniMessage.miniMessage()
+                    .deserialize(line)
+                    .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+            }
+            itemMeta.lore(lore);
+            return;
+        }
+
+        itemMeta.setLore(new ArrayList<>(loreLines));
     }
 
     private @NotNull String getMenuCosmeticName(@NotNull Player viewer, @NotNull ConfigurationNode config, @NotNull Cosmetic cosmetic) {
