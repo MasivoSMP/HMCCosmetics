@@ -19,11 +19,13 @@ import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
 import com.hibiscusmc.hmccosmetics.util.HMCCServerUtils;
 import me.lojosho.hibiscuscommons.hooks.Hooks;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -159,6 +161,21 @@ public class CosmeticCommand implements CommandExecutor {
 
                     if (!isConsole && !user.hasCosmeticPermission(selectedCosmetic)) {
                         if (!isSilent) MessagesUtil.sendMessage(target, "no-cosmetic-permission");
+                        return;
+                    }
+
+                    if (!isConsole && !user.canEquipCosmetic(selectedCosmetic)) {
+                        if (!isSilent) {
+                            if (selectedCosmetic.requiresAdvancement()) {
+                                MessagesUtil.sendMessage(
+                                    target,
+                                    "no-cosmetic-advancement",
+                                    TagResolver.resolver(Placeholder.component("advancement", resolveAdvancementChatDisplay(selectedCosmetic)))
+                                );
+                            } else {
+                                MessagesUtil.sendMessage(target, "no-cosmetic-permission");
+                            }
+                        }
                         return;
                     }
 
@@ -627,5 +644,17 @@ public class CosmeticCommand implements CommandExecutor {
             return;
         }
         action.run();
+    }
+
+    private static @NotNull Component resolveAdvancementChatDisplay(@NotNull Cosmetic cosmetic) {
+        if (!cosmetic.requiresAdvancement()) return Component.text("Unknown");
+
+        Advancement advancement = cosmetic.resolveAdvancement();
+        if (advancement == null) {
+            String fallback = cosmetic.getAdvancement();
+            return Component.text((fallback == null || fallback.isBlank()) ? "Unknown" : fallback);
+        }
+
+        return advancement.displayName();
     }
 }

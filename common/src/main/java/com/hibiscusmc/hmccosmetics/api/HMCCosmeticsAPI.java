@@ -101,6 +101,18 @@ public final class HMCCosmeticsAPI {
         return user.hasPurchasedCosmetic(cosmetic);
     }
 
+    public static boolean hasAdvancementUnlockedCosmetic(@NotNull CosmeticUser user, @NotNull Cosmetic cosmetic) {
+        return user.hasAdvancementUnlockedCosmetic(cosmetic);
+    }
+
+    public static boolean hasRequiredAdvancement(@NotNull CosmeticUser user, @NotNull Cosmetic cosmetic) {
+        return user.hasRequiredAdvancement(cosmetic);
+    }
+
+    public static boolean syncAdvancementUnlocks(@NotNull CosmeticUser user) {
+        return user.syncAdvancementUnlocks();
+    }
+
     public static boolean canUseCosmetic(@NotNull CosmeticUser user, @NotNull Cosmetic cosmetic) {
         return user.canUseCosmetic(cosmetic);
     }

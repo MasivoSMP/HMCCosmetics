@@ -20,6 +20,10 @@ import me.lojosho.shaded.configurate.serialize.SerializationException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.EquipmentSlot;
@@ -57,9 +61,19 @@ public class TypeCosmetic extends Type {
         }
 
         CosmeticUser user = CosmeticHolder.ensureSingleCosmeticUser(viewer, cosmeticHolder);
-        if (!user.hasCosmeticPermission(cosmetic) && !cosmeticHolder.canEquipCosmetic(cosmetic)) {
-            MessagesUtil.sendDebugMessages("No Cosmetic Permission");
-            MessagesUtil.sendMessage(viewer, "no-cosmetic-permission");
+        boolean canEquipCosmetic = cosmeticHolder.canEquipCosmetic(cosmetic);
+        if (!canEquipCosmetic) {
+            if (!user.hasCosmeticPermission(cosmetic)) {
+                MessagesUtil.sendDebugMessages("No Cosmetic Permission");
+                MessagesUtil.sendMessage(viewer, "no-cosmetic-permission");
+            } else if (cosmetic.requiresAdvancement()) {
+                MessagesUtil.sendDebugMessages("Missing Cosmetic Advancement");
+                MessagesUtil.sendMessage(
+                    viewer,
+                    "no-cosmetic-advancement",
+                    TagResolver.resolver(Placeholder.component("advancement", resolveAdvancementChatDisplay(cosmetic)))
+                );
+            }
             return;
         }
 
@@ -220,7 +234,7 @@ public class TypeCosmetic extends Type {
 
     private boolean shouldAppendPurchaseLore(@NotNull CosmeticUser user, @NotNull Cosmetic cosmetic) {
         return cosmetic.requiresPurchase()
-            && user.hasCosmeticPermission(cosmetic)
+            && user.canEquipCosmetic(cosmetic, true)
             && !user.hasPurchasedCosmetic(cosmetic);
     }
 
@@ -260,7 +274,7 @@ public class TypeCosmetic extends Type {
         List<String> existingLore = getRawLore(itemMeta);
         List<String> combinedLore = new ArrayList<>(templateLore);
         combinedLore.addAll(existingLore);
-        setRawLore(itemMeta, combinedLore);
+        setRawLore(itemMeta, combinedLore, cosmetic);
     }
 
     private @NotNull List<String> resolveConfiguredCosmeticLore(@NotNull Cosmetic cosmetic) {
@@ -285,6 +299,7 @@ public class TypeCosmetic extends Type {
 
         String allowedWith = getMetadataValue(cosmeticConfig, "allowed-with");
         String madeBy = getMetadataValue(cosmeticConfig, "made-by");
+        Component advancementDisplay = resolveAdvancementDisplay(cosmetic);
         if (allowedWith != null) {
             allowedWith = Settings.resolveAllowedWithDisplay(allowedWith);
         }
@@ -294,14 +309,46 @@ public class TypeCosmetic extends Type {
             if (line == null) continue;
             if (line.contains("{allowed-with}") && (allowedWith == null || allowedWith.isBlank())) continue;
             if (line.contains("{made-by}") && (madeBy == null || madeBy.isBlank())) continue;
+            if (line.contains("{advancement}") && advancementDisplay == null) continue;
 
-            renderedLines.add(line
+            String renderedLine = line
                 .replace("{cosmetic}", cosmetic.getId())
                 .replace("{allowed-with}", allowedWith == null ? "" : allowedWith)
-                .replace("{made-by}", madeBy == null ? "" : madeBy)
-            );
+                .replace("{made-by}", madeBy == null ? "" : madeBy);
+
+            if (!HibiscusCommonsPlugin.isOnPaper()) {
+                String advancementReplacement = advancementDisplay == null
+                    ? ""
+                    : PlainTextComponentSerializer.plainText().serialize(advancementDisplay);
+                renderedLine = renderedLine.replace("{advancement}", advancementReplacement);
+            }
+
+            renderedLines.add(renderedLine);
         }
         return renderedLines;
+    }
+
+    private @Nullable Component resolveAdvancementDisplay(@NotNull Cosmetic cosmetic) {
+        if (!cosmetic.requiresAdvancement()) return null;
+
+        Advancement advancement = cosmetic.resolveAdvancement();
+        if (advancement == null) return null;
+
+        io.papermc.paper.advancement.AdvancementDisplay display = advancement.getDisplay();
+        if (display == null) return null;
+        return display.title().colorIfAbsent(display.frame().color());
+    }
+
+    private @NotNull Component resolveAdvancementChatDisplay(@NotNull Cosmetic cosmetic) {
+        if (!cosmetic.requiresAdvancement()) return Component.text("Unknown");
+
+        Advancement advancement = cosmetic.resolveAdvancement();
+        if (advancement == null) {
+            String fallback = cosmetic.getAdvancement();
+            return Component.text((fallback == null || fallback.isBlank()) ? "Unknown" : fallback);
+        }
+
+        return advancement.displayName();
     }
 
     private @Nullable String getMetadataValue(@Nullable ConfigurationNode cosmeticConfig, @NotNull String path) {
@@ -325,13 +372,19 @@ public class TypeCosmetic extends Type {
         return new ArrayList<>(itemMeta.getLore());
     }
 
-    private void setRawLore(@NotNull ItemMeta itemMeta, @NotNull List<String> loreLines) {
+    private void setRawLore(@NotNull ItemMeta itemMeta, @NotNull List<String> loreLines, @NotNull Cosmetic cosmetic) {
         if (HibiscusCommonsPlugin.isOnPaper()) {
+            Component advancementDisplay = resolveAdvancementDisplay(cosmetic);
             List<Component> lore = new ArrayList<>();
             for (String line : loreLines) {
-                lore.add(MiniMessage.miniMessage()
-                    .deserialize(line)
-                    .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+                Component deserialized;
+                if (line.contains("{advancement}") && advancementDisplay != null) {
+                    String parsed = line.replace("{advancement}", "<hmcc_advancement>");
+                    deserialized = MiniMessage.miniMessage().deserialize(parsed, Placeholder.component("hmcc_advancement", advancementDisplay));
+                } else {
+                    deserialized = MiniMessage.miniMessage().deserialize(line);
+                }
+                lore.add(deserialized.decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
             }
             itemMeta.lore(lore);
             return;

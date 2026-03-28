@@ -18,8 +18,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public abstract class Type {
+    private static final Pattern LEGACY_SECTION_COLOR_CODES = Pattern.compile("(?i)\u00A7[0-9A-FK-ORX]");
 
     private final String id;
 
@@ -74,14 +76,14 @@ public abstract class Type {
             if (itemMeta.hasDisplayName()) {
                 String displayName = MiniMessage.miniMessage().serialize(itemMeta.displayName());
                 displayName = Hooks.processPlaceholders(viewer, displayName);
-                itemMeta.displayName(MiniMessage.miniMessage().deserialize(displayName).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+                itemMeta.displayName(MiniMessage.miniMessage().deserialize(sanitizeMiniMessageInput(displayName)).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
             }
 
             if (itemMeta.hasLore()) {
                 for (Component loreLine : itemMeta.lore()) {
                     String loreStringLine = MiniMessage.miniMessage().serialize(loreLine);
                     loreStringLine = Hooks.processPlaceholders(viewer, loreStringLine);
-                    processedLore.add(MiniMessage.miniMessage().deserialize(loreStringLine).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+                    processedLore.add(MiniMessage.miniMessage().deserialize(sanitizeMiniMessageInput(loreStringLine)).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
                 }
             }
 
@@ -114,5 +116,9 @@ public abstract class Type {
         }
 
         return itemMeta;
+    }
+
+    private @NotNull String sanitizeMiniMessageInput(@NotNull String input) {
+        return LEGACY_SECTION_COLOR_CODES.matcher(input).replaceAll("");
     }
 }

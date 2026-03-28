@@ -25,12 +25,16 @@ public class UserData {
     @Setter
     @Getter
     private Set<String> purchasedCosmetics;
+    @Setter
+    @Getter
+    private Set<String> advancementUnlockedCosmetics;
 
     public UserData(UUID owner) {
         this.owner = owner;
         this.cosmetics = new HashMap<>();
         this.hiddenReasons = new ArrayList<>();
         this.purchasedCosmetics = new HashSet<>();
+        this.advancementUnlockedCosmetics = new HashSet<>();
     }
 
     public void addCosmetic(CosmeticSlot slot, Cosmetic cosmetic, Integer color) {
@@ -43,5 +47,9 @@ public class UserData {
 
     public void addPurchasedCosmetic(String cosmeticId) {
         purchasedCosmetics.add(cosmeticId);
+    }
+
+    public void addAdvancementUnlockedCosmetic(String cosmeticId) {
+        advancementUnlockedCosmetics.add(cosmeticId);
     }
 }

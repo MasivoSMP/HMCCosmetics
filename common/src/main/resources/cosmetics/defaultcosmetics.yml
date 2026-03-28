@@ -1,10 +1,12 @@
 # Optional lore metadata per cosmetic:
 # allowed-with: "<rank-or-group-key>" # Example: masivo (resolved via config.yml cosmetic-lore.allowed-with-mappings)
 # made-by: "<creator>"
+# advancement: "<namespace:path>" # Example: minecraft:adventure/sleep_in_bed
 # custom-lore:
 #   - ""
 #   - "<gray>Enabled: <#6D9DC5>%HMCCosmetics_equipped_{cosmetic}%"
 #   - "<gray>Allowed: <#6D9DC5>%HMCCosmetics_unlocked_{cosmetic}%"
+#   - "<gray>Advancement: {advancement}"
 #   - "<gray>Available with: <white>{allowed-with}"
 #   - "<gray>Made by: <yellow>{made-by}"
 #

@@ -633,6 +633,10 @@ public class Menu {
 
         Cosmetic cosmetic = Cosmetics.getCosmetic(cosmeticId);
         if (cosmetic == null) return true;
+
+        CosmeticUser user = CosmeticUsers.getUser(viewer);
+        if (user != null) return user.canEquipCosmetic(cosmetic, true);
+
         if (!cosmetic.requiresPermission()) return true;
         return cosmetic.hasPermission(viewer::hasPermission);
     }

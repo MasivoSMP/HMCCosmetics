@@ -9,8 +9,11 @@ import lombok.Setter;
 import me.lojosho.hibiscuscommons.config.serializer.ItemSerializer;
 import me.lojosho.shaded.configurate.ConfigurationNode;
 import me.lojosho.shaded.configurate.serialize.SerializationException;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.ApiStatus;
@@ -66,6 +69,12 @@ public abstract class Cosmetic {
 
     /** The one-time purchase price for the cosmetic. Non-positive values mean no purchase is required. */
     private double price;
+    /** Optional advancement key required before this cosmetic can be equipped. */
+    private String advancement;
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private NamespacedKey advancementKey;
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private boolean missingAdvancementLogged;
 
     protected Cosmetic(@NotNull String id, @NotNull ConfigurationNode config) {
         this.id = id;
@@ -98,6 +107,20 @@ public abstract class Cosmetic {
 
         this.dyeable = config.node("dyeable").getBoolean(false);
         this.price = Math.max(0, config.node("price").getDouble(0));
+
+        String advancement = config.node("advancement").getString();
+        if (advancement != null) advancement = advancement.trim();
+        if (advancement == null || advancement.isBlank()) {
+            this.advancement = null;
+            this.advancementKey = null;
+        } else {
+            this.advancement = advancement;
+            this.advancementKey = NamespacedKey.fromString(advancement);
+            if (this.advancementKey == null) {
+                MessagesUtil.sendDebugMessages("Invalid advancement key '" + advancement + "' for cosmetic '" + id + "'.", Level.WARNING);
+            }
+        }
+        this.missingAdvancementLogged = false;
         MessagesUtil.sendDebugMessages("Dyeable " + dyeable);
     }
 
@@ -113,6 +136,9 @@ public abstract class Cosmetic {
         this.material = material;
         this.slot = slot;
         this.dyeable = dyeable;
+        this.advancement = null;
+        this.advancementKey = null;
+        this.missingAdvancementLogged = false;
     }
 
     public boolean requiresPermission() {
@@ -127,6 +153,26 @@ public abstract class Cosmetic {
 
     public boolean requiresPurchase() {
         return price > 0;
+    }
+
+    public boolean requiresAdvancement() {
+        return advancement != null && !advancement.isBlank();
+    }
+
+    /**
+     * Resolve the configured advancement for this cosmetic.
+     * Returns {@code null} when no advancement is configured or it can't be resolved.
+     */
+    public @Nullable Advancement resolveAdvancement() {
+        if (!requiresAdvancement()) return null;
+        if (advancementKey == null) return null;
+
+        Advancement advancement = Bukkit.getAdvancement(advancementKey);
+        if (advancement == null && !missingAdvancementLogged) {
+            missingAdvancementLogged = true;
+            MessagesUtil.sendDebugMessages("Unable to resolve advancement '" + this.advancement + "' for cosmetic '" + id + "'.", Level.WARNING);
+        }
+        return advancement;
     }
 
     /**

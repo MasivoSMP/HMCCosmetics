@@ -10,6 +10,7 @@ import com.hibiscusmc.hmccosmetics.config.WardrobeSettings;
 import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetic;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticHolder;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
+import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetics;
 import com.hibiscusmc.hmccosmetics.cosmetic.behavior.CosmeticMovementBehavior;
 import com.hibiscusmc.hmccosmetics.cosmetic.behavior.CosmeticUpdateBehavior;
 import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticArmorType;
@@ -39,6 +40,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -69,6 +71,9 @@ public class CosmeticUser implements CosmeticHolder {
     private final ArrayList<HiddenReason> hiddenReason = new ArrayList<>();
     private final HashMap<CosmeticSlot, Color> colors = new HashMap<>();
     private final Set<String> purchasedCosmetics = new HashSet<>();
+    private final Set<String> advancementUnlockedCosmetics = new HashSet<>();
+    private final Map<String, Long> advancementRequirementCache = new HashMap<>();
+    private static final long ADVANCEMENT_REQUIREMENT_NEGATIVE_CACHE_TTL_MS = 30_000L;
 
     /**
      * Use {@link #CosmeticUser(UUID)} instead and use {@link #initialize(UserData)} to populate the user with data.
@@ -96,8 +101,11 @@ public class CosmeticUser implements CosmeticHolder {
      */
     public CosmeticUser initialize(final @Nullable UserData userData) {
         if(userData != null) {
+            advancementRequirementCache.clear();
             purchasedCosmetics.clear();
             purchasedCosmetics.addAll(userData.getPurchasedCosmetics());
+            advancementUnlockedCosmetics.clear();
+            advancementUnlockedCosmetics.addAll(userData.getAdvancementUnlockedCosmetics());
             // CosmeticSlot -> Entry<Cosmetic, Integer>
             for(final Map.Entry<CosmeticSlot, Map.Entry<Cosmetic, Integer>> entry : userData.getCosmetics().entrySet()) {
                 final Cosmetic cosmetic = entry.getValue().getKey();
@@ -752,6 +760,84 @@ public class CosmeticUser implements CosmeticHolder {
         return Set.copyOf(purchasedCosmetics);
     }
 
+    public boolean hasAdvancementUnlockedCosmetic(@NotNull Cosmetic cosmetic) {
+        return hasAdvancementUnlockedCosmetic(cosmetic.getId());
+    }
+
+    public boolean hasAdvancementUnlockedCosmetic(@NotNull String cosmeticId) {
+        return advancementUnlockedCosmetics.contains(cosmeticId);
+    }
+
+    public boolean markAdvancementUnlockedCosmetic(@NotNull Cosmetic cosmetic) {
+        return markAdvancementUnlockedCosmetic(cosmetic.getId());
+    }
+
+    public boolean markAdvancementUnlockedCosmetic(@NotNull String cosmeticId) {
+        boolean unlocked = advancementUnlockedCosmetics.add(cosmeticId);
+        advancementRequirementCache.remove(cosmeticId);
+        if (unlocked) refreshPacketSnapshot();
+        return unlocked;
+    }
+
+    public @NotNull Set<String> getAdvancementUnlockedCosmetics() {
+        return Set.copyOf(advancementUnlockedCosmetics);
+    }
+
+    public void invalidateAdvancementRequirementCache() {
+        advancementRequirementCache.clear();
+    }
+
+    public boolean hasRequiredAdvancement(@NotNull Cosmetic cosmetic) {
+        return hasRequiredAdvancement(cosmetic, false, true);
+    }
+
+    public boolean syncAdvancementUnlocks() {
+        return syncAdvancementUnlocks(false);
+    }
+
+    public boolean syncAdvancementUnlocks(boolean ignoreNegativeCache) {
+        Player player = getPlayer();
+        if (player == null) return false;
+
+        boolean changed = false;
+        for (Cosmetic cosmetic : Cosmetics.values()) {
+            if (!cosmetic.requiresAdvancement()) continue;
+            if (hasAdvancementUnlockedCosmetic(cosmetic)) continue;
+
+            if (hasRequiredAdvancement(cosmetic, ignoreNegativeCache, false) && hasAdvancementUnlockedCosmetic(cosmetic)) {
+                changed = true;
+            }
+        }
+
+        if (changed) Database.save(this);
+        return changed;
+    }
+
+    public boolean handleCompletedAdvancement(@NotNull Advancement advancement) {
+        invalidateAdvancementRequirementCache();
+        String completedKey = advancement.getKey().toString();
+        boolean changed = false;
+
+        for (Cosmetic cosmetic : Cosmetics.values()) {
+            if (!cosmetic.requiresAdvancement()) continue;
+            if (!completedKey.equals(cosmetic.getAdvancement())) continue;
+            if (markAdvancementUnlockedCosmetic(cosmetic)) changed = true;
+        }
+
+        if (changed) Database.save(this);
+        return changed;
+    }
+
+    public boolean enforceEquippedCosmeticRequirements() {
+        boolean changed = false;
+        for (Cosmetic cosmetic : List.copyOf(getCosmetics())) {
+            if (canUseCosmetic(cosmetic, true)) continue;
+            removeCosmeticSlot(cosmetic.getSlot());
+            changed = true;
+        }
+        return changed;
+    }
+
     public boolean canUseCosmetic(@NotNull Cosmetic cosmetic) {
         return canUseCosmetic(cosmetic, false);
     }
@@ -802,9 +888,43 @@ public class CosmeticUser implements CosmeticHolder {
 
     @Override
     public boolean canEquipCosmetic(@NotNull Cosmetic cosmetic, boolean ignoreWardrobe) {
+        if (!hasRequiredAdvancement(cosmetic)) return false;
         if (!cosmetic.requiresPermission()) return true;
         if (canBypassWardrobeRequirements(ignoreWardrobe)) return true;
         return hasCosmeticPermission(cosmetic);
+    }
+
+    private boolean hasRequiredAdvancement(@NotNull Cosmetic cosmetic, boolean ignoreNegativeCache, boolean persistOnUnlock) {
+        if (!cosmetic.requiresAdvancement()) return true;
+        if (hasAdvancementUnlockedCosmetic(cosmetic)) return true;
+
+        final Player player = getPlayer();
+        if (player == null) return false;
+
+        final String cosmeticId = cosmetic.getId();
+        if (!ignoreNegativeCache) {
+            Long cacheExpiry = advancementRequirementCache.get(cosmeticId);
+            if (cacheExpiry != null) {
+                if (cacheExpiry > System.currentTimeMillis()) return false;
+                advancementRequirementCache.remove(cosmeticId);
+            }
+        }
+
+        Advancement advancement = cosmetic.resolveAdvancement();
+        if (advancement == null) {
+            advancementRequirementCache.put(cosmeticId, System.currentTimeMillis() + ADVANCEMENT_REQUIREMENT_NEGATIVE_CACHE_TTL_MS);
+            return false;
+        }
+
+        boolean unlocked = player.getAdvancementProgress(advancement).isDone();
+        if (!unlocked) {
+            advancementRequirementCache.put(cosmeticId, System.currentTimeMillis() + ADVANCEMENT_REQUIREMENT_NEGATIVE_CACHE_TTL_MS);
+            return false;
+        }
+
+        if (!markAdvancementUnlockedCosmetic(cosmetic)) return true;
+        if (persistOnUnlock) Database.save(this);
+        return true;
     }
 
     private boolean canBypassWardrobeRequirements(boolean ignoreWardrobe) {

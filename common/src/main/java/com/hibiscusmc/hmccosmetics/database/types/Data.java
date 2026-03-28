@@ -38,6 +38,9 @@ public abstract class Data {
         for (String cosmeticId : user.getPurchasedCosmetics()) {
             data.add("PURCHASED=" + cosmeticId);
         }
+        for (String cosmeticId : user.getAdvancementUnlockedCosmetics()) {
+            data.add("ADVANCEMENT=" + cosmeticId);
+        }
         for (Cosmetic cosmetic : user.getCosmetics()) {
             Color color = user.getCosmeticColor(cosmetic.getSlot());
             String input = cosmetic.getSlot() + "=" + cosmetic.getId();
@@ -63,6 +66,10 @@ public abstract class Data {
             }
             if (splitData[0].equalsIgnoreCase("PURCHASED")) {
                 userData.addPurchasedCosmetic(splitData[1]);
+                continue;
+            }
+            if (splitData[0].equalsIgnoreCase("ADVANCEMENT")) {
+                userData.addAdvancementUnlockedCosmetic(splitData[1]);
                 continue;
             }
 

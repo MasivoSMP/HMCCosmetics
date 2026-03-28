@@ -113,6 +113,7 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
         // Listener
         getServer().getPluginManager().registerEvents(new PlayerConnectionListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerGameListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerAdvancementListener(), this);
         getServer().getPluginManager().registerEvents(new ServerListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerMovementListener(), this);
         getServer().getPluginManager().registerEvents(this.playerSearchManager.getEngine(), this);

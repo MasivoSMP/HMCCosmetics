@@ -158,13 +158,14 @@ menu-settings:
     allowed-with-mappings:
       masivo: ""
     # Supported placeholders:
-    # {cosmetic}, {allowed-with}, {made-by}
-    # If a line contains {allowed-with} or {made-by} and the cosmetic does not define
+    # {cosmetic}, {allowed-with}, {made-by}, {advancement}
+    # If a line contains {allowed-with}, {made-by}, or {advancement} and the cosmetic does not define
     # that value, the line is omitted.
     lines:
       - ""
       - "<gray>Enabled: <#6D9DC5>%HMCCosmetics_equipped_{cosmetic}%"
       - "<gray>Allowed: <#6D9DC5>%HMCCosmetics_unlocked_{cosmetic}%"
+      - "<gray>Advancement: {advancement}"
       - "<gray>Available with: <#6D9DC5>{allowed-with}"
       - "<gray>Made by: <yellow>{made-by}"
   shading:
