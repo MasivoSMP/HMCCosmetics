@@ -72,6 +72,8 @@ public class UserWardrobeManager {
     @Setter
     private Menu lastOpenMenu;
     private TaskHandle updateTask = TaskHandle.NONE;
+    private TaskHandle autoOpenMenuTask = TaskHandle.NONE;
+    private boolean menuOpened;
 
     public UserWardrobeManager(CosmeticUser user, Wardrobe wardrobe) {
         NPC_ID = me.lojosho.hibiscuscommons.util.ServerUtils.getNextEntityId();
@@ -203,15 +205,16 @@ public class UserWardrobeManager {
                 player.showBossBar(bossBar);
             }
 
-            if (WardrobeSettings.isEnterOpenMenu()) {
-                Menu menu = Menus.getDefaultMenu();
-                if (menu != null) menu.openMenu(user);
-            }
-
             this.active = true;
             update();
             setWardrobeStatus(WardrobeStatus.RUNNING);
             user.refreshPacketSnapshot();
+
+            if (WardrobeSettings.isEnterOpenMenu()) {
+                openLastOpenMenu();
+            } else {
+                scheduleAutoOpenMenu();
+            }
         };
 
 
@@ -236,6 +239,8 @@ public class UserWardrobeManager {
         Player player = user.getPlayer();
         updateTask.cancel();
         updateTask = TaskHandle.NONE;
+        autoOpenMenuTask.cancel();
+        autoOpenMenuTask = TaskHandle.NONE;
 
         List<Player> viewer = Collections.singletonList(player);
         List<Player> outsideViewers = HMCCPacketManager.getViewers(viewingLocation);
@@ -384,6 +389,27 @@ public class UserWardrobeManager {
         };
 
         updateTask = HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntityAtFixedRate(player, run, 0, 2);
+    }
+
+    public void openLastOpenMenu() {
+        if (lastOpenMenu == null) return;
+        menuOpened = true;
+        autoOpenMenuTask.cancel();
+        autoOpenMenuTask = TaskHandle.NONE;
+        lastOpenMenu.openMenu(user);
+    }
+
+    private void scheduleAutoOpenMenu() {
+        Player player = user.getPlayer();
+        if (player == null || lastOpenMenu == null) return;
+
+        autoOpenMenuTask.cancel();
+        autoOpenMenuTask = HMCCosmeticsPlugin.getInstance().getScheduler().runAtEntityLater(player, () -> {
+            autoOpenMenuTask = TaskHandle.NONE;
+            if (menuOpened) return;
+            if (!user.isInWardrobe() || !active || wardrobeStatus != WardrobeStatus.RUNNING) return;
+            openLastOpenMenu();
+        }, 60);
     }
 
     public enum WardrobeStatus {

@@ -3,7 +3,6 @@ package com.hibiscusmc.hmccosmetics.packets;
 import com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin;
 import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
-import com.hibiscusmc.hmccosmetics.gui.Menu;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUserSnapshot;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
@@ -168,10 +167,7 @@ public class CosmeticPacketInterface implements PacketInterface {
             if (user == null || !user.isInWardrobe()) return;
             if (user.getWardrobeManager().getWardrobeStatus() != UserWardrobeManager.WardrobeStatus.RUNNING) return;
 
-            Menu menu = user.getWardrobeManager().getLastOpenMenu();
-            if (menu != null) {
-                menu.openMenu(user);
-            }
+            user.getWardrobeManager().openLastOpenMenu();
         });
         return PacketAction.CANCELLED;
     }
