@@ -14,8 +14,10 @@ import com.hibiscusmc.hmccosmetics.gui.Menu;
 import com.hibiscusmc.hmccosmetics.gui.Menus;
 import com.hibiscusmc.hmccosmetics.gui.special.DyeMenuProvider;
 import com.hibiscusmc.hmccosmetics.gui.special.impl.HMCColorDyeMenu;
+import com.hibiscusmc.hmccosmetics.gui.special.impl.InternalDyeMenu;
 import com.hibiscusmc.hmccosmetics.hooks.items.HookHMCCosmetics;
 import com.hibiscusmc.hmccosmetics.hooks.misc.HookBetterHud;
+import com.hibiscusmc.hmccosmetics.hooks.misc.HookVulcan;
 import com.hibiscusmc.hmccosmetics.hooks.placeholders.HMCPlaceholderExpansion;
 import com.hibiscusmc.hmccosmetics.hooks.worldguard.WGHook;
 import com.hibiscusmc.hmccosmetics.hooks.worldguard.WGListener;
@@ -35,12 +37,14 @@ import me.lojosho.hibiscuscommons.config.serializer.ItemSerializer;
 import me.lojosho.hibiscuscommons.config.serializer.LocationSerializer;
 import me.lojosho.hibiscuscommons.hooks.Hooks;
 import me.lojosho.shaded.configupdater.common.config.CommentedConfiguration;
+import me.lojosho.shaded.configurate.CommentedConfigurationNode;
 import me.lojosho.shaded.configurate.ConfigurateException;
 import me.lojosho.shaded.configurate.ConfigurationOptions;
 import me.lojosho.shaded.configurate.yaml.NodeStyle;
 import me.lojosho.shaded.configurate.yaml.YamlConfigurationLoader;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
@@ -60,6 +64,7 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
         super(13873, 1879);
         new HookHMCCosmetics();
         new HookBetterHud();
+        new HookVulcan();
     }
 
     @Override
@@ -77,6 +82,9 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
             saveResource("menus/defaultmenu_balloons.yml", false);
             saveResource("menus/defaultmenu_hands.yml", false);
             saveResource("menus/defaultmenu_backpacks.yml", false);
+        }
+        if (!Path.of(getDataFolder().getPath() + "/menus/functional/internal_dye_menu.yml").toFile().exists()) {
+            saveResource("menus/functional/internal_dye_menu.yml", false);
         }
         if (!Path.of(getDataFolder().getPath() + "/wardrobes/").toFile().exists()) {
             saveResource("wardrobes/defaultwardrobe.yml", false);
@@ -107,8 +115,13 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
         this.playerSearchManager = new PlayerSearchManager(Settings.getEngine(), this);
 
         // Commands
-        getServer().getPluginCommand("cosmetic").setExecutor(new CosmeticCommand());
-        getServer().getPluginCommand("cosmetic").setTabCompleter(new CosmeticCommandTabComplete());
+        PluginCommand cosmeticCommand = getServer().getPluginCommand("hmccosmetics");
+        if (cosmeticCommand != null) {
+            cosmeticCommand.setExecutor(new CosmeticCommand());
+            cosmeticCommand.setTabCompleter(new CosmeticCommandTabComplete());
+        } else {
+            getLogger().severe("Unable to register commands! (Is another plugin interfering with HMCCosmetics commands?)");
+        }
 
         // Listener
         getServer().getPluginManager().registerEvents(new PlayerConnectionListener(), this);
@@ -124,18 +137,21 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
         // Database
         new Database();
 
+        // HMCColor
+        try {
+            if (Settings.isPreferHMCColorDyeMenu() && Hooks.isActiveHook("HMCColor")) {
+                DyeMenuProvider.setDyeMenuProvider(new HMCColorDyeMenu());
+            } else {
+                DyeMenuProvider.setDyeMenuProvider(new InternalDyeMenu());
+            }
+            // Reload method called in setup, do not need to call it here as all we do is set the provider.
+        } catch (IllegalStateException e) {
+            getLogger().warning("Unable to set a dye menu. There is likely another plugin registering another dye menu.");
+        }
+
         // WorldGuard
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") != null && Settings.isWorldGuardMoveCheck()) {
             getServer().getPluginManager().registerEvents(new WGListener(), this);
-        }
-
-        // HMCColor
-        if (Hooks.isActiveHook("HMCColor")) {
-            try {
-                DyeMenuProvider.setDyeMenuProvider(new HMCColorDyeMenu());
-            } catch (IllegalStateException e) {
-                getLogger().warning("Unable to set HMCColor as the dye menu. There is likely another plugin registering another dye menu.");
-            }
         }
     }
 
@@ -228,6 +244,9 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
 
         // Menus setup
         Menus.setup();
+
+        // Dye Menu Reload
+        DyeMenuProvider.reload();
 
         // For reloads
         /*

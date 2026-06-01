@@ -63,8 +63,10 @@ public class Settings {
     private static final String HOOK_WG_MOVE_CHECK_PATH_LEGACY = "player_move_check";
     private static final String COSMETIC_DISABLED_WORLDS_PATH = "disabled-worlds";
     private static final String COSMETIC_BACKPACK_FORCE_RIDING_PACKET_PATH = "backpack-force-riding-packet";
+    private static final String COSMETIC_BACKPACK_INTERCEPT_PASSENGER_PACKET_PATH = "backpack-intercept-passenger-packets";
     private static final String COSMETIC_DESTROY_LOOSE_COSMETIC_PATH = "destroy-loose-cosmetics";
     private static final String COSMETIC_BALLOON_HEAD_FORWARD_PATH = "balloon-head-forward";
+    private static final String COSMETIC_BALLOON_DEFAULT_SHOW_LEAD_PATH = "balloon-lead-default";
     private static final String COSMETIC_OFFHAND_PREVENT_SWAPPING = "offhand-prevent-swapping";
     private static final String COSMETIC_TOGGLE_SOUNDS_PATH = "toggle-sounds";
     private static final String COSMETIC_TOGGLE_SOUNDS_ON_PATH = "on-sound";
@@ -99,7 +101,11 @@ public class Settings {
     private static final String BACKPACK_PREVENT_DARKNESS_PATH = "backpack-prevent-darkness";
     private static final String BETTER_HUD_PATH = "betterhud";
     private static final String BETTER_HUD_HIDE_IN_WARDROBE_PATH = "wardrobe-hide";
+    private static final String HOOK_HMCCOLOR_PATH = "hmccolor";
+    private static final String HMCCOLOR_PREFER_DYE_MENU = "prefer-hmccolor-menu";
     private static final String PLAYER_SEARCH_IMPLEMENTATION = "player-search-implmentation";
+    private static final String VULCAN_HOOK_PATH = "vulcan";
+    private static final String VULCAN_IGNORE_CHECKS_IN_WARDROBE_PATH = "exempt-checks-in-wardrobe";
 
     @Getter
     private static String defaultMenu;
@@ -139,13 +145,19 @@ public class Settings {
     @Getter
     private static boolean toggleSoundsEnabled;
     @Getter
+    private static boolean backpackInterceptPassengerPacket;
+    @Getter
     private static boolean disabledGamemodesEnabled;
     @Getter
     private static boolean balloonHeadForward;
     @Getter
     private static boolean balloonPhysics;
     @Getter
+    private static boolean balloonDefaultShowLead;
+    @Getter
     private static boolean backpackPreventDarkness;
+    @Getter
+    private static boolean preferHMCColorDyeMenu;
     @Getter
     private static List<String> disabledGamemodes;
     @Getter
@@ -221,6 +233,10 @@ public class Settings {
     @Getter
     private static String toggleOnSound;
     @Getter
+    private static boolean vulcanIgnoreViolationInWardrobe;
+    @Getter
+    private static boolean dyeMenuEnabled;
+    @Getter
     private static float toggleOnSoundVolume;
     @Getter
     private static float toggleOnSoundPitch;
@@ -232,7 +248,6 @@ public class Settings {
     private static float toggleOffSoundPitch;
     @Getter
     private static PlayerSearchManager.SearchEngine engine;
-
 
     public static void load(ConfigurationNode source) {
 
@@ -270,6 +285,7 @@ public class Settings {
         forceShowOnJoin = cosmeticSettings.node(FORCE_SHOW_COSMETICS_PATH).getBoolean(false);
         destroyLooseCosmetics = cosmeticSettings.node(COSMETIC_DESTROY_LOOSE_COSMETIC_PATH).getBoolean(false);
         backpackForceRidingEnabled = cosmeticSettings.node(COSMETIC_BACKPACK_FORCE_RIDING_PACKET_PATH).getBoolean(false);
+        backpackInterceptPassengerPacket = cosmeticSettings.node(COSMETIC_BACKPACK_INTERCEPT_PASSENGER_PACKET_PATH).getBoolean(true);
         preventOffhandSwapping = cosmeticSettings.node(COSMETIC_OFFHAND_PREVENT_SWAPPING).getBoolean(false);
         ConfigurationNode toggleSoundsSettings = cosmeticSettings.node(COSMETIC_TOGGLE_SOUNDS_PATH);
         toggleSoundsEnabled = toggleSoundsSettings.node(ENABLED_PATH).getBoolean(false);
@@ -293,7 +309,9 @@ public class Settings {
             }
             boolean addEnchantments = value.node("add-enchantments").getBoolean(false);
             boolean requireEmpty = value.node("require-empty").getBoolean(false);
-            slotOptions.put(slot, new SlotOptionConfig(slot, addEnchantments, requireEmpty));
+            boolean addElytraComponent = value.node("add-elytra-componnt").getBoolean(true);
+            boolean attemptDamagePassthrough = value.node("passthrough-damage").getBoolean(true);
+            slotOptions.put(slot, new SlotOptionConfig(slot, addEnchantments, requireEmpty, addElytraComponent, attemptDamagePassthrough));
         });
 
         tickPeriod = cosmeticSettings.node(TICK_PERIOD_PATH).getInt(-1);
@@ -301,6 +319,7 @@ public class Settings {
         viewDistance = cosmeticSettings.node(VIEW_DISTANCE_PATH).getInt(-3);
         balloonHeadForward = cosmeticSettings.node(COSMETIC_BALLOON_HEAD_FORWARD_PATH).getBoolean(false);
         balloonPhysics = cosmeticSettings.node(BALLOON_PHYSICS).getBoolean(false);
+        balloonDefaultShowLead = cosmeticSettings.node(COSMETIC_BALLOON_DEFAULT_SHOW_LEAD_PATH).getBoolean(true);
         backpackPreventDarkness = cosmeticSettings.node(BACKPACK_PREVENT_DARKNESS_PATH).getBoolean(true);
         final var balloonPhysicsSettings = cosmeticSettings.node(BALLOON_PHYSICS_SETTINGS);
         if (balloonPhysicsSettings.node(BALLOON_PHYSICS_HAND_OFFSET).virtual()) {
@@ -375,6 +394,7 @@ public class Settings {
         dyeMenuName = dyeMenuSettings.node(DYE_MENU_NAME).getString("Dye Menu");
         dyeMenuInputSlot = dyeMenuSettings.node(DYE_MENU_INPUT_SLOT).getInt(19);
         dyeMenuOutputSlot = dyeMenuSettings.node(DYE_MENU_OUTPUT_SLOT).getInt(25);
+        dyeMenuEnabled = dyeMenuSettings.node(ENABLED_PATH).getBoolean(true);
 
         ConfigurationNode hookSettings = source.node(HOOK_SETTING_PATH);
 
@@ -387,13 +407,14 @@ public class Settings {
         ConfigurationNode betterHudSettings = hookSettings.node(BETTER_HUD_PATH);
         wardrobeHideHud = betterHudSettings.node(BETTER_HUD_HIDE_IN_WARDROBE_PATH).getBoolean(true);
 
+        ConfigurationNode hmccolorSettings = hookSettings.node(HOOK_HMCCOLOR_PATH);
+        preferHMCColorDyeMenu = hmccolorSettings.node(HMCCOLOR_PREFER_DYE_MENU).getBoolean(false);
+
+        ConfigurationNode vulcanSettings = hookSettings.node(VULCAN_HOOK_PATH);
+        vulcanIgnoreViolationInWardrobe = vulcanSettings.node(VULCAN_IGNORE_CHECKS_IN_WARDROBE_PATH).getBoolean(false);
+
         ConfigurationNode worldGuardSettings = hookSettings.node(HOOK_WORLDGUARD_PATH);
         worldGuardMoveCheck = worldGuardSettings.node(HOOK_WG_MOVE_CHECK_PATH).getBoolean(true);
-        // I messed up in release 2.2.6 and forgot to change player_move_check to player-move-check.
-        if (!worldGuardSettings.node(HOOK_WG_MOVE_CHECK_PATH_LEGACY).virtual()) {
-            MessagesUtil.sendDebugMessages("There is a deprecated way of using WG hook setting. Change player_move_check to player-move-check in your configuration to prevent issues in the future. ", Level.WARNING);
-            worldGuardMoveCheck = worldGuardSettings.node(HOOK_WG_MOVE_CHECK_PATH_LEGACY).getBoolean(true);
-        }
     }
 
     public static Vector loadVector(final ConfigurationNode config) {
@@ -405,7 +426,7 @@ public class Settings {
     }
 
     public static SlotOptionConfig getSlotOption(EquipmentSlot slot) {
-        if (!slotOptions.containsKey(slot)) slotOptions.put(slot, new SlotOptionConfig(slot, false, false));
+        if (!slotOptions.containsKey(slot)) slotOptions.put(slot, new SlotOptionConfig(slot, false, false, false, false));
         return slotOptions.get(slot);
     }
 

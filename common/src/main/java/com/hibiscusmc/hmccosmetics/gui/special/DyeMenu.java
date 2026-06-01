@@ -17,4 +17,10 @@ public interface DyeMenu {
      */
     void openMenu(@NotNull Player viewer, @NotNull CosmeticHolder cosmeticHolder, @NotNull Cosmetic cosmetic);
 
+    /**
+     * Reload is called whenever the plugin runs the setup sequence. As such, it will be called when the plugin starts up and reloads.
+     * This is primarily to get new values that the reload might have changed.
+     */
+    void reload();
+
 }

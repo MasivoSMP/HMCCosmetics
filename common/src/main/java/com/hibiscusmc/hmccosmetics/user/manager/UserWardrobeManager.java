@@ -17,9 +17,7 @@ import com.hibiscusmc.hmccosmetics.util.HMCCServerUtils;
 import com.hibiscusmc.hmccosmetics.util.packets.HMCCPacketManager;
 import lombok.Getter;
 import lombok.Setter;
-import me.lojosho.hibiscuscommons.nms.NMSHandlers;
 import me.lojosho.hibiscuscommons.scheduler.TaskHandle;
-import me.lojosho.hibiscuscommons.util.packets.PacketManager;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -121,8 +119,7 @@ public class UserWardrobeManager {
             // Armorstand
             HMCCPacketManager.sendEntitySpawnPacket(viewingLocation, ARMORSTAND_ID, EntityType.ARMOR_STAND, UUID.randomUUID(), viewer);
             HMCCPacketManager.sendArmorstandMetadata(ARMORSTAND_ID, viewer);
-            NMSHandlers.getHandler().getPacketHandler().sendTeleportPacket(ARMORSTAND_ID, viewingLocation.getX(), viewingLocation.getY(), viewingLocation.getZ(), viewingLocation.getYaw(), viewingLocation.getPitch(), false, viewer);
-            //NMSHandlers.getHandler().getPacketHandler().sendLookAtPacket(ARMORSTAND_ID, viewingLocation, viewer);
+            HMCCPacketManager.sendTeleportPacket(ARMORSTAND_ID, viewingLocation, false, viewer);
             HMCCPacketManager.sendRotateHeadPacket(ARMORSTAND_ID, viewingLocation, viewer);
 
             // Player
@@ -144,7 +141,7 @@ public class UserWardrobeManager {
                 HMCCPacketManager.sendFakePlayerSpawnPacket(npcLocation, WARDROBE_UUID, NPC_ID, viewer);
                 HMCCPacketManager.sendPlayerOverlayPacket(NPC_ID, viewer);
                 MessagesUtil.sendDebugMessages("Spawned Fake Player on " + npcLocation);
-                NMSHandlers.getHandler().getPacketHandler().sendScoreboardHideNamePacket(player, npcName);
+                HMCCPacketManager.sendScoreboardHideNamePacket(player, npcName, viewer);
                 AttributeInstance scaleAttribute = user.getPlayer().getAttribute(Attribute.SCALE);
                 if (scaleAttribute != null) {
                     HMCCPacketManager.sendEntityScalePacket(NPC_ID, scaleAttribute.getValue(), viewer);
@@ -161,7 +158,7 @@ public class UserWardrobeManager {
                 if (user.getUserBackpackManager() == null) user.respawnBackpack();
                 if (user.isBackpackSpawned()) {
                     user.getUserBackpackManager().getEntityManager().teleport(npcLocation.clone().add(Settings.getBackpackOffset()));
-                    PacketManager.equipmentSlotUpdate(user.getUserBackpackManager().getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(user.getCosmetic(CosmeticSlot.BACKPACK)), viewer);
+                    HMCCPacketManager.equipmentSlotUpdate(user.getUserBackpackManager().getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(user.getCosmetic(CosmeticSlot.BACKPACK)), viewer);
                     if (!Settings.isBackpackOffsetEnabled()) {
                         HMCCPacketManager.ridingMountPacket(NPC_ID, user.getUserBackpackManager().getFirstArmorStandId(), viewer);
                     }
@@ -288,7 +285,6 @@ public class UserWardrobeManager {
 
             if (user.hasCosmeticInSlot(CosmeticSlot.BACKPACK)) {
                 user.respawnBackpack();
-                //PacketManager.ridingMountPacket(player.getEntityId(), VIEWER.getBackpackEntity().getEntityId(), viewer);
             }
 
             if (user.hasCosmeticInSlot(CosmeticSlot.BALLOON)) {
@@ -349,7 +345,6 @@ public class UserWardrobeManager {
             int rotationSpeed = WardrobeSettings.getRotationSpeed();
             int newYaw = HMCCServerUtils.getNextYaw(yaw - 30, rotationSpeed);
             location.setYaw(newYaw);
-            NMSHandlers.getHandler().getPacketHandler().sendRotationPacket(NPC_ID, newYaw, 0, false, viewer);
             HMCCPacketManager.sendRotationPacket(NPC_ID, newYaw, true, viewer);
             int nextyaw = HMCCServerUtils.getNextYaw(yaw, rotationSpeed);
             data.set(nextyaw);
@@ -382,7 +377,7 @@ public class UserWardrobeManager {
             }
 
             if (WardrobeSettings.isEquipPumpkin()) {
-                PacketManager.equipmentSlotUpdate(currentPlayer.getEntityId(), EquipmentSlot.HEAD, new ItemStack(Material.CARVED_PUMPKIN), viewer);
+                HMCCPacketManager.equipmentSlotUpdate(currentPlayer.getEntityId(), EquipmentSlot.HEAD, new ItemStack(Material.CARVED_PUMPKIN), viewer);
             } else {
                 HMCCPacketManager.equipmentSlotUpdate(currentPlayer, true, viewer); // Optifine dumbassery
             }

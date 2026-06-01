@@ -8,7 +8,6 @@ import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
 import com.hibiscusmc.hmccosmetics.util.packets.HMCCPacketManager;
 import lombok.Getter;
 import me.lojosho.hibiscuscommons.util.ServerUtils;
-import me.lojosho.hibiscuscommons.util.packets.PacketManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -93,17 +92,17 @@ public class UserBackpackManager {
                 else HMCCPacketManager.sendRidingPacket(particleCloud.get(i - 1), particleCloud.get(i) , owner);
             }
             HMCCPacketManager.sendRidingPacket(particleCloud.getLast(), user.getUserBackpackManager().getFirstArmorStandId(), owner);
-            if (!user.isHidden()) PacketManager.equipmentSlotUpdate(user.getUserBackpackManager().getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(cosmeticBackpackType, cosmeticBackpackType.getFirstPersonBackpack()), owner);
+            if (!user.isHidden()) HMCCPacketManager.equipmentSlotUpdate(user.getUserBackpackManager().getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(cosmeticBackpackType, cosmeticBackpackType.getFirstPersonBackpack()), owner);
         }
         if (cosmeticBackpackType.isFirstPersonCompadible() && user.getPlayer() != null && !user.isHidden()) {
-            PacketManager.equipmentSlotUpdate(
+            HMCCPacketManager.equipmentSlotUpdate(
                 getFirstArmorStandId(),
                 EquipmentSlot.HEAD,
                 user.getUserCosmeticItem(cosmeticBackpackType, cosmeticBackpackType.getFirstPersonBackpack()),
                 List.of(user.getPlayer())
             );
         }
-        PacketManager.equipmentSlotUpdate(getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(cosmeticBackpackType), outsideViewers);
+        HMCCPacketManager.equipmentSlotUpdate(getFirstArmorStandId(), EquipmentSlot.HEAD, user.getUserCosmeticItem(cosmeticBackpackType), outsideViewers);
         if (!Settings.isBackpackOffsetEnabled()) {
             HMCCPacketManager.sendRidingPacket(entity.getEntityId(), passengerIDs, outsideViewers);
         }
@@ -144,11 +143,11 @@ public class UserBackpackManager {
     }
 
     public void setItem(ItemStack item) {
-        PacketManager.equipmentSlotUpdate(getFirstArmorStandId(), EquipmentSlot.HEAD, item, getEntityManager().getViewers());
+        HMCCPacketManager.equipmentSlotUpdate(getFirstArmorStandId(), EquipmentSlot.HEAD, item, getEntityManager().getViewers());
     }
 
     public void clearItems() {
         ItemStack item = new ItemStack(Material.AIR);
-        PacketManager.equipmentSlotUpdate(getFirstArmorStandId(), EquipmentSlot.HEAD, item, getEntityManager().getViewers());
+        HMCCPacketManager.equipmentSlotUpdate(getFirstArmorStandId(), EquipmentSlot.HEAD, item, getEntityManager().getViewers());
     }
 }

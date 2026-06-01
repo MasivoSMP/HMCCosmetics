@@ -15,6 +15,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -196,7 +197,7 @@ public class WardrobeSettings {
         }
     }
 
-    private static void registerWardrobe(ConfigurationNode wardrobesNode, File file) {
+    private static void registerWardrobe(@NotNull ConfigurationNode wardrobesNode, @NotNull File file) {
         String id = wardrobesNode.key().toString();
         try {
             Location npcLocation = LocationSerializer.INSTANCE.deserialize(Location.class, wardrobesNode.node(NPC_LOCATION_PATH));
@@ -215,7 +216,7 @@ public class WardrobeSettings {
             Wardrobe wardrobe = new Wardrobe(id, wardrobeLocation, permission, distance, defaultMenu, file);
             addWardrobe(wardrobe);
         } catch (Exception e) {
-            MessagesUtil.sendDebugMessages("Unable to create wardrobe " + id, Level.SEVERE);
+            throw new RuntimeException("Unable to load wardrobe " + id, e);
         }
     }
 
@@ -356,5 +357,9 @@ public class WardrobeSettings {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static @NotNull File getWardrobeDefaultFile() {
+        return new File(HMCCosmeticsPlugin.getInstance().getDataFolder() + "/wardrobes/defaultwardrobe.yml");
     }
 }

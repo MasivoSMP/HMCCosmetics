@@ -6,7 +6,7 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Called when cosmetics are hidden from a player.
+ * Called when cosmetics are hidden from a player. This event is only called when a cosmetic user has a new hidden reason.
  */
 public class PlayerCosmeticHideEvent extends PlayerCosmeticEvent implements Cancellable {
     private static final HandlerList HANDLER_LIST = new HandlerList();

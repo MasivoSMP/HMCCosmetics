@@ -26,12 +26,12 @@ public class Actions {
     private static final ActionSound ACTION_SOUND = new ActionSound();
     private static final ActionEquip ACTION_EQUIP = new ActionEquip();
     private static final ActionUnequip ACTION_UNEQUIP = new ActionUnequip();
-    private static final ActionParticle ACTION_PARTICLE = new ActionParticle();
     private static final ActionCosmeticShow ACTION_SHOW = new ActionCosmeticShow();
     private static final ActionCosmeticHide ACTION_HIDE = new ActionCosmeticHide();
     private static final ActionCosmeticToggle ACTION_TOGGLE = new ActionCosmeticToggle();
     private static final ActionNextPage ACTION_NEXT_PAGE = new ActionNextPage();
     private static final ActionPreviousPage ACTION_PREVIOUS_PAGE = new ActionPreviousPage();
+    private static final ActionEquipRandom ACTION_EQUIP_RANDOM = new ActionEquipRandom();
 
     public static Action getAction(@NotNull String id) {
         return actions.get(id.toUpperCase());

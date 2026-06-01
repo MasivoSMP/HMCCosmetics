@@ -46,6 +46,11 @@ public class HMCColorDyeMenu implements DyeMenu {
         gui.open(viewer);
     }
 
+    @Override
+    public void reload() {
+        // Nothing
+    }
+
     private void addCosmetic(@NotNull Player viewer, @NotNull CosmeticHolder cosmeticHolder, @NotNull Cosmetic cosmetic, @Nullable Color color) {
         if (cosmeticHolder instanceof com.hibiscusmc.hmccosmetics.user.CosmeticUser user && !user.canUseCosmetic(cosmetic)) {
             return;

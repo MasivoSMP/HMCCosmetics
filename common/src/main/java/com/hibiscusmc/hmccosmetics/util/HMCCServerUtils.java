@@ -1,11 +1,6 @@
 package com.hibiscusmc.hmccosmetics.util;
 
 import com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin;
-import com.owen1212055.particlehelper.api.particle.MultiParticle;
-import com.owen1212055.particlehelper.api.particle.Particle;
-import com.owen1212055.particlehelper.api.particle.types.*;
-import com.owen1212055.particlehelper.api.particle.types.dust.transition.TransitionDustParticle;
-import com.owen1212055.particlehelper.api.particle.types.note.MultiNoteParticle;
 import me.lojosho.hibiscuscommons.nms.NMSHandlers;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
@@ -70,54 +65,6 @@ public class HMCCServerUtils {
         }
 
         return Color.WHITE;
-    }
-
-    // particle amount offsetxyz
-    // Ex. HEART 10 0.1 0.1 0.1
-    public static Particle addParticleValues(Particle particle, String[] split) {
-        var counter = 1;
-        if (particle instanceof MultiParticle multiParticle) {
-            multiParticle.setCount(getBigInteger(split[counter]).intValue());
-            counter++;
-            multiParticle.setXOffset(getBigInteger(split[counter]).floatValue());
-            counter++;
-            multiParticle.setYOffset(getBigInteger(split[counter]).floatValue());
-            counter++;
-            multiParticle.setZOffset(getBigInteger(split[counter]).floatValue());
-            counter++;
-            if (multiParticle instanceof MultiNoteParticle multiNoteParticle) {
-                multiNoteParticle.setColorMultplier(getBigInteger(split[counter]).intValue());
-                counter++;
-            }
-        }
-        if (particle instanceof ColorableParticle colorableParticle && colorFromString(split[counter]) != null) {
-            colorableParticle.setColor(colorFromString(split[counter]));
-            counter++;
-        }
-        if (particle instanceof TransitionDustParticle transitionDustParticle && colorFromString(split[counter]) != null) {
-            transitionDustParticle.setFadeColor(colorFromString(split[counter]));
-            counter++;
-        }
-        if (particle instanceof MaterialParticle materialParticle && Material.getMaterial(split[counter]) != null) {
-            materialParticle.setMaterial(Material.getMaterial(split[counter]));
-            counter++;
-        }
-        if (particle instanceof SpeedModifiableParticle speedModifiableParticle) {
-            speedModifiableParticle.setSpeed(getBigInteger(split[counter]).floatValue());
-            counter++;
-        }
-        if (particle instanceof DelayableParticle delayableParticle) {
-            delayableParticle.setDelay(getBigInteger(split[counter]).intValue());
-            counter++;
-        }
-        if (particle instanceof SizeableParticle sizeableParticle) {
-            sizeableParticle.setSize(getBigInteger(split[counter]).floatValue());
-            counter++;
-        }
-        if (particle instanceof RollableParticle rollableParticle) {
-            rollableParticle.setRoll(getBigInteger(split[counter]).floatValue());
-        }
-        return particle;
     }
 
     private static BigInteger getBigInteger(String string) {

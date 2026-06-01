@@ -7,7 +7,6 @@ import com.hibiscusmc.hmccosmetics.util.packets.HMCCPacketManager;
 import lombok.Getter;
 import me.lojosho.hibiscuscommons.nms.NMSHandlers;
 import me.lojosho.hibiscuscommons.util.ServerUtils;
-import me.lojosho.hibiscuscommons.util.packets.PacketManager;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -111,7 +110,7 @@ public class UserBalloonManager {
         if (balloonType != BalloonType.ITEM || viewers.isEmpty() || cosmeticBalloonType == null) return;
         addViewers(displayEntity, viewers);
         HMCCPacketManager.spawnInvisibleArmorstand(displayEntityId, location, displayUuid, viewers);
-        PacketManager.equipmentSlotUpdate(
+        HMCCPacketManager.equipmentSlotUpdate(
             displayEntityId,
             EquipmentSlot.HEAD,
             user.getUserCosmeticItem(cosmeticBalloonType),

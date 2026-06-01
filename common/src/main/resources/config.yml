@@ -71,6 +71,8 @@ cosmetic-settings:
   backpack-force-riding-packet: true
   # This prevents the backpack from being dark when the player is below a block at the expense of making the backpack bright
   backpack-prevent-darkness: true
+  # Intercepts packets to attempt to reorder them to properly handle the backpack
+  backpack-intercept-passenger-packets: false
 
   slot-options:
     helmet:
@@ -78,19 +80,25 @@ cosmetic-settings:
       add-enchantments: false
       # Should the player slot be empty for the cosmetic to be applied? A cosmetic will be "hidden" if a player has an item equipped in the slot
       require-empty: false
+      passthrough-damage: false
     chestplate:
       add-enchantments: false
       require-empty: false
+      add-elytra-componnt: true
+      passthrough-damage: false
     leggings:
       add-enchantments: false
       require-empty: false
+      passthrough-damage: false
     boots:
       add-enchantments: false
       require-empty: false
+      passthrough-damage: false
     offhand:
       add-enchantments: false
       # There is a small visual blip for a tick when you put a new item in the offhand slot, hence why its enabled by default.
       require-empty: true
+      passthrough-damage: false
 
   # This attempts to destroy cosmetics that get loose in the wild, such as through a player entering creative mode.
   # Most servers who don't use creative mode and have properly set up the plugin should have no need for this and can leave it disabled.
@@ -128,6 +136,8 @@ cosmetic-settings:
     pitch-damping-per-second: 9.5
     # Maximum visual head tilt in degrees.
     max-pitch-degrees: 32.0
+  # Should, by default, the lead be spawned for the balloon
+  balloon-lead-default: true
   # how the balloon should be positioned relative to the player
   balloon-offset:
     x: 0.5
@@ -187,6 +197,7 @@ menu-settings:
     equip-click: "ANY" # ANY or ClickType, https://jd.papermc.io/paper/org/bukkit/event/inventory/ClickType.html
     unequip-click: "ANY" # ANY or ClickType, https://jd.papermc.io/paper/org/bukkit/event/inventory/ClickType.html
 dye-menu:
+  enabled: true
   # If you use ItemsAdder, set this to "<white>:img_offset_-8::img_hmcc_dye_menu:"
   # If you use Oraxen, set this to "<white><s:-8><g:hmcc_dye_menu>"
   # If you use Nexo, set this to "<white><shift:-8><glyph:hmcc_dye_menu>"
@@ -208,6 +219,12 @@ hook-settings:
     player-move-check: true
   betterhud:
     wardrobe-hide: true
+  hmccolor:
+    # If HMCColor is available, prefer hmccolor dye menu rather than the internal menu. Requires a restart.
+    prefer-hmccolor-menu: false
+  vulcan:
+    # Will ignore any violations in Vulcan if a player is within a wardrobe
+    exempt-checks-in-wardrobe: false
 wardrobe:
   # how much yaw should change per tick, set to 0 for none
   rotation-speed: 3
@@ -238,9 +255,9 @@ wardrobe:
     color: BLUE
   transition:
     enabled: true
-    # If you use ItemsAdder, set this to "<black>%img_title%
+    # If you use ItemsAdder, set this to "<black>%img_hmcc_title%
     # If you use Oraxen, set this to "<black><glyph:title>"
-    # If you use Nexo, set this to "<black>%nexo_title%" and use PlaceholderAPI
+    # If you use Nexo, set this to "<black><glyph:hmcc_title:colorable>" (alternatively, you can use PlaceholderAPI and put: "<black>%nexo_hmcc_title%" )
     text: "<black>"
     delay: 40
     title-fade-in: 1000 # milliseconds

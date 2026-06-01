@@ -8,6 +8,7 @@ import me.lojosho.shaded.configurate.CommentedConfigurationNode;
 import me.lojosho.shaded.configurate.ConfigurateException;
 import me.lojosho.shaded.configurate.ConfigurationNode;
 import me.lojosho.shaded.configurate.yaml.YamlConfigurationLoader;
+import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -89,6 +90,8 @@ public class Cosmetics {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        refreshPermissions();
     }
 
     /**
@@ -137,6 +140,15 @@ public class Cosmetics {
             } catch(Exception ex) {
                 log.error("Unable to construct cosmetic for {}, skipping processing it.", id, ex);
             }
+        }
+    }
+
+    public static void refreshPermissions() {
+        final HMCCosmeticsPlugin instance = HMCCosmeticsPlugin.getInstance();
+        for (Cosmetic cosmetic : Cosmetics.values()) {
+            if (cosmetic.getPermission() == null) continue;
+            if (instance.getServer().getPluginManager().getPermission(cosmetic.getPermission()) != null) continue;
+            instance.getServer().getPluginManager().addPermission(new Permission(cosmetic.getPermission()));
         }
     }
 }

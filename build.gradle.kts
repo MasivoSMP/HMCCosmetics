@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.hibiscusmc"
-version = "2.8.3${getGitCommitHash()}"
+version = "2.9.1${getGitCommitHash()}"
 
 allprojects {
     apply(plugin = "java")
@@ -49,12 +49,6 @@ allprojects {
             }
         }
 
-        // ParticleHelper
-        maven("https://repo.bytecode.space/repository/maven-public/")
-
-        // PlayerAnimator
-        maven("https://mvn.lumine.io/repository/maven/")
-
         // md-5 Repo
         maven("https://repo.md-5.net/content/groups/public/")
 
@@ -64,6 +58,9 @@ allprojects {
         // Eco-Suite/Auxilor Repo
         maven("https://repo.auxilor.io/repository/maven-public/")
 
+        // Triumph GUI, used only by the internal dye menu.
+        maven("https://repo.triumphteam.dev/snapshots")
+
         // Hibiscus Commons
         maven("https://repo.hibiscusmc.com/releases")
     }
@@ -71,7 +68,6 @@ allprojects {
     dependencies {
         compileOnly(fileTree("${project.rootDir}/lib") { include("*.jar") })
         compileOnly("com.mojang:authlib:1.5.25")
-        //compileOnly("org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT")
         compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
         compileOnly("org.jetbrains:annotations:24.1.0")
         compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
@@ -90,7 +86,7 @@ allprojects {
         compileOnly("io.github.toxicity188:BetterCommand:1.3") //BetterCommand library
         //compileOnly("it.unimi.dsi:fastutil:8.5.14")
         compileOnly("org.projectlombok:lombok:1.18.34")
-        compileOnly("me.lojosho:HibiscusCommons:0.8.3-dd545ed")
+        compileOnly("me.lojosho:HibiscusCommons:0.9.1-8523cbe")
 
         // Handled by Spigot Library Loader ~ Deprecated as of Dec 16, 2025
         /*
@@ -104,6 +100,9 @@ allprojects {
         testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
 
         compileOnly("me.rockyhawk:CommandPanels:SNAPSHOT:api")
+        implementation("dev.triumphteam:triumph-gui:3.2.0-SNAPSHOT") {
+            exclude("net.kyori")
+        }
         implementation("com.owen1212055:particlehelper:1.0.0-SNAPSHOT")
     }
 
@@ -137,14 +136,14 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.21.8")
+        minecraftVersion("1.21.11")
 
         downloadPlugins {
-            hangar("PlaceholderAPI", "2.11.6")
+            hangar("PlaceholderAPI", "2.12.2")
             hangar("Multiverse-Core", "5.3.4")
-            url("https://download.luckperms.net/1604/bukkit/loader/LuckPerms-Bukkit-5.5.15.jar")
+            url("https://download.luckperms.net/1624/bukkit/loader/LuckPerms-Bukkit-5.5.36.jar")
             github("Test-Account666", "PlugManX", "2.4.1", "PlugManX-2.4.1.jar")
-            //github("gecolay", "GSit", "2.4.3", "GSit-2.4.3.jar")
+            github("gecolay", "GSit", "3.2.1", "GSit-3.2.1.jar")
         }
     }
 
@@ -152,7 +151,7 @@ tasks {
         mergeServiceFiles()
 
         relocate("com.owen1212055.particlehelper", "com.hibiscusmc.hmccosmetics.shaded.particlehelper")
-        relocate("com.ticxo.playeranimator", "com.hibiscusmc.hmccosmetics.shaded.playeranimator")
+        relocate("dev.triumphteam.gui", "com.hibiscusmc.hmccosmetics.shaded.gui")
         archiveFileName.set("HMCCosmeticsRemapped-${project.version}.jar")
 
         dependencies {
@@ -184,7 +183,7 @@ bukkit {
     softDepend = listOf("Vault", "Nexo", "BetterHud", "ModelEngine", "Oraxen", "ItemsAdder", "Geary", "HMCColor", "WorldGuard", "MythicMobs", "PlaceholderAPI", "SuperVanish", "PremiumVanish", "LibsDisguises", "Denizen", "MMOItems", "Eco")
     version = "${project.version}"
     loadBefore = listOf(
-        "Cosmin" // Fixes an issue with Cosmin loading before and taking /cosmetic, when messing with what we do.
+        "Cosmin" // Prevents Cosmin from taking /cosmetic first.
     )
 
     commands {
@@ -248,10 +247,16 @@ bukkit {
         register("hmccosmetics.cmd.show") {
             default = BukkitPluginDescription.Permission.Default.OP
         }
+        register("hmccosmetics.cmd.toggle") {
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
         register("hmccosmetics.cmd.hide.other") {
             default = BukkitPluginDescription.Permission.Default.OP
         }
         register("hmccosmetics.cmd.show.other") {
+            default = BukkitPluginDescription.Permission.Default.OP
+        }
+        register("hmccosmetics.cmd.toggle.other") {
             default = BukkitPluginDescription.Permission.Default.OP
         }
         register("hmccosmetics.cmd.wardrobe.other") {

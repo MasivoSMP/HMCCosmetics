@@ -2,7 +2,9 @@ package com.hibiscusmc.hmccosmetics.packets;
 
 import com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin;
 import com.hibiscusmc.hmccosmetics.config.Settings;
+import com.hibiscusmc.hmccosmetics.cosmetic.Cosmetic;
 import com.hibiscusmc.hmccosmetics.cosmetic.CosmeticSlot;
+import com.hibiscusmc.hmccosmetics.cosmetic.types.CosmeticBackpackType;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUserSnapshot;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
@@ -12,7 +14,7 @@ import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
 import com.hibiscusmc.hmccosmetics.util.packets.HMCCPacketManager;
 import me.lojosho.hibiscuscommons.packets.PacketAction;
 import me.lojosho.hibiscuscommons.packets.PacketInterface;
-import me.lojosho.hibiscuscommons.packets.wrapper.*;
+import me.lojosho.hibiscuscommons.packets.data.*;
 import me.lojosho.hibiscuscommons.util.EntityIdRegistry;
 import me.lojosho.hibiscuscommons.util.PacketThreadGate;
 import org.bukkit.entity.Player;
@@ -20,9 +22,11 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CosmeticPacketInterface implements PacketInterface {
@@ -99,8 +103,33 @@ public class CosmeticPacketInterface implements PacketInterface {
 
     @Override
     public @NotNull PacketAction writePassengerContent(@NotNull Player player, @NotNull PassengerWrapper wrapper) {
-        // TODO: Figure out what to do with this, because with it in, it ruins backpacks (they keep getting thrown to random locations).
-        return PacketAction.NOTHING;
+        if (!Settings.isBackpackInterceptPassengerPacket()) return PacketAction.NOTHING;
+
+        CosmeticUser viewerUser = CosmeticUsers.getUser(player);
+        if (viewerUser == null || viewerUser.isInWardrobe()) return PacketAction.NOTHING;
+
+        int ownerId = wrapper.getOwner();
+
+        Optional<CosmeticUser> optionalCosmeticUser = CosmeticUsers.values().stream().filter(user -> user.getPlayer() != null).filter(user -> ownerId == user.getPlayer().getEntityId()).findFirst();
+        if (optionalCosmeticUser.isEmpty()) return PacketAction.NOTHING;
+        CosmeticUser user = optionalCosmeticUser.get();
+
+        Cosmetic backpackCosmetic = user.getCosmetic(CosmeticSlot.BACKPACK);
+        if (backpackCosmetic == null) return PacketAction.NOTHING;
+        if (!(backpackCosmetic instanceof CosmeticBackpackType cosmeticBackpackType)) return PacketAction.NOTHING;
+        // If a player is viewing their own backpack, don't do anything
+        if (user.getUniqueId().equals(viewerUser.getUniqueId())) {
+            if (cosmeticBackpackType.isFirstPersonCompadible()) return PacketAction.NOTHING;
+        }
+
+        if (user.getUserBackpackManager() == null) return PacketAction.NOTHING;
+
+        List<Integer> originalPassengers = wrapper.getPassengers();
+        List<Integer> passengers = new ArrayList<>(originalPassengers.size() + 1);
+        passengers.add(user.getUserBackpackManager().getFirstArmorStandId());
+        passengers.addAll(originalPassengers);
+        wrapper.setPassengers(passengers);
+        return PacketAction.CHANGED;
     }
 
     @Override

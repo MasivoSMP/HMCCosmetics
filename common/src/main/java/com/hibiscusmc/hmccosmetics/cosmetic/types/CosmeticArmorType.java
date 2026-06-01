@@ -6,7 +6,10 @@ import com.hibiscusmc.hmccosmetics.cosmetic.behavior.CosmeticUpdateBehavior;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.util.HMCCInventoryUtils;
 import com.hibiscusmc.hmccosmetics.util.packets.HMCCPacketManager;
-import me.lojosho.hibiscuscommons.util.packets.PacketManager;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import me.lojosho.hibiscuscommons.HibiscusCommonsPlugin;
+import me.lojosho.hibiscuscommons.nms.MinecraftVersion;
+import me.lojosho.hibiscuscommons.nms.NMSHandlers;
 import me.lojosho.shaded.configurate.ConfigurationNode;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -40,7 +43,7 @@ public class CosmeticArmorType extends Cosmetic implements CosmeticUpdateBehavio
         }
         ItemStack item = getItem(user);
         if (item == null) return;
-        PacketManager.equipmentSlotUpdate(entity.getEntityId(), equipSlot, item, HMCCPacketManager.getViewers(entity.getLocation()));
+        HMCCPacketManager.equipmentSlotUpdate(entity.getEntityId(), equipSlot, item, HMCCPacketManager.getViewers(entity.getLocation()));
     }
 
     public ItemStack getItem(@NotNull CosmeticUser user) {
@@ -51,9 +54,24 @@ public class CosmeticArmorType extends Cosmetic implements CosmeticUpdateBehavio
         Player player = user.getPlayer();
         if (player == null) return null;
 
+        ItemStack physicalEquippedItem = player.getInventory().getItem(equipSlot);
         if (Settings.getSlotOption(equipSlot).isAddEnchantments()) {
-            ItemStack equippedItem = player.getInventory().getItem(equipSlot);
-            cosmeticItem.addUnsafeEnchantments(equippedItem.getEnchantments());
+            cosmeticItem.addUnsafeEnchantments(physicalEquippedItem.getEnchantments());
+        }
+
+        if (NMSHandlers.getVersion().isLower(MinecraftVersion.v1_21_4)) return cosmeticItem;
+        // Past this point, we know the server is over 1.21.4
+        if (Settings.getSlotOption(equipSlot).isAddElytraComponent()
+                && HibiscusCommonsPlugin.isOnPaper()
+                && physicalEquippedItem.hasData(DataComponentTypes.GLIDER)) {
+            cosmeticItem.setData(DataComponentTypes.GLIDER);
+        }
+        if (Settings.getSlotOption(equipSlot).isItemDamagePassThrough()
+                && HibiscusCommonsPlugin.isOnPaper()) {
+            if (physicalEquippedItem.hasData(DataComponentTypes.MAX_DAMAGE))
+                cosmeticItem.setData(DataComponentTypes.MAX_DAMAGE, physicalEquippedItem.getData(DataComponentTypes.MAX_DAMAGE));
+            if (physicalEquippedItem.hasData(DataComponentTypes.DAMAGE))
+                cosmeticItem.setData(DataComponentTypes.DAMAGE, physicalEquippedItem.getData(DataComponentTypes.DAMAGE));
         }
         // Basically, if force offhand is off AND there is no item in an offhand slot, then the equipment packet to add the cosmetic
         return cosmeticItem;

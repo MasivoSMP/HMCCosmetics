@@ -32,7 +32,6 @@ import me.lojosho.hibiscuscommons.hooks.Hooks;
 import me.lojosho.hibiscuscommons.nms.NMSHandlers;
 import me.lojosho.hibiscuscommons.scheduler.TaskHandle;
 import me.lojosho.hibiscuscommons.util.InventoryUtils;
-import me.lojosho.hibiscuscommons.util.packets.PacketManager;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -390,7 +389,7 @@ public class CosmeticUser implements CosmeticHolder {
 
         final Entity entity = this.getEntity();
         if(!items.isEmpty() && entity != null) {
-            PacketManager.equipmentSlotUpdate(
+            HMCCPacketManager.equipmentSlotUpdate(
                 entity.getEntityId(),
                 items,
                 HMCCPacketManager.getViewers(entity.getLocation())
@@ -554,7 +553,8 @@ public class CosmeticUser implements CosmeticHolder {
      * @param ejected If true, the player was ejected from the wardrobe (Skips transition). If false, the player left the wardrobe normally.
      */
     public void leaveWardrobe(boolean ejected) {
-        PlayerWardrobeLeaveEvent event = new PlayerWardrobeLeaveEvent(this);
+        if (userWardrobeManager == null) return;
+        PlayerWardrobeLeaveEvent event = new PlayerWardrobeLeaveEvent(this, userWardrobeManager);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             return;
@@ -689,7 +689,7 @@ public class CosmeticUser implements CosmeticHolder {
         EquipmentSlot equipmentSlot = HMCCInventoryUtils.getEquipmentSlot(slot);
         if (equipmentSlot == null) return;
         if (getPlayer() != null) {
-            PacketManager.equipmentSlotUpdate(getEntity().getEntityId(), equipmentSlot, getPlayer().getInventory().getItem(equipmentSlot), HMCCPacketManager.getViewers(getEntity().getLocation()));
+            HMCCPacketManager.equipmentSlotUpdate(getEntity().getEntityId(), equipmentSlot, getPlayer().getInventory().getItem(equipmentSlot), HMCCPacketManager.getViewers(getEntity().getLocation()));
         } else {
             HMCCPacketManager.equipmentSlotUpdate(getEntity().getEntityId(), this, slot, HMCCPacketManager.getViewers(getEntity().getLocation()));
         }
@@ -996,7 +996,7 @@ public class CosmeticUser implements CosmeticHolder {
     public void showCosmetics(HiddenReason reason) {
         if (hiddenReason.isEmpty()) return;
 
-        PlayerCosmeticShowEvent event = new PlayerCosmeticShowEvent(this);
+        PlayerCosmeticShowEvent event = new PlayerCosmeticShowEvent(this, reason);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             return;
