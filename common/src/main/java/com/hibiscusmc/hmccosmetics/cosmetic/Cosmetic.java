@@ -64,6 +64,12 @@ public abstract class Cosmetic {
     /** Whether the cosmetic is dyeable or not. */
     private boolean dyeable;
 
+    /** Whether the cosmetic should be auto-added to matching cosmetic menus. */
+    private boolean showInMenu;
+
+    /** Whether inaccessible cosmetics should still be visible in menus. */
+    private boolean visibleInMenu;
+
     /** The config for the cosmetic */
     private ConfigurationNode config;
 
@@ -106,6 +112,8 @@ public abstract class Cosmetic {
         this.slot = CosmeticSlot.valueOf(config.node("slot").getString());
 
         this.dyeable = config.node("dyeable").getBoolean(false);
+        this.showInMenu = config.node("show-in-menu").getBoolean(false);
+        this.visibleInMenu = config.node("visible").getBoolean(true);
         this.price = Math.max(0, config.node("price").getDouble(0));
 
         String advancement = config.node("advancement").getString();
@@ -136,6 +144,8 @@ public abstract class Cosmetic {
         this.material = material;
         this.slot = slot;
         this.dyeable = dyeable;
+        this.showInMenu = false;
+        this.visibleInMenu = true;
         this.advancement = null;
         this.advancementKey = null;
         this.missingAdvancementLogged = false;

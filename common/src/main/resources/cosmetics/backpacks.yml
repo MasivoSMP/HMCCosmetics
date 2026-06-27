@@ -1,0 +1,395 @@
+b_chocolate_box:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_b_chocolate_box
+  permission-group: "hmccosmetics.omega"
+  model: backpack_b_chocolate_box
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:farming/hot_chocolate"
+  item:
+    material: BLUE_DYE
+    model-data: 8000
+    name: "<#8b4513>Caja de Chocolates</#8b4513>"
+    amount: 1
+b_plush_bear:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_b_plush_bear
+  permission-group: "hmccosmetics.omega"
+  model: backpack_b_plush_bear
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8001
+    name: "<#c48a5a>Oso de Peluche</#c48a5a>"
+    amount: 1
+first_aid_charger:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_first_aid_charger
+  permission-group: "hmccosmetics.omega"
+  model: backpack_first_aid_charger
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:potion/hyper_healing"
+  item:
+    material: BLUE_DYE
+    model-data: 8002
+    name: "<#ef5350>Botiquín de Carga</#ef5350>"
+    amount: 1
+globos:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_globos
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_globos
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8003
+    name: "<gradient:#ff6ec7:#ffd166>Mochila de Globos</gradient>"
+    amount: 1
+kirbyv2:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_kirbyv2
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_kirbyv2
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8004
+    name: "<gradient:#ff7eb3:#ff65a3>Kirby</gradient>"
+    amount: 1
+military_backpacks:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_military_backpacks
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_military_backpacks
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8005
+    name: "<gradient:#556b2f:#8fbc8f>Mochila Militar</gradient>"
+    amount: 1
+oveja_mochila:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_oveja_mochila
+  permission-group: "hmccosmetics.omega"
+  model: backpack_oveja_mochila
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/bred_all_animals"
+  item:
+    material: BLUE_DYE
+    model-data: 8006
+    name: "<#f5f5f5>Mochila de Oveja</#f5f5f5>"
+    amount: 1
+panda_mochila:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_panda_mochila
+  permission-group: "hmccosmetics.omega"
+  model: backpack_panda_mochila
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/bred_all_animals"
+  item:
+    material: BLUE_DYE
+    model-data: 8007
+    name: "<#90a4ae>Mochila de Panda</#90a4ae>"
+    amount: 1
+poker_cards:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_poker_cards
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_poker_cards
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:challenges/stockbroker"
+  item:
+    material: BLUE_DYE
+    model-data: 8008
+    name: "<gradient:#d32f2f:#212121>Cartas de Póker</gradient>"
+    amount: 1
+pollo_mochila:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_pollo_mochila
+  permission-group: "hmccosmetics.omega"
+  model: backpack_pollo_mochila
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/bred_all_animals"
+  item:
+    material: BLUE_DYE
+    model-data: 8009
+    name: "<#ffd54f>Mochila de Pollo</#ffd54f>"
+    amount: 1
+vaca_mochila:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_vaca_mochila
+  permission-group: "hmccosmetics.omega"
+  model: backpack_vaca_mochila
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/bred_all_animals"
+  item:
+    material: BLUE_DYE
+    model-data: 8010
+    name: "<#8d6e63>Mochila de Vaca</#8d6e63>"
+    amount: 1
+backpack_bmo_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_bmo_v1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_bmo_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8011
+    name: "<#26a69a>Mochila BMO</#26a69a>"
+    amount: 1
+backpack_car_blue:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_car_blue
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_car_blue
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:statistics/minecart_rider"
+  item:
+    material: BLUE_DYE
+    model-data: 8012
+    name: "<gradient:#1e88e5:#42a5f5>Auto Azul</gradient>"
+    amount: 1
+backpack_car_green:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_car_green
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_car_green
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:statistics/i_like_trains"
+  item:
+    material: BLUE_DYE
+    model-data: 8013
+    name: "<gradient:#43a047:#9ccc65>Auto Verde</gradient>"
+    amount: 1
+backpack_car_red:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_car_red
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_car_red
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:statistics/global_railway_network"
+  item:
+    material: BLUE_DYE
+    model-data: 8014
+    name: "<gradient:#e53935:#ff8a65>Auto Rojo</gradient>"
+    amount: 1
+backpack_cookieman_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_cookieman_v1
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_cookieman_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:farming/me_love_cookie"
+  item:
+    material: BLUE_DYE
+    model-data: 8015
+    name: "<gradient:#b5651d:#f4d03f>Hombre Galleta</gradient>"
+    amount: 1
+backpack_finn_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_finn_v1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_finn_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:adventure/veteran_of_the_village"
+  item:
+    material: BLUE_DYE
+    model-data: 8016
+    name: "<#42a5f5>Mochila de Finn</#42a5f5>"
+    amount: 1
+backpack_flamingo_float_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_flamingo_float_v1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_flamingo_float_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/ride_a_boat_with_a_goat"
+  item:
+    material: BLUE_DYE
+    model-data: 8017
+    name: "<#ff6fa8>Flotador Flamingo</#ff6fa8>"
+    amount: 1
+backpack_gatitocolgando1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_gatitocolgando1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_gatitocolgando1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:adventure/if_only_cats_grew_into_kittens"
+  item:
+    material: BLUE_DYE
+    model-data: 8018
+    name: "<#ffb3ba>Gatito Colgante</#ffb3ba>"
+    amount: 1
+backpack_gift_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_gift_v1
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_gift_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:adventure/undying_fandom"
+  item:
+    material: BLUE_DYE
+    model-data: 8019
+    name: "<gradient:#ff1744:#00c853>Regalo</gradient>"
+    amount: 1
+backpack_sharktail1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_sharktail1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_sharktail1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:adventure/laser_sharks"
+  item:
+    material: BLUE_DYE
+    model-data: 8020
+    name: "<#4fc3f7>Cola de Tiburón</#4fc3f7>"
+    amount: 1
+backpack_skeletalshield_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_skeletalshield_v1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_skeletalshield_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8021
+    name: "<#b0bec5>Escudo Esquelético</#b0bec5>"
+    amount: 1
+backpack_snowman_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_snowman_v1
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_snowman_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:farming/unmasked"
+  item:
+    material: BLUE_DYE
+    model-data: 8022
+    name: "<gradient:#e0f7fa:#90caf9>Muñeco de Nieve</gradient>"
+    amount: 1
+backpack_spider_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_spider_v1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_spider_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:monsters/the_ghastly_eyes"
+  item:
+    material: BLUE_DYE
+    model-data: 8023
+    name: "<#424242>Araña</#424242>"
+    amount: 1
+backpack_spine_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_spine_v1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_spine_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8024
+    name: "<#9e9e9e>Espina Dorsal</#9e9e9e>"
+    amount: 1
+backpack_tank_v1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_tank_v1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_tank_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:potion/tank"
+  item:
+    material: BLUE_DYE
+    model-data: 8026
+    name: "<#607d3b>Tanque</#607d3b>"
+    amount: 1
+backpack_wumpus_v2:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_wumpus_v2
+  permission-group: "hmccosmetics.masivo"
+  model: backpack_wumpus_v2
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8027
+    name: "<gradient:#6a5cff:#00c2ff>Mochila de Wumpus</gradient>"
+    amount: 1
+backpack_steampunk_1:
+  slot: BACKPACK
+  show-in-menu: true
+  permission: hmccosmetics.backpack_backpack_steampunk_1
+  permission-group: "hmccosmetics.omega"
+  model: backpack_steampunk_1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 8025
+    name: "<#b87333>Mochila Steampunk</#b87333>"
+    amount: 1
+backpack_easteregg_pascua:
+  slot: BACKPACK
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.evento.pascuas.backpack_easteregg_pascua
+  model: backpack_easteregg_pascua
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 8028
+    name: "<gradient:#FFD6A5:#FFB4A2:#E598Ff:#B8C0FF>Easter Egg</gradient>"
+    amount: 1

@@ -1,0 +1,356 @@
+balloon_fox_v1:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_fox_v1
+  permission-group: "hmccosmetics.omega"
+  model: balloon_fox_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:animal/what_does_the_fox_say"
+  item:
+    material: BLUE_DYE
+    model-data: 5000
+    name: <#ff8c42>Zorro Globo</#ff8c42>
+    amount: 1
+balloon_corgi:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_corgi
+  permission-group: "hmccosmetics.omega"
+  model: balloon_corgi
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/tame_an_animal"
+  item:
+    material: BLUE_DYE
+    model-data: 5002
+    name: <#f4a261>Corgi Globo</#f4a261>
+    amount: 1
+balloon_cuervoverdefideo:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_cuervoverdefideo
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_cuervoverdefideo
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:animal/birdkeeper"
+  item:
+    material: BLUE_DYE
+    model-data: 5003
+    name: <gradient:#00c853:#b2ff59>Cuervo Verde Fideo</gradient>
+    amount: 1
+balloon_fox_v2:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_fox_v2
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_fox_v2
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:animal/foxy_thievery"
+  item:
+    material: BLUE_DYE
+    model-data: 5004
+    name: <gradient:#ff7b00:#ffb347>Zorro Globo Deluxe</gradient>
+    amount: 1
+balloon_glorp_dron:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_glorp_dron
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_glorp_dron
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:challenges/ad_astra"
+  item:
+    material: BLUE_DYE
+    model-data: 5005
+    name: <gradient:#00ff87:#60efff>Dron Glorp</gradient>
+    amount: 1
+balloon_helicopter:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_helicopter
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_helicopter
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:statistics/take_to_the_skies"
+  item:
+    material: BLUE_DYE
+    model-data: 5006
+    name: <gradient:#5c6bc0:#26c6da>Helicóptero</gradient>
+    amount: 1
+balloon_patomomo:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_patomomo
+  permission-group: "hmccosmetics.omega"
+  model: balloon_patomomo
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:animal/feeding_the_chickens"
+  item:
+    material: BLUE_DYE
+    model-data: 5009
+    name: <#ffd166>Patomomo</#ffd166>
+    amount: 1
+balloon_patomomo_wide:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_patomomo_wide
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_patomomo_wide
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:animal/omelette"
+  item:
+    material: BLUE_DYE
+    model-data: 5010
+    name: <gradient:#f9c74f:#f9844a>Patomomo Ancho</gradient>
+    amount: 1
+balloon_reindeer_v1:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_reindeer_v1
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_reindeer_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:monsters/freezing"
+  item:
+    material: BLUE_DYE
+    model-data: 5011
+    name: <gradient:#8b4513:#d32f2f>Reno Globo</gradient>
+    amount: 1
+balloon_seal_v1:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_seal_v1
+  permission-group: "hmccosmetics.omega"
+  model: balloon_seal_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:weaponry/king_of_the_sea"
+  item:
+    material: BLUE_DYE
+    model-data: 5012
+    name: <#90caf9>Foca Globo</#90caf9>
+    amount: 1
+balloon_sniffer_v1:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_sniffer_v1
+  permission-group: "hmccosmetics.omega"
+  model: balloon_sniffer_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/feed_snifflet"
+  item:
+    material: BLUE_DYE
+    model-data: 5013
+    name: <#8bc34a>Sniffer Globo</#8bc34a>
+    amount: 1
+balloon_steamhappy:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_steamhappy
+  permission-group: "hmccosmetics.omega"
+  model: balloon_steamhappy
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 5014
+    name: <#66bb6a>Steam Feliz</#66bb6a>
+    amount: 1
+balloon_steamsad:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_balloon_steamsad
+  permission-group: "hmccosmetics.omega"
+  model: balloon_steamsad
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 5015
+    name: <#5c6bc0>Steam Triste</#5c6bc0>
+    amount: 1
+ufo:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_ufo
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_ufo
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:challenges/ad_astra"
+  item:
+    material: BLUE_DYE
+    model-data: 5016
+    name: <gradient:#7f00ff:#00e5ff>OVNI</gradient>
+    amount: 1
+cohetev2:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_cohetev2
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_cohetev2
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:weaponry/pyrotechnic"
+  item:
+    material: BLUE_DYE
+    model-data: 5017
+    name: <gradient:#ff512f:#dd2476>Cohete</gradient>
+    amount: 1
+dog_balloon:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_dog_balloon
+  permission-group: "hmccosmetics.omega"
+  model: balloon_dog_balloon
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/whole_pack"
+  item:
+    material: BLUE_DYE
+    model-data: 5018
+    name: <#ffb74d>Perro Globo</#ffb74d>
+    amount: 1
+globoaerostatico:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_globoaerostatico
+  permission-group: "hmccosmetics.omega"
+  model: balloon_globoaerostatico
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:statistics/test_flight"
+  item:
+    material: BLUE_DYE
+    model-data: 5019
+    name: <#29b6f6>Globo Aerostático</#29b6f6>
+    amount: 1
+heart:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_heart
+  permission-group: "hmccosmetics.omega"
+  model: balloon_heart
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:adventure/heart_transplanter"
+  item:
+    material: BLUE_DYE
+    model-data: 5021
+    name: <#ff4d6d>Corazón</#ff4d6d>
+    amount: 1
+magician_balloon:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_magician_balloon
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_magician_balloon
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:potion/death_by_magic"
+  item:
+    material: BLUE_DYE
+    model-data: 5022
+    name: <gradient:#9d4edd:#00d4ff>Globo de Mago</gradient>
+    amount: 1
+pinata:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_pinata
+  permission-group: "hmccosmetics.omega"
+  model: balloon_pinata
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:adventure/tricky_treasures"
+  item:
+    material: BLUE_DYE
+    model-data: 5023
+    name: <#ab47bc>Piñata</#ab47bc>
+    amount: 1
+satelite:
+  slot: BALLOON
+  show-in-menu: true
+  permission: hmccosmetics.balloon_satelite
+  permission-group: "hmccosmetics.masivo"
+  model: balloon_satelite
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:challenges/im_in_space"
+  item:
+    material: BLUE_DYE
+    model-data: 5024
+    name: <gradient:#90a4ae:#42a5f5>Satélite</gradient>
+    amount: 1
+balloon_silvicultor:
+  slot: BALLOON
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.balloon_balloon_silvicultor
+  permission-group: "hmccosmetics.jobs_silvicultor"
+  model: balloon_silvicultor
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 5025
+    name: Globo Silvicultor
+    amount: 1
+balloon_hunter_lv75:
+  slot: BALLOON
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.balloon_balloon_hunter_lv75
+  permission-group: "hmccosmetics.jobs_cazador"
+  model: balloon_hunter_lv75
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 5007
+    name: Globo Cazador Lv. 75
+    amount: 1
+balloon_miner_lv75:
+  slot: BALLOON
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.balloon_balloon_miner_lv75
+  permission-group: "hmccosmetics.jobs_minero"
+  model: balloon_miner_lv75
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 5008
+    name: Globo Minero Lv. 75
+    amount: 1
+balloon_granjeroo:
+  slot: BALLOON
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.balloon_balloon_granjeroo
+  permission-group: "hmccosmetics.jobs_granjero"
+  model: balloon_granjeroo
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 5020
+    name: Globo Granjero
+    amount: 1
+balloon_cloudbunny_pascua:
+  slot: BALLOON
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.evento.pascuas.balloon_balloon_cloudbunny_pascua
+  model: balloon_cloudbunny_pascua
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 5026
+    name: "<gradient:#FFD6A5:#FFB4A2:#E598Ff:#B8C0FF>Conejo en las nubes</gradient>"
+    amount: 1

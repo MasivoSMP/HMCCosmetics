@@ -1,0 +1,739 @@
+hats_crab_orange:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_crab_orange
+  permission-group: "hmccosmetics.masivo"
+  model: hat_hats_crab_orange
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:animal/totally_not_an_afk_fisher"
+  item:
+    material: BLUE_DYE
+    model-data: 6000
+    name: "<gradient:#ff7a18:#ffb347>Cangrejo Naranja</gradient>"
+    amount: 1
+hats_finn_v1:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_finn_v1
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_finn_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:adventure/veteran_of_the_village"
+  item:
+    material: BLUE_DYE
+    model-data: 6001
+    name: "<#4dd0ff>Finn</#4dd0ff>"
+    amount: 1
+hats_fionna_v1:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_fionna_v1
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_fionna_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:adventure/veteran_of_the_village"
+  item:
+    material: BLUE_DYE
+    model-data: 6002
+    name: "<#ff8ad8>Fionna</#ff8ad8>"
+    amount: 1
+hats_mullet_fish:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_mullet_fish
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_mullet_fish
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:enchanting/master_fisher"
+  item:
+    material: BLUE_DYE
+    model-data: 6003
+    name: "<#5ec8ff>Pez Mújol</#5ec8ff>"
+    amount: 1
+hats_hatsunemiku_v1:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_hatsunemiku_v1
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_hatsunemiku_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6004
+    name: "<#39d5c7>Hatsune Miku v1</#39d5c7>"
+    amount: 1
+hats_hatsunemiku_v2:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_hatsunemiku_v2
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_hatsunemiku_v2
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6005
+    name: "<#00bcd4>Hatsune Miku v2</#00bcd4>"
+    amount: 1
+hats_horns_crown_v1:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_horns_crown_v1
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_horns_crown_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6006
+    name: "<#c77dff>Corona de Cuernos</#c77dff>"
+    amount: 1
+hats_hotdog:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_hotdog
+  permission-group: "hmccosmetics.masivo"
+  model: hat_hats_hotdog
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "blazeandcave:farming/a_gluttonous_diet"
+  item:
+    material: BLUE_DYE
+    model-data: 6007
+    name: "<gradient:#ff512f:#f09819>Hot Dog</gradient>"
+    amount: 1
+hats_meowl:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_meowl
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_meowl
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/complete_catalogue"
+  item:
+    material: BLUE_DYE
+    model-data: 6011
+    name: "<#7c4dff>Meowl</#7c4dff>"
+    amount: 1
+hats_neru_v1:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_neru_v1
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_neru_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6015
+    name: "<#ffd54f>Neru v1</#ffd54f>"
+    amount: 1
+hats_neru_v2:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_neru_v2
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_neru_v2
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6016
+    name: "<#ffca28>Neru v2</#ffca28>"
+    amount: 1
+hats_platano_v1:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_platano_v1
+  permission-group: "hmccosmetics.masivo"
+  model: hat_hats_platano_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/break_diamond_hoe"
+  item:
+    material: BLUE_DYE
+    model-data: 6017
+    name: "<gradient:#fceabb:#f8b500>Plátano</gradient>"
+    amount: 1
+hats_repo_head_green:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_repo_head_green
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_repo_head_green
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6018
+    name: "<#43a047>Cabeza Repo Verde</#43a047>"
+    amount: 1
+hats_sharkplushy:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_sharkplushy
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_sharkplushy
+  made-by: "MrDonuts__"
+  advancement: "blazeandcave:animal/master_angler"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6019
+    name: "<#4fc3f7>Tiburón de Peluche</#4fc3f7>"
+    amount: 1
+hats_televisor_caritas:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_televisor_caritas
+  permission-group: "hmccosmetics.masivo"
+  model: hat_hats_televisor_caritas
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6022
+    name: "<gradient:#8e2de2:#4a00e0>Televisor Caritas</gradient>"
+    amount: 1
+hats_televisor_jugador:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_televisor_jugador
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_televisor_jugador
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6021
+    name: "<#5c6bc0>Televisor Jugador</#5c6bc0>"
+    amount: 1
+hats_teto_v1:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_teto_v1
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_teto_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6023
+    name: "<#ff5fa2>Teto v1</#ff5fa2>"
+    amount: 1
+hats_teto_v2:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_teto_v2
+  permission-group: "hmccosmetics.omega"
+  model: hat_hats_teto_v2
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6024
+    name: "<#ff4081>Teto v2</#ff4081>"
+    amount: 1
+hats_wumpus:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_hats_wumpus
+  permission-group: "hmccosmetics.masivo"
+  model: hat_hats_wumpus
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6025
+    name: "<gradient:#43cea2:#185a9d>Wumpus</gradient>"
+    amount: 1
+birthday_hat:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_birthday_hat
+  permission-group: "hmccosmetics.omega"
+  model: hat_birthday_hat
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6026
+    name: "<#ffb300>Sombrero de Cumpleaños</#ffb300>"
+    amount: 1
+clown_hair:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_clown_hair
+  permission-group: "hmccosmetics.omega"
+  model: hat_clown_hair
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:animal/catching_nemo"
+  item:
+    material: BLUE_DYE
+    model-data: 6027
+    name: "<#ff5252>Cabello de Payaso</#ff5252>"
+    amount: 1
+cone:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_cone
+  permission-group: "hmccosmetics.omega"
+  model: hat_cone
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6028
+    name: "<#ff9800>Cono</#ff9800>"
+    amount: 1
+farfapeluche:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_farfapeluche
+  permission-group: "hmccosmetics.omega"
+  model: hat_farfapeluche
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6029
+    name: "<#9c27b0>Farfa Peluche</#9c27b0>"
+    amount: 1
+gas_mask:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_gas_mask
+  permission-group: "hmccosmetics.masivo"
+  model: hat_gas_mask
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:potion/noxious_fumes"
+  item:
+    material: BLUE_DYE
+    model-data: 6030
+    name: "<gradient:#556270:#4ecdc4>Máscara de Gas</gradient>"
+    amount: 1
+gato_blanco_negro:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_gato_blanco_negro
+  permission-group: "hmccosmetics.omega"
+  model: hat_gato_blanco_negro
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/complete_catalogue"
+  item:
+    material: BLUE_DYE
+    model-data: 6031
+    name: "<#b0bec5>Gato Blanco y Negro</#b0bec5>"
+    amount: 1
+gato_calico:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_gato_calico
+  permission-group: "hmccosmetics.omega"
+  model: hat_gato_calico
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/complete_catalogue"
+  item:
+    material: BLUE_DYE
+    model-data: 6032
+    name: "<#ff8a65>Gato Calicó</#ff8a65>"
+    amount: 1
+gato_naranja:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_gato_naranja
+  permission-group: "hmccosmetics.omega"
+  model: hat_gato_naranja
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/complete_catalogue"
+  item:
+    material: BLUE_DYE
+    model-data: 6033
+    name: "<#ff7043>Gato Naranja</#ff7043>"
+    amount: 1
+gato_siames:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_gato_siames
+  permission-group: "hmccosmetics.omega"
+  model: hat_gato_siames
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:husbandry/complete_catalogue"
+  item:
+    material: BLUE_DYE
+    model-data: 6034
+    name: "<#8d6e63>Gato Siamés</#8d6e63>"
+    amount: 1
+gianpeluche:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_gianpeluche
+  permission-group: "hmccosmetics.omega"
+  model: hat_gianpeluche
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6035
+    name: "<#00acc1>Gian Peluche</#00acc1>"
+    amount: 1
+heart_glasses:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_heart_glasses
+  permission-group: "hmccosmetics.omega"
+  model: hat_heart_glasses
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:adventure/heart_transplanter"
+  item:
+    material: BLUE_DYE
+    model-data: 6038
+    name: "<#ff4d6d>Gafas de Corazón</#ff4d6d>"
+    amount: 1
+magician_hat:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_magician_hat
+  permission-group: "hmccosmetics.masivo"
+  model: hat_magician_hat
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:bacap/enchanting_milestone"
+  item:
+    material: BLUE_DYE
+    model-data: 6039
+    name: "<gradient:#7f00ff:#e100ff>Sombrero de Mago</gradient>"
+    amount: 1
+medalla_bronce:
+  slot: HELMET
+  permission: hmccosmetics.hat_medalla_bronce
+  permission-group: "hmccosmetics.omega"
+  model: hat_medalla_bronce
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6040
+    name: "<#cd7f32>Medalla de Bronce</#cd7f32>"
+    amount: 1
+medalla_oro:
+  slot: HELMET
+  permission: hmccosmetics.hat_medalla_oro
+  permission-group: "hmccosmetics.omega"
+  model: hat_medalla_oro
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6041
+    name: "<#ffd700>Medalla de Oro</#ffd700>"
+    amount: 1
+medalla_plata:
+  slot: HELMET
+  permission: hmccosmetics.hat_medalla_plata
+  permission-group: "hmccosmetics.omega"
+  model: hat_medalla_plata
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6042
+    name: "<#c0c0c0>Medalla de Plata</#c0c0c0>"
+    amount: 1
+carlosnoob_peluche:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_carlosnoob_peluche
+  permission-group: "hmccosmetics.omega"
+  model: hat_carlosnoob_peluche
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6043
+    name: "<#66bb6a>CarlosNoob Peluche</#66bb6a>"
+    amount: 1
+omega_peluche:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_omega_peluche
+  permission-group: "hmccosmetics.omega"
+  model: hat_omega_peluche
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6044
+    name: "<#00e5ff>Omega Peluche</#00e5ff>"
+    amount: 1
+pirupeluche:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_pirupeluche
+  permission-group: "hmccosmetics.omega"
+  model: hat_pirupeluche
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6045
+    name: "<#ef5350>Piru Peluche</#ef5350>"
+    amount: 1
+rose:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_rose
+  permission-group: "hmccosmetics.omega"
+  model: hat_rose
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:biomes/for_you_my_sweet"
+  item:
+    material: BLUE_DYE
+    model-data: 6046
+    name: "<#e91e63>Rosa</#e91e63>"
+    amount: 1
+suwiepeluche:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_suwiepeluche
+  permission-group: "hmccosmetics.omega"
+  model: hat_suwiepeluche
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6049
+    name: "<#ab47bc>Suwie Peluche</#ab47bc>"
+    amount: 1
+wool_hat_black:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_wool_hat_black
+  permission-group: "hmccosmetics.omega"
+  model: hat_wool_hat_black
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6050
+    name: "<#424242>Gorro de Lana Negro</#424242>"
+    amount: 1
+wool_hat_white:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hat_wool_hat_white
+  permission-group: "hmccosmetics.omega"
+  model: hat_wool_hat_white
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 6051
+    name: "<#f5f5f5>Gorro de Lana Blanco</#f5f5f5>"
+    amount: 1
+hats_hunter_lv100:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_hats_hunter_lv100
+  permission-group: "hmccosmetics.jobs_cazador"
+  model: hat_hats_hunter_lv100
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 6008
+    name: "Sombrero de Cazador Lv. 100"
+    amount: 1
+hats_hunter_lv100_v2:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_hats_hunter_lv100_v2
+  permission-group: "hmccosmetics.jobs_cazador"
+  model: hat_hats_hunter_lv100_v2
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 6009
+    name: "Sombrero de Cazador Lv. 100 v2"
+    amount: 1
+hats_hunter_lv50:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_hats_hunter_lv50
+  permission-group: "hmccosmetics.jobs_cazador"
+  model: hat_hats_hunter_lv50
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 6010
+    name: "Sombrero de Cazador Lv. 50"
+    amount: 1
+hats_miner_lv100:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_hats_miner_lv100
+  permission-group: "hmccosmetics.jobs_minero"
+  model: hat_hats_miner_lv100
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 6012
+    name: "Casco de Minero Lv. 100"
+    amount: 1
+hats_miner_lv100_v2:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_hats_miner_lv100_v2
+  permission-group: "hmccosmetics.jobs_minero"
+  model: hat_hats_miner_lv100_v2
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 6013
+    name: "Casco de Minero Lv. 100 v2"
+    amount: 1
+hats_miner_lv50:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_hats_miner_lv50
+  permission-group: "hmccosmetics.jobs_minero"
+  model: hat_hats_miner_lv50
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 6014
+    name: "Casco de Minero Lv. 50"
+    amount: 1
+granjero_hat:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_granjero_hat
+  permission-group: "hmccosmetics.jobs_granjero"
+  model: hat_granjero_hat
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 6036
+    name: "Sombrero de Granjero"
+    amount: 1
+granjero_hat_lvl100:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_granjero_hat_lvl100
+  permission-group: "hmccosmetics.jobs_granjero"
+  model: hat_granjero_hat_lvl100
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 6037
+    name: "Sombrero de Granjero Lv. 100"
+    amount: 1
+silvicultor_hat:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_silvicultor_hat
+  permission-group: "hmccosmetics.jobs_silvicultor"
+  model: hat_silvicultor_hat
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 6047
+    name: "Sombrero de Silvicultor"
+    amount: 1
+silvicultor_level_100:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hat_silvicultor_level_100
+  permission-group: "hmccosmetics.jobs_silvicultor"
+  model: hat_silvicultor_level_100
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 6048
+    name: "Sombrero de Silvicultor Lv. 100"
+    amount: 1
+
+hats_carrotsuit_pascua:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.evento.pascuas.hat_hats_carrotsuit_pascua
+  model: hat_hats_carrotsuit_pascua
+  made-by: "MrDonuts__"
+  item:
+    material: BLUE_DYE
+    model-data: 6052
+    name: "<gradient:#FFD6A5:#FFB4A2:#E598Ff:#B8C0FF>Zanahoria</gradient>"
+    amount: 1
+easter_egg:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.evento.pascuas.hat_easter_egg
+  model: hat_easter_egg
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 6053
+    name: "<gradient:#FFD6A5:#FFB4A2:#E598Ff:#B8C0FF>Easter Egg</gradient>"
+    amount: 1
+rabbit_egg:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.evento.pascuas.hat_rabbit_egg
+  model: hat_rabbit_egg
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 6054
+    name: "<gradient:#FFD6A5:#FFB4A2:#E598Ff:#B8C0FF>Conejo, y un huevo</gradient>"
+    amount: 1
+rabbit_hat:
+  slot: HELMET
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.evento.pascuas.hat_rabbit_hat
+  model: hat_rabbit_hat
+  made-by: "SrChat"
+  item:
+    material: BLUE_DYE
+    model-data: 6055
+    name: "<gradient:#FFD6A5:#FFB4A2:#E598Ff:#B8C0FF>Gorro de conejo</gradient>"
+    amount: 1
+hats_gorrito_helicoptero:
+  slot: HELMET
+  show-in-menu: true
+  permission: hmccosmetics.hats_gorrito_helicoptero
+  permission-group: "hmccosmetics.omega"
+  allowed-with: ""
+  model: hats_gorrito_helicoptero
+  made-by: "celestebanana"
+  item:
+    material: BLUE_DYE
+    model-data: 6056
+    name: "<gradient:#ff3ecb:#ffd84d>Gorrito Helicoptero</gradient>"
+    amount: 1

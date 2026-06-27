@@ -1,0 +1,258 @@
+hands_bear_sv_v1:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_hands_bear_sv_v1
+  permission-group: "hmccosmetics.omega"
+  model: hand_hands_bear_sv_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7000
+    name: "<#ff6fa8>Oso de San Valentín</#ff6fa8>"
+    amount: 1
+hands_bear_v1:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_hands_bear_v1
+  permission-group: "hmccosmetics.omega"
+  model: hand_hands_bear_v1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7001
+    name: "<#a874ff>Osito</#a874ff>"
+    amount: 1
+hands_frierenstaff:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_hands_frierenstaff
+  permission-group: "hmccosmetics.omega"
+  model: hand_hands_frierenstaff
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7002
+    name: "<#d9c28f>Báculo de Frieren</#d9c28f>"
+    amount: 1
+hands_wumpus_plushy:
+  slot: OFFHAND
+  show-in-menu: true
+  visible: false
+  permission: hmccosmetics.hand_hands_wumpus_plushy
+  permission-group: "hmccosmetics.masivo"
+  model: hand_hands_wumpus_plushy
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7004
+    name: "<gradient:#7b5cff:#4de0ff>Peluche de Wumpus</gradient>"
+    amount: 1
+axe:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_axe
+  permission-group: "hmccosmetics.omega"
+  model: hand_axe
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7005
+    name: "<#8d6e63>Hacha</#8d6e63>"
+    amount: 1
+balloon_sword:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_balloon_sword
+  permission-group: "hmccosmetics.masivo"
+  model: hand_balloon_sword
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "minecraft:adventure/spyglass_at_ghast"
+  item:
+    material: BLUE_DYE
+    model-data: 7006
+    name: "<gradient:#ff8a00:#ffd000>Espada Globo</gradient>"
+    amount: 1
+bat:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_bat
+  permission-group: "hmccosmetics.masivo"
+  model: hand_bat
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7007
+    name: "<gradient:#6d4c41:#a1887f>Bate</gradient>"
+    amount: 1
+cake:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_cake
+  permission-group: "hmccosmetics.omega"
+  model: hand_cake
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:farming/the_lie"
+  item:
+    material: BLUE_DYE
+    model-data: 7008
+    name: "<#ff9ecb>Pastel</#ff9ecb>"
+    amount: 1
+chocolate_box:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_chocolate_box
+  permission-group: "hmccosmetics.omega"
+  model: hand_chocolate_box
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:farming/hot_chocolate"
+  item:
+    material: BLUE_DYE
+    model-data: 7009
+    name: "<#8b4513>Caja de Chocolates</#8b4513>"
+    amount: 1
+crowbar:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_crowbar
+  permission-group: "hmccosmetics.masivo"
+  model: hand_crowbar
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7010
+    name: "<gradient:#ff5f6d:#ffc371>Pata de Cabra</gradient>"
+    amount: 1
+daisy:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_daisy
+  permission-group: "hmccosmetics.omega"
+  model: hand_daisy
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:biomes/flower_power"
+  item:
+    material: BLUE_DYE
+    model-data: 7011
+    name: "<#fff176>Margarita</#fff176>"
+    amount: 1
+gerberas:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_gerberas
+  permission-group: "hmccosmetics.omega"
+  model: hand_gerberas
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:biomes/flower_power"
+  item:
+    material: BLUE_DYE
+    model-data: 7012
+    name: "<#ff7043>Gerberas</#ff7043>"
+    amount: 1
+magician_wand:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_magician_wand
+  permission-group: "hmccosmetics.masivo"
+  model: hand_magician_wand
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:monsters/taste_of_your_own_medicine"
+  item:
+    material: BLUE_DYE
+    model-data: 7013
+    name: "<gradient:#8a2be2:#00e5ff>Varita Mágica</gradient>"
+    amount: 1
+plush_bear:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_plush_bear
+  permission-group: "hmccosmetics.omega"
+  model: hand_plush_bear
+  made-by: "SrChat"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7014
+    name: "<#c48a5a>Oso de Peluche</#c48a5a>"
+    amount: 1
+roses:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_roses
+  permission-group: "hmccosmetics.omega"
+  model: hand_roses
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:biomes/flower_power"
+  item:
+    material: BLUE_DYE
+    model-data: 7015
+    name: "<#e53935>Rosas</#e53935>"
+    amount: 1
+sunflowers:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_sunflowers
+  permission-group: "hmccosmetics.omega"
+  model: hand_sunflowers
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:biomes/flower_power"
+  item:
+    material: BLUE_DYE
+    model-data: 7016
+    name: "<#fbc02d>Girasoles</#fbc02d>"
+    amount: 1
+trofeo:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_trofeo
+  permission-group: "hmccosmetics.omega"
+  model: hand_trofeo
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:adventure/awards_ceremony"
+  item:
+    material: BLUE_DYE
+    model-data: 7017
+    name: "<#ffd54f>Trofeo</#ffd54f>"
+    amount: 1
+tulips:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_tulips
+  permission-group: "hmccosmetics.omega"
+  model: hand_tulips
+  made-by: "SrChat"
+  allowed-with: ""
+  advancement: "blazeandcave:biomes/flower_power"
+  item:
+    material: BLUE_DYE
+    model-data: 7018
+    name: "<#ff80ab>Tulipanes</#ff80ab>"
+    amount: 1
+hands_steampunk_shield_1:
+  slot: OFFHAND
+  show-in-menu: true
+  permission: hmccosmetics.hand_hands_steampunk_shield_1
+  permission-group: "hmccosmetics.omega"
+  model: hand_hands_steampunk_shield_1
+  made-by: "MrDonuts__"
+  allowed-with: ""
+  item:
+    material: BLUE_DYE
+    model-data: 7003
+    name: "<#b87333>Escudo Steampunk</#b87333>"
+    amount: 1

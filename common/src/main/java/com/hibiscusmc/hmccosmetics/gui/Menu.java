@@ -120,6 +120,8 @@ public class Menu {
                 if (Types.isType(typeId)) type = Types.getType(typeId);
             }
 
+            if (type instanceof TypeCosmetic) continue;
+
             List<Integer> slots = getSlots(config.node("slots"));
 
             ItemStack item;
@@ -137,12 +139,6 @@ public class Menu {
 
             MenuItem menuItem = new MenuItem(slots, item, type, priority, config);
 
-            if (type instanceof TypeCosmetic && slots.isEmpty() && !configuredCosmeticSlots.isEmpty()) {
-                if (!matchesCosmeticType(menuItem)) continue;
-                cosmeticItems.add(menuItem);
-                continue;
-            }
-
             if (slots.isEmpty()) {
                 MessagesUtil.sendDebugMessages("Slot is empty for " + config.key().toString());
                 continue;
@@ -159,6 +155,52 @@ public class Menu {
                 }
             }
         }
+
+        setupCosmeticItems();
+    }
+
+    private void setupCosmeticItems() {
+        if (configuredCosmeticSlots.isEmpty()) return;
+
+        Type type = Types.getType("cosmetic");
+        if (!(type instanceof TypeCosmetic)) {
+            MessagesUtil.sendDebugMessages("Unable to populate cosmetics in menu " + getId() + " because the cosmetic menu type is unavailable.", Level.WARNING);
+            return;
+        }
+
+        for (Cosmetic cosmetic : Cosmetics.values()) {
+            if (!cosmetic.isShowInMenu()) continue;
+            if (!matchesCosmeticType(cosmetic)) continue;
+
+            ItemStack item = cosmetic.getItem();
+            if (item == null) {
+                MessagesUtil.sendDebugMessages("Unable to create menu item for " + cosmetic.getId() + " because it has no display item.", Level.WARNING);
+                continue;
+            }
+
+            ConfigurationNode itemConfig = createCosmeticMenuItemConfig(cosmetic);
+            if (itemConfig == null) continue;
+
+            cosmeticItems.add(new MenuItem(Collections.emptyList(), item, type, 1, itemConfig));
+        }
+    }
+
+    @Nullable
+    private ConfigurationNode createCosmeticMenuItemConfig(@NotNull Cosmetic cosmetic) {
+        ConfigurationNode cosmeticConfig = cosmetic.getConfig();
+        if (cosmeticConfig == null) return null;
+
+        ConfigurationNode itemConfig = cosmeticConfig.copy();
+        try {
+            itemConfig.node("type").set("cosmetic");
+            itemConfig.node("cosmetic").set(cosmetic.getId());
+            itemConfig.node("visible").set(cosmetic.isVisibleInMenu());
+        } catch (Exception e) {
+            MessagesUtil.sendDebugMessages("Unable to create menu config for " + cosmetic.getId() + ": " + e.getMessage(), Level.WARNING);
+            return null;
+        }
+
+        return itemConfig;
     }
 
     private void setupCosmeticSlots() {
@@ -529,17 +571,9 @@ public class Menu {
         }
     }
 
-    private boolean matchesCosmeticType(@NotNull MenuItem item) {
+    private boolean matchesCosmeticType(@NotNull Cosmetic cosmetic) {
         if (!cosmeticTypeConfigured) return true;
         if (cosmeticType == null) return false;
-
-        String cosmeticId = item.itemConfig().node("cosmetic").getString("");
-        Cosmetic cosmetic = Cosmetics.getCosmetic(cosmeticId);
-        if (cosmetic == null) {
-            MessagesUtil.sendDebugMessages("Unable to resolve cosmetic '" + cosmeticId + "' for type filtering in menu " + getId(), Level.WARNING);
-            return false;
-        }
-
         return cosmeticType.equals(cosmetic.getSlot());
     }
 
