@@ -297,7 +297,7 @@ public class TypeCosmetic extends Type {
                                                            @Nullable ConfigurationNode cosmeticConfig) {
         if (lines == null || lines.isEmpty()) return new ArrayList<>();
 
-        String allowedWith = getMetadataValue(cosmeticConfig, "allowed-with");
+        String allowedWith = cosmetic.getPermissionGroup();
         String madeBy = getMetadataValue(cosmeticConfig, "made-by");
         Component advancementDisplay = resolveAdvancementDisplay(cosmetic);
         if (allowedWith != null) {

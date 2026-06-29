@@ -455,11 +455,22 @@ public class Settings {
         }
     }
 
-    public static @NotNull String resolveAllowedWithDisplay(@NotNull String value) {
-        if (value.isBlank()) return value;
-        String mapped = cosmeticLoreAllowedWithMappings.get(value.toLowerCase(Locale.ROOT));
-        if (mapped == null || mapped.isBlank()) return value;
+    public static @NotNull String resolveAllowedWithDisplay(@NotNull String permissionGroup) {
+        if (permissionGroup.isBlank()) return permissionGroup;
+
+        String mapped = cosmeticLoreAllowedWithMappings.get(permissionGroup.toLowerCase(Locale.ROOT));
+        if (mapped != null && !mapped.isBlank()) return mapped;
+
+        String groupKey = getPermissionGroupKey(permissionGroup);
+        mapped = cosmeticLoreAllowedWithMappings.get(groupKey.toLowerCase(Locale.ROOT));
+        if (mapped == null || mapped.isBlank()) return groupKey;
         return mapped;
+    }
+
+    private static @NotNull String getPermissionGroupKey(@NotNull String permissionGroup) {
+        int separatorIndex = permissionGroup.lastIndexOf('.');
+        if (separatorIndex < 0 || separatorIndex >= permissionGroup.length() - 1) return permissionGroup;
+        return permissionGroup.substring(separatorIndex + 1);
     }
 
     private static @NotNull ConfigurationNode getToggleSoundSettingsNode(

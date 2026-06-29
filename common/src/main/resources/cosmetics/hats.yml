@@ -5,7 +5,6 @@ hats_crab_orange:
   permission-group: "hmccosmetics.masivo"
   model: hat_hats_crab_orange
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:animal/totally_not_an_afk_fisher"
   item:
     material: BLUE_DYE
@@ -19,7 +18,6 @@ hats_finn_v1:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_finn_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:adventure/veteran_of_the_village"
   item:
     material: BLUE_DYE
@@ -33,7 +31,6 @@ hats_fionna_v1:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_fionna_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:adventure/veteran_of_the_village"
   item:
     material: BLUE_DYE
@@ -47,7 +44,6 @@ hats_mullet_fish:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_mullet_fish
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:enchanting/master_fisher"
   item:
     material: BLUE_DYE
@@ -61,7 +57,6 @@ hats_hatsunemiku_v1:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_hatsunemiku_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6004
@@ -74,7 +69,6 @@ hats_hatsunemiku_v2:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_hatsunemiku_v2
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6005
@@ -87,7 +81,6 @@ hats_horns_crown_v1:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_horns_crown_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6006
@@ -100,7 +93,6 @@ hats_hotdog:
   permission-group: "hmccosmetics.masivo"
   model: hat_hats_hotdog
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:farming/a_gluttonous_diet"
   item:
     material: BLUE_DYE
@@ -114,7 +106,6 @@ hats_meowl:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_meowl
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "minecraft:husbandry/complete_catalogue"
   item:
     material: BLUE_DYE
@@ -128,7 +119,6 @@ hats_neru_v1:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_neru_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6015
@@ -141,7 +131,6 @@ hats_neru_v2:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_neru_v2
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6016
@@ -154,7 +143,6 @@ hats_platano_v1:
   permission-group: "hmccosmetics.masivo"
   model: hat_hats_platano_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "minecraft:husbandry/break_diamond_hoe"
   item:
     material: BLUE_DYE
@@ -168,7 +156,6 @@ hats_repo_head_green:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_repo_head_green
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6018
@@ -182,7 +169,6 @@ hats_sharkplushy:
   model: hat_hats_sharkplushy
   made-by: "MrDonuts__"
   advancement: "blazeandcave:animal/master_angler"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6019
@@ -195,7 +181,6 @@ hats_televisor_caritas:
   permission-group: "hmccosmetics.masivo"
   model: hat_hats_televisor_caritas
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6022
@@ -208,7 +193,6 @@ hats_televisor_jugador:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_televisor_jugador
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6021
@@ -221,7 +205,6 @@ hats_teto_v1:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_teto_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6023
@@ -234,7 +217,6 @@ hats_teto_v2:
   permission-group: "hmccosmetics.omega"
   model: hat_hats_teto_v2
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6024
@@ -247,7 +229,6 @@ hats_wumpus:
   permission-group: "hmccosmetics.masivo"
   model: hat_hats_wumpus
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6025
@@ -260,7 +241,6 @@ birthday_hat:
   permission-group: "hmccosmetics.omega"
   model: hat_birthday_hat
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6026
@@ -273,7 +253,6 @@ clown_hair:
   permission-group: "hmccosmetics.omega"
   model: hat_clown_hair
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:animal/catching_nemo"
   item:
     material: BLUE_DYE
@@ -287,7 +266,6 @@ cone:
   permission-group: "hmccosmetics.omega"
   model: hat_cone
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6028
@@ -300,7 +278,6 @@ farfapeluche:
   permission-group: "hmccosmetics.omega"
   model: hat_farfapeluche
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6029
@@ -313,7 +290,6 @@ gas_mask:
   permission-group: "hmccosmetics.masivo"
   model: hat_gas_mask
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:potion/noxious_fumes"
   item:
     material: BLUE_DYE
@@ -327,7 +303,6 @@ gato_blanco_negro:
   permission-group: "hmccosmetics.omega"
   model: hat_gato_blanco_negro
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/complete_catalogue"
   item:
     material: BLUE_DYE
@@ -341,7 +316,6 @@ gato_calico:
   permission-group: "hmccosmetics.omega"
   model: hat_gato_calico
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/complete_catalogue"
   item:
     material: BLUE_DYE
@@ -355,7 +329,6 @@ gato_naranja:
   permission-group: "hmccosmetics.omega"
   model: hat_gato_naranja
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/complete_catalogue"
   item:
     material: BLUE_DYE
@@ -369,7 +342,6 @@ gato_siames:
   permission-group: "hmccosmetics.omega"
   model: hat_gato_siames
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/complete_catalogue"
   item:
     material: BLUE_DYE
@@ -383,7 +355,6 @@ gianpeluche:
   permission-group: "hmccosmetics.omega"
   model: hat_gianpeluche
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6035
@@ -396,7 +367,6 @@ heart_glasses:
   permission-group: "hmccosmetics.omega"
   model: hat_heart_glasses
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:adventure/heart_transplanter"
   item:
     material: BLUE_DYE
@@ -410,7 +380,6 @@ magician_hat:
   permission-group: "hmccosmetics.masivo"
   model: hat_magician_hat
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:bacap/enchanting_milestone"
   item:
     material: BLUE_DYE
@@ -423,7 +392,6 @@ medalla_bronce:
   permission-group: "hmccosmetics.omega"
   model: hat_medalla_bronce
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6040
@@ -435,7 +403,6 @@ medalla_oro:
   permission-group: "hmccosmetics.omega"
   model: hat_medalla_oro
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6041
@@ -447,7 +414,6 @@ medalla_plata:
   permission-group: "hmccosmetics.omega"
   model: hat_medalla_plata
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6042
@@ -460,7 +426,6 @@ carlosnoob_peluche:
   permission-group: "hmccosmetics.omega"
   model: hat_carlosnoob_peluche
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6043
@@ -473,7 +438,6 @@ omega_peluche:
   permission-group: "hmccosmetics.omega"
   model: hat_omega_peluche
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6044
@@ -486,7 +450,6 @@ pirupeluche:
   permission-group: "hmccosmetics.omega"
   model: hat_pirupeluche
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6045
@@ -499,7 +462,6 @@ rose:
   permission-group: "hmccosmetics.omega"
   model: hat_rose
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:biomes/for_you_my_sweet"
   item:
     material: BLUE_DYE
@@ -513,7 +475,6 @@ suwiepeluche:
   permission-group: "hmccosmetics.omega"
   model: hat_suwiepeluche
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6049
@@ -526,7 +487,6 @@ wool_hat_black:
   permission-group: "hmccosmetics.omega"
   model: hat_wool_hat_black
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6050
@@ -539,7 +499,6 @@ wool_hat_white:
   permission-group: "hmccosmetics.omega"
   model: hat_wool_hat_white
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 6051
@@ -729,7 +688,6 @@ hats_gorrito_helicoptero:
   show-in-menu: true
   permission: hmccosmetics.hats_gorrito_helicoptero
   permission-group: "hmccosmetics.omega"
-  allowed-with: ""
   model: hats_gorrito_helicoptero
   made-by: "celestebanana"
   item:

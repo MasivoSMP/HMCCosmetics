@@ -5,7 +5,6 @@ balloon_fox_v1:
   permission-group: "hmccosmetics.omega"
   model: balloon_fox_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:animal/what_does_the_fox_say"
   item:
     material: BLUE_DYE
@@ -19,7 +18,6 @@ balloon_corgi:
   permission-group: "hmccosmetics.omega"
   model: balloon_corgi
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "minecraft:husbandry/tame_an_animal"
   item:
     material: BLUE_DYE
@@ -33,7 +31,6 @@ balloon_cuervoverdefideo:
   permission-group: "hmccosmetics.masivo"
   model: balloon_cuervoverdefideo
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:animal/birdkeeper"
   item:
     material: BLUE_DYE
@@ -47,7 +44,6 @@ balloon_fox_v2:
   permission-group: "hmccosmetics.masivo"
   model: balloon_fox_v2
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:animal/foxy_thievery"
   item:
     material: BLUE_DYE
@@ -61,7 +57,6 @@ balloon_glorp_dron:
   permission-group: "hmccosmetics.masivo"
   model: balloon_glorp_dron
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:challenges/ad_astra"
   item:
     material: BLUE_DYE
@@ -75,7 +70,6 @@ balloon_helicopter:
   permission-group: "hmccosmetics.masivo"
   model: balloon_helicopter
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:statistics/take_to_the_skies"
   item:
     material: BLUE_DYE
@@ -89,7 +83,6 @@ balloon_patomomo:
   permission-group: "hmccosmetics.omega"
   model: balloon_patomomo
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:animal/feeding_the_chickens"
   item:
     material: BLUE_DYE
@@ -103,7 +96,6 @@ balloon_patomomo_wide:
   permission-group: "hmccosmetics.masivo"
   model: balloon_patomomo_wide
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:animal/omelette"
   item:
     material: BLUE_DYE
@@ -117,7 +109,6 @@ balloon_reindeer_v1:
   permission-group: "hmccosmetics.masivo"
   model: balloon_reindeer_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:monsters/freezing"
   item:
     material: BLUE_DYE
@@ -131,7 +122,6 @@ balloon_seal_v1:
   permission-group: "hmccosmetics.omega"
   model: balloon_seal_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:weaponry/king_of_the_sea"
   item:
     material: BLUE_DYE
@@ -145,7 +135,6 @@ balloon_sniffer_v1:
   permission-group: "hmccosmetics.omega"
   model: balloon_sniffer_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "minecraft:husbandry/feed_snifflet"
   item:
     material: BLUE_DYE
@@ -159,7 +148,6 @@ balloon_steamhappy:
   permission-group: "hmccosmetics.omega"
   model: balloon_steamhappy
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 5014
@@ -172,7 +160,6 @@ balloon_steamsad:
   permission-group: "hmccosmetics.omega"
   model: balloon_steamsad
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 5015
@@ -185,7 +172,6 @@ ufo:
   permission-group: "hmccosmetics.masivo"
   model: balloon_ufo
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:challenges/ad_astra"
   item:
     material: BLUE_DYE
@@ -199,7 +185,6 @@ cohetev2:
   permission-group: "hmccosmetics.masivo"
   model: balloon_cohetev2
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:weaponry/pyrotechnic"
   item:
     material: BLUE_DYE
@@ -213,7 +198,6 @@ dog_balloon:
   permission-group: "hmccosmetics.omega"
   model: balloon_dog_balloon
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/whole_pack"
   item:
     material: BLUE_DYE
@@ -227,7 +211,6 @@ globoaerostatico:
   permission-group: "hmccosmetics.omega"
   model: balloon_globoaerostatico
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:statistics/test_flight"
   item:
     material: BLUE_DYE
@@ -241,7 +224,6 @@ heart:
   permission-group: "hmccosmetics.omega"
   model: balloon_heart
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:adventure/heart_transplanter"
   item:
     material: BLUE_DYE
@@ -255,7 +237,6 @@ magician_balloon:
   permission-group: "hmccosmetics.masivo"
   model: balloon_magician_balloon
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:potion/death_by_magic"
   item:
     material: BLUE_DYE
@@ -269,7 +250,6 @@ pinata:
   permission-group: "hmccosmetics.omega"
   model: balloon_pinata
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:adventure/tricky_treasures"
   item:
     material: BLUE_DYE
@@ -283,7 +263,6 @@ satelite:
   permission-group: "hmccosmetics.masivo"
   model: balloon_satelite
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:challenges/im_in_space"
   item:
     material: BLUE_DYE

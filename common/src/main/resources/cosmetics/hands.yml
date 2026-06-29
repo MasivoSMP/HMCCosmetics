@@ -5,7 +5,6 @@ hands_bear_sv_v1:
   permission-group: "hmccosmetics.omega"
   model: hand_hands_bear_sv_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7000
@@ -18,7 +17,6 @@ hands_bear_v1:
   permission-group: "hmccosmetics.omega"
   model: hand_hands_bear_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7001
@@ -31,7 +29,6 @@ hands_frierenstaff:
   permission-group: "hmccosmetics.omega"
   model: hand_hands_frierenstaff
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7002
@@ -45,7 +42,6 @@ hands_wumpus_plushy:
   permission-group: "hmccosmetics.masivo"
   model: hand_hands_wumpus_plushy
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7004
@@ -58,7 +54,6 @@ axe:
   permission-group: "hmccosmetics.omega"
   model: hand_axe
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7005
@@ -71,7 +66,6 @@ balloon_sword:
   permission-group: "hmccosmetics.masivo"
   model: hand_balloon_sword
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:adventure/spyglass_at_ghast"
   item:
     material: BLUE_DYE
@@ -85,7 +79,6 @@ bat:
   permission-group: "hmccosmetics.masivo"
   model: hand_bat
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7007
@@ -98,7 +91,6 @@ cake:
   permission-group: "hmccosmetics.omega"
   model: hand_cake
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:farming/the_lie"
   item:
     material: BLUE_DYE
@@ -112,7 +104,6 @@ chocolate_box:
   permission-group: "hmccosmetics.omega"
   model: hand_chocolate_box
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:farming/hot_chocolate"
   item:
     material: BLUE_DYE
@@ -126,7 +117,6 @@ crowbar:
   permission-group: "hmccosmetics.masivo"
   model: hand_crowbar
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7010
@@ -139,7 +129,6 @@ daisy:
   permission-group: "hmccosmetics.omega"
   model: hand_daisy
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:biomes/flower_power"
   item:
     material: BLUE_DYE
@@ -153,7 +142,6 @@ gerberas:
   permission-group: "hmccosmetics.omega"
   model: hand_gerberas
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:biomes/flower_power"
   item:
     material: BLUE_DYE
@@ -167,7 +155,6 @@ magician_wand:
   permission-group: "hmccosmetics.masivo"
   model: hand_magician_wand
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:monsters/taste_of_your_own_medicine"
   item:
     material: BLUE_DYE
@@ -181,7 +168,6 @@ plush_bear:
   permission-group: "hmccosmetics.omega"
   model: hand_plush_bear
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7014
@@ -194,7 +180,6 @@ roses:
   permission-group: "hmccosmetics.omega"
   model: hand_roses
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:biomes/flower_power"
   item:
     material: BLUE_DYE
@@ -208,7 +193,6 @@ sunflowers:
   permission-group: "hmccosmetics.omega"
   model: hand_sunflowers
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:biomes/flower_power"
   item:
     material: BLUE_DYE
@@ -222,7 +206,6 @@ trofeo:
   permission-group: "hmccosmetics.omega"
   model: hand_trofeo
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:adventure/awards_ceremony"
   item:
     material: BLUE_DYE
@@ -236,7 +219,6 @@ tulips:
   permission-group: "hmccosmetics.omega"
   model: hand_tulips
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:biomes/flower_power"
   item:
     material: BLUE_DYE
@@ -250,7 +232,6 @@ hands_steampunk_shield_1:
   permission-group: "hmccosmetics.omega"
   model: hand_hands_steampunk_shield_1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 7003

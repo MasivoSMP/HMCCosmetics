@@ -162,11 +162,13 @@ menu-settings:
     # Enables global auto-generated lore for menu items with type: cosmetic.
     # Lore order is: cosmetic-lore/custom-lore -> menu item lore -> purchase-lore.
     enabled: false
-    # Maps readable rank keys to in-game display glyphs for {allowed-with}.
-    # Cosmetic example: allowed-with: "masivo"
+    # Maps permission group keys to in-game display glyphs for {allowed-with}.
+    # The key is the final permission segment, e.g. hmccosmetics.masivo -> masivo.
+    # Cosmetic example: permission-group: "hmccosmetics.masivo"
     # Lore output example: "<gray>Available with: <#6D9DC5>"
     allowed-with-mappings:
-      masivo: ""
+      masivo: 
+      omega: 
     # Supported placeholders:
     # {cosmetic}, {allowed-with}, {made-by}, {advancement}
     # If a line contains {allowed-with}, {made-by}, or {advancement} and the cosmetic does not define

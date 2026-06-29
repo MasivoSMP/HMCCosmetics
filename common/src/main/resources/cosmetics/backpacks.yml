@@ -5,7 +5,6 @@ b_chocolate_box:
   permission-group: "hmccosmetics.omega"
   model: backpack_b_chocolate_box
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:farming/hot_chocolate"
   item:
     material: BLUE_DYE
@@ -19,7 +18,6 @@ b_plush_bear:
   permission-group: "hmccosmetics.omega"
   model: backpack_b_plush_bear
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8001
@@ -32,7 +30,6 @@ first_aid_charger:
   permission-group: "hmccosmetics.omega"
   model: backpack_first_aid_charger
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:potion/hyper_healing"
   item:
     material: BLUE_DYE
@@ -46,7 +43,6 @@ globos:
   permission-group: "hmccosmetics.masivo"
   model: backpack_globos
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8003
@@ -59,7 +55,6 @@ kirbyv2:
   permission-group: "hmccosmetics.masivo"
   model: backpack_kirbyv2
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8004
@@ -72,7 +67,6 @@ military_backpacks:
   permission-group: "hmccosmetics.masivo"
   model: backpack_military_backpacks
   made-by: "SrChat"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8005
@@ -85,7 +79,6 @@ oveja_mochila:
   permission-group: "hmccosmetics.omega"
   model: backpack_oveja_mochila
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/bred_all_animals"
   item:
     material: BLUE_DYE
@@ -99,7 +92,6 @@ panda_mochila:
   permission-group: "hmccosmetics.omega"
   model: backpack_panda_mochila
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/bred_all_animals"
   item:
     material: BLUE_DYE
@@ -113,7 +105,6 @@ poker_cards:
   permission-group: "hmccosmetics.masivo"
   model: backpack_poker_cards
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "blazeandcave:challenges/stockbroker"
   item:
     material: BLUE_DYE
@@ -127,7 +118,6 @@ pollo_mochila:
   permission-group: "hmccosmetics.omega"
   model: backpack_pollo_mochila
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/bred_all_animals"
   item:
     material: BLUE_DYE
@@ -141,7 +131,6 @@ vaca_mochila:
   permission-group: "hmccosmetics.omega"
   model: backpack_vaca_mochila
   made-by: "SrChat"
-  allowed-with: ""
   advancement: "minecraft:husbandry/bred_all_animals"
   item:
     material: BLUE_DYE
@@ -155,7 +144,6 @@ backpack_bmo_v1:
   permission-group: "hmccosmetics.omega"
   model: backpack_bmo_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8011
@@ -168,7 +156,6 @@ backpack_car_blue:
   permission-group: "hmccosmetics.masivo"
   model: backpack_car_blue
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:statistics/minecart_rider"
   item:
     material: BLUE_DYE
@@ -182,7 +169,6 @@ backpack_car_green:
   permission-group: "hmccosmetics.masivo"
   model: backpack_car_green
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:statistics/i_like_trains"
   item:
     material: BLUE_DYE
@@ -196,7 +182,6 @@ backpack_car_red:
   permission-group: "hmccosmetics.masivo"
   model: backpack_car_red
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:statistics/global_railway_network"
   item:
     material: BLUE_DYE
@@ -210,7 +195,6 @@ backpack_cookieman_v1:
   permission-group: "hmccosmetics.masivo"
   model: backpack_cookieman_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:farming/me_love_cookie"
   item:
     material: BLUE_DYE
@@ -224,7 +208,6 @@ backpack_finn_v1:
   permission-group: "hmccosmetics.omega"
   model: backpack_finn_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:adventure/veteran_of_the_village"
   item:
     material: BLUE_DYE
@@ -238,7 +221,6 @@ backpack_flamingo_float_v1:
   permission-group: "hmccosmetics.omega"
   model: backpack_flamingo_float_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "minecraft:husbandry/ride_a_boat_with_a_goat"
   item:
     material: BLUE_DYE
@@ -252,7 +234,6 @@ backpack_gatitocolgando1:
   permission-group: "hmccosmetics.omega"
   model: backpack_gatitocolgando1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:adventure/if_only_cats_grew_into_kittens"
   item:
     material: BLUE_DYE
@@ -266,7 +247,6 @@ backpack_gift_v1:
   permission-group: "hmccosmetics.masivo"
   model: backpack_gift_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:adventure/undying_fandom"
   item:
     material: BLUE_DYE
@@ -280,7 +260,6 @@ backpack_sharktail1:
   permission-group: "hmccosmetics.omega"
   model: backpack_sharktail1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:adventure/laser_sharks"
   item:
     material: BLUE_DYE
@@ -294,7 +273,6 @@ backpack_skeletalshield_v1:
   permission-group: "hmccosmetics.omega"
   model: backpack_skeletalshield_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8021
@@ -307,7 +285,6 @@ backpack_snowman_v1:
   permission-group: "hmccosmetics.masivo"
   model: backpack_snowman_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:farming/unmasked"
   item:
     material: BLUE_DYE
@@ -321,7 +298,6 @@ backpack_spider_v1:
   permission-group: "hmccosmetics.omega"
   model: backpack_spider_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:monsters/the_ghastly_eyes"
   item:
     material: BLUE_DYE
@@ -335,7 +311,6 @@ backpack_spine_v1:
   permission-group: "hmccosmetics.omega"
   model: backpack_spine_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8024
@@ -348,7 +323,6 @@ backpack_tank_v1:
   permission-group: "hmccosmetics.omega"
   model: backpack_tank_v1
   made-by: "MrDonuts__"
-  allowed-with: ""
   advancement: "blazeandcave:potion/tank"
   item:
     material: BLUE_DYE
@@ -362,7 +336,6 @@ backpack_wumpus_v2:
   permission-group: "hmccosmetics.masivo"
   model: backpack_wumpus_v2
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8027
@@ -375,7 +348,6 @@ backpack_steampunk_1:
   permission-group: "hmccosmetics.omega"
   model: backpack_steampunk_1
   made-by: "MrDonuts__"
-  allowed-with: ""
   item:
     material: BLUE_DYE
     model-data: 8025
