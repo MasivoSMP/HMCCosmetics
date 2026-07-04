@@ -1,5 +1,6 @@
 title: "<white>"
 rows: 6
+# HMCC maps these slots to a MasivoGUI repeat item at runtime.
 cosmetic-slots: [0-26, 28-34]
 cosmetic-type: hats
 items:

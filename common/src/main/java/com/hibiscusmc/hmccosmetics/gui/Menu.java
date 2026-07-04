@@ -19,14 +19,14 @@ import lombok.Setter;
 import me.lojosho.hibiscuscommons.HibiscusCommonsPlugin;
 import me.lojosho.hibiscuscommons.config.serializer.ItemSerializer;
 import me.lojosho.shaded.configurate.ConfigurationNode;
-import me.rockyhawk.commandpanels.api.v1.CommandPanelsApi;
-import me.rockyhawk.commandpanels.api.v1.MenuCloseContext;
-import me.rockyhawk.commandpanels.api.v1.MenuDefinitionContext;
-import me.rockyhawk.commandpanels.api.v1.MenuKey;
-import me.rockyhawk.commandpanels.api.v1.MenuListener;
-import me.rockyhawk.commandpanels.api.v1.OpenRequest;
-import me.rockyhawk.commandpanels.api.v1.OpenResult;
-import me.rockyhawk.commandpanels.api.v1.OpenStatus;
+import gg.masivo.masivogui.api.MasivoGUIApi;
+import gg.masivo.masivogui.api.MenuCloseContext;
+import gg.masivo.masivogui.api.MenuDefinitionContext;
+import gg.masivo.masivogui.api.MenuKey;
+import gg.masivo.masivogui.api.MenuListener;
+import gg.masivo.masivogui.api.OpenRequest;
+import gg.masivo.masivogui.api.OpenResult;
+import gg.masivo.masivogui.api.OpenStatus;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -83,7 +83,7 @@ public class Menu {
     @Getter
     @Setter
     @Nullable
-    private MenuKey commandPanelsKey;
+    private MenuKey masivoGUIKey;
 
     public Menu(String id, @NotNull ConfigurationNode config) {
         this.id = config.node("id").getString(id);
@@ -248,9 +248,9 @@ public class Menu {
             }
         }
 
-        CommandPanelsApi api = Menus.getCommandPanelsApi();
-        if (api == null || commandPanelsKey == null) {
-            MessagesUtil.sendDebugMessages("CommandPanels is not initialized for menu " + getId(), Level.WARNING);
+        MasivoGUIApi api = Menus.getMasivoGUIApi();
+        if (api == null || masivoGUIKey == null) {
+            MessagesUtil.sendDebugMessages("MasivoGUI is not initialized for menu " + getId(), Level.WARNING);
             MessagesUtil.sendMessage(viewer, "invalid-menu");
             return;
         }
@@ -262,10 +262,10 @@ public class Menu {
             Menus.setSession(viewer.getUniqueId(), session);
 
             OpenRequest request = OpenRequest.builder()
-                    .sessionValue("page", String.valueOf(session.getPage()))
+                    .sessionValue(Menus.getCosmeticsPageKey(), String.valueOf(session.getPage()))
                     .listener(new MenuListener() {
                         @Override
-                        public void onOpen(me.rockyhawk.commandpanels.api.v1.MenuSession openedSession) {
+                        public void onOpen(gg.masivo.masivogui.api.MenuSession openedSession) {
                             session.setExternalSessionId(openedSession.id());
                         }
 
@@ -282,14 +282,14 @@ public class Menu {
                     })
                     .build();
 
-            OpenResult result = api.open(commandPanelsKey, viewer, request);
+            OpenResult result = api.open(masivoGUIKey, viewer, request);
             if (result.sessionId() != null) {
                 session.setExternalSessionId(result.sessionId());
             }
 
             if (result.successful()) return;
 
-            MessagesUtil.sendDebugMessages("Failed to open CommandPanels menu " + getId() + " for " + viewer.getName()
+            MessagesUtil.sendDebugMessages("Failed to open MasivoGUI menu " + getId() + " for " + viewer.getName()
                     + " (status=" + result.status() + ", message='" + result.message() + "')", Level.WARNING);
             Menus.removeSession(viewer.getUniqueId(), session);
             if (result.status() == OpenStatus.MENU_NOT_FOUND || result.status() == OpenStatus.FAILED) {
@@ -353,10 +353,10 @@ public class Menu {
         return true;
     }
 
-    public @NotNull YamlConfiguration buildCommandPanelsConfiguration(@NotNull MenuDefinitionContext context) throws IOException {
+    public @NotNull YamlConfiguration buildMasivoGUIConfiguration(@NotNull MenuDefinitionContext context) throws IOException {
         Player viewer = context.player();
         if (viewer == null) {
-            return createBaseCommandPanelsConfiguration();
+            return createBaseMasivoGUIConfiguration();
         }
 
         MenuSession session = Menus.getSession(viewer.getUniqueId());
@@ -367,15 +367,17 @@ public class Menu {
             Menus.setSession(viewer.getUniqueId(), session);
         }
 
-        RenderData renderData = buildRenderData(viewer, session.getCosmeticHolder(), session);
+        syncPageFromMasivoGUIContext(context, session, viewer);
 
-        YamlConfiguration generated = createBaseCommandPanelsConfiguration();
+        RenderData renderData = buildStaticRenderData(viewer, session.getCosmeticHolder(), session);
+
+        YamlConfiguration generated = createBaseMasivoGUIConfiguration();
         generated.set("title", renderData.title());
 
         ConfigurationSection layoutSection = generated.getConfigurationSection("layout");
         ConfigurationSection itemsSection = generated.getConfigurationSection("items");
         if (layoutSection == null || itemsSection == null) {
-            throw new IOException("Unable to initialize CommandPanels layout/items sections for menu " + getId());
+            throw new IOException("Unable to initialize MasivoGUI layout/items sections for menu " + getId());
         }
 
         for (Map.Entry<Integer, RenderedSlot> entry : renderData.renderedSlots().entrySet()) {
@@ -390,21 +392,35 @@ public class Menu {
             writeClickActions(itemSection, slot);
         }
 
+        writeCosmeticRepeatItem(itemsSection);
+
         return generated;
     }
 
-    private @NotNull YamlConfiguration createBaseCommandPanelsConfiguration() {
+    private void syncPageFromMasivoGUIContext(@NotNull MenuDefinitionContext context,
+                                              @NotNull MenuSession session,
+                                              @NotNull Player viewer) {
+        String rawPage = context.sessionValue(Menus.getCosmeticsPageKey());
+        if (rawPage == null || rawPage.isBlank()) return;
+
+        try {
+            session.setPage(Integer.parseInt(rawPage), session.getTotalPages(viewer));
+        } catch (NumberFormatException ignored) {
+        }
+    }
+
+    private @NotNull YamlConfiguration createBaseMasivoGUIConfiguration() {
         YamlConfiguration generated = new YamlConfiguration();
         generated.set("type", "inventory");
-        generated.set("rows", String.valueOf(rows));
+        generated.set("rows", rows);
         generated.set("title", title);
-        generated.set("update-delay", String.valueOf(Math.max(0, refreshRate)));
+        generated.set("update-delay", Math.max(0, refreshRate));
         generated.createSection("layout");
         generated.createSection("items");
         return generated;
     }
 
-    private @NotNull RenderData buildRenderData(@NotNull Player viewer, @NotNull CosmeticHolder cosmeticHolder, @NotNull MenuSession session) {
+    private @NotNull RenderData buildStaticRenderData(@NotNull Player viewer, @NotNull CosmeticHolder cosmeticHolder, @NotNull MenuSession session) {
         List<MenuItem> visibleCosmeticItems = getVisibleCosmeticItems(viewer);
         session.setPage(session.getPage(), getTotalPages(visibleCosmeticItems));
 
@@ -415,11 +431,49 @@ public class Menu {
         int menuSize = rows * 9;
         Map<Integer, RenderedSlot> renderedSlots = new HashMap<>();
         for (int slot = 0; slot < menuSize; slot++) {
-            RenderedSlot renderedSlot = resolveRenderedSlot(viewer, cosmeticHolder, session, slot, visibleCosmeticItems);
+            RenderedSlot renderedSlot = resolveStaticRenderedSlot(viewer, cosmeticHolder, slot);
             if (renderedSlot != null) renderedSlots.put(slot, renderedSlot);
         }
 
         return new RenderData(finalTitle, renderedSlots);
+    }
+
+    @Nullable
+    private RenderedSlot resolveStaticRenderedSlot(@NotNull Player viewer,
+                                                   @NotNull CosmeticHolder cosmeticHolder,
+                                                   int slot) {
+        List<MenuItem> slotItems = items.get(slot);
+        if (slotItems == null || slotItems.isEmpty()) return null;
+
+        for (MenuItem item : slotItems) {
+            if (!shouldShowMenuItem(viewer, item)) continue;
+            Type type = item.type();
+            ItemStack modifiedItem = getMenuItem(viewer, cosmeticHolder, type, item.itemConfig(), item.item().clone(), slot);
+            if (modifiedItem.getType().isAir()) continue;
+            return new RenderedSlot(item, modifiedItem);
+        }
+
+        return null;
+    }
+
+    private void writeCosmeticRepeatItem(@NotNull ConfigurationSection itemsSection) {
+        if (cosmeticSlots.isEmpty() || cosmeticItems.isEmpty()) return;
+
+        ConfigurationSection itemSection = itemsSection.createSection("hmcc_cosmetics");
+        ConfigurationSection repeatSection = itemSection.createSection("repeat");
+        repeatSection.set("provider", Menus.getCosmeticsListProviderId());
+        repeatSection.set("slots", cosmeticSlotsToLayout());
+        repeatSection.set("page-key", Menus.getCosmeticsPageKey());
+        writeClickActions(itemSection, -1);
+    }
+
+    @NotNull
+    private List<String> cosmeticSlotsToLayout() {
+        List<String> layout = new ArrayList<>();
+        for (Integer slot : cosmeticSlots) {
+            layout.add(String.valueOf(slot));
+        }
+        return layout;
     }
 
     private @NotNull String buildShadedTitle(@NotNull Player viewer,
@@ -500,7 +554,8 @@ public class Menu {
 
     @NotNull
     private String buildClickActionCommand(int slot, @NotNull ClickType clickType) {
-        return "[" + Menus.getCommandPanelsNamespace() + ":" + Menus.getMenuClickActionId() + "] slot=" + slot + " click=" + clickType.name();
+        String slotValue = slot < 0 ? "{slot}" : String.valueOf(slot);
+        return "[" + Menus.getMasivoGUINamespace() + ":" + Menus.getMenuClickActionId() + "] slot=" + slotValue + " click=" + clickType.name();
     }
 
     private void writeInventoryItem(@NotNull ConfigurationSection section, @NotNull ItemStack itemStack) {
@@ -654,6 +709,25 @@ public class Menu {
             }
         }
         return visibleItems;
+    }
+
+    public int getVisibleCosmeticItemCount(@NotNull Player viewer) {
+        return getVisibleCosmeticItems(viewer).size();
+    }
+
+    @Nullable
+    public ItemStack createCosmeticListItem(@NotNull Player viewer,
+                                            @NotNull CosmeticHolder cosmeticHolder,
+                                            int absoluteIndex,
+                                            int slot) {
+        List<MenuItem> visibleCosmeticItems = getVisibleCosmeticItems(viewer);
+        if (absoluteIndex < 0 || absoluteIndex >= visibleCosmeticItems.size()) return null;
+
+        MenuItem item = visibleCosmeticItems.get(absoluteIndex);
+        Type type = item.type();
+        ItemStack modifiedItem = getMenuItem(viewer, cosmeticHolder, type, item.itemConfig(), item.item().clone(), slot);
+        if (modifiedItem.getType().isAir()) return null;
+        return modifiedItem;
     }
 
     private boolean shouldShowMenuItem(@NotNull Player viewer, @NotNull MenuItem item) {

@@ -99,7 +99,7 @@ allprojects {
         testCompileOnly("org.projectlombok:lombok:1.18.36")
         testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
 
-        compileOnly("me.rockyhawk:CommandPanels:SNAPSHOT:api")
+        compileOnly("gg.masivo:MasivoGUI:4.2.5")
         implementation("dev.triumphteam:triumph-gui:3.2.0-SNAPSHOT") {
             exclude("net.kyori")
         }
@@ -179,7 +179,7 @@ bukkit {
     apiVersion = "1.20"
     foliaSupported = true
     authors = listOf("LoJoSho")
-    depend = listOf("HibiscusCommons", "CommandPanels")
+    depend = listOf("HibiscusCommons", "MasivoGUI")
     softDepend = listOf("Vault", "Nexo", "BetterHud", "ModelEngine", "Oraxen", "ItemsAdder", "Geary", "HMCColor", "WorldGuard", "MythicMobs", "PlaceholderAPI", "SuperVanish", "PremiumVanish", "LibsDisguises", "Denizen", "MMOItems", "Eco")
     version = "${project.version}"
     loadBefore = listOf(

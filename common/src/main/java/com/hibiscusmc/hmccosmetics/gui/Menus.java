@@ -5,22 +5,28 @@ import com.hibiscusmc.hmccosmetics.config.Settings;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
 import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
+import gg.masivo.masivogui.api.ActionRegistration;
+import gg.masivo.masivogui.api.ActionResult;
+import gg.masivo.masivogui.api.ListProviderRegistration;
+import gg.masivo.masivogui.api.MasivoGUIApi;
+import gg.masivo.masivogui.api.MenuActionContext;
+import gg.masivo.masivogui.api.MenuArguments;
+import gg.masivo.masivogui.api.MenuCloseReason;
+import gg.masivo.masivogui.api.MenuDefinitionSource;
+import gg.masivo.masivogui.api.MenuKey;
+import gg.masivo.masivogui.api.MenuListContext;
+import gg.masivo.masivogui.api.MenuListItemContext;
+import gg.masivo.masivogui.api.MenuRegistration;
+import gg.masivo.masivogui.api.MenuRegistrationOptions;
 import me.lojosho.shaded.configurate.CommentedConfigurationNode;
 import me.lojosho.shaded.configurate.ConfigurateException;
 import me.lojosho.shaded.configurate.yaml.YamlConfigurationLoader;
-import me.rockyhawk.commandpanels.api.v1.ActionResult;
-import me.rockyhawk.commandpanels.api.v1.CommandPanelsApi;
-import me.rockyhawk.commandpanels.api.v1.MenuActionContext;
-import me.rockyhawk.commandpanels.api.v1.MenuCloseReason;
-import me.rockyhawk.commandpanels.api.v1.MenuDefinitionSource;
-import me.rockyhawk.commandpanels.api.v1.MenuKey;
-import me.rockyhawk.commandpanels.api.v1.MenuRegistration;
-import me.rockyhawk.commandpanels.api.v1.MenuRegistrationOptions;
 import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,18 +48,24 @@ import java.util.stream.Stream;
 public final class Menus {
 
     private static final String MENU_CLICK_ACTION_ID = "menu_click";
+    private static final String COSMETICS_LIST_PROVIDER_ID = "cosmetics";
+    private static final String COSMETICS_PAGE_KEY = "hmcc_page";
 
     private static final HashMap<String, Menu> MENUS = new HashMap<>();
     private static final Map<UUID, Long> COOLDOWNS = new ConcurrentHashMap<>();
     private static final Map<UUID, MenuSession> SESSIONS = new ConcurrentHashMap<>();
-    private static final Map<String, MenuRegistration> COMMAND_PANELS_REGISTRATIONS = new ConcurrentHashMap<>();
-    private static final Map<String, MenuKey> COMMAND_PANELS_KEYS = new ConcurrentHashMap<>();
+    private static final Map<String, MenuRegistration> MASIVO_GUI_REGISTRATIONS = new ConcurrentHashMap<>();
+    private static final Map<String, MenuKey> MASIVO_GUI_KEYS = new ConcurrentHashMap<>();
     private static final ThreadLocal<MenuActionContext> ACTION_CONTEXT = new ThreadLocal<>();
     private static final ThreadLocal<ActionExecutionState> ACTION_EXECUTION_STATE = new ThreadLocal<>();
 
     @Nullable
-    private static volatile CommandPanelsApi commandPanelsApi;
-    private static volatile String commandPanelsNamespace = "hmccosmetics";
+    private static volatile MasivoGUIApi masivoGUIApi;
+    private static volatile String masivoGUINamespace = "hmccosmetics";
+    @Nullable
+    private static volatile ActionRegistration menuClickActionRegistration;
+    @Nullable
+    private static volatile ListProviderRegistration cosmeticsListProviderRegistration;
 
     private Menus() {
     }
@@ -140,13 +152,13 @@ public final class Menus {
     }
 
     @Nullable
-    public static CommandPanelsApi getCommandPanelsApi() {
-        return commandPanelsApi;
+    public static MasivoGUIApi getMasivoGUIApi() {
+        return masivoGUIApi;
     }
 
     @NotNull
-    public static String getCommandPanelsNamespace() {
-        return commandPanelsNamespace;
+    public static String getMasivoGUINamespace() {
+        return masivoGUINamespace;
     }
 
     @NotNull
@@ -154,15 +166,36 @@ public final class Menus {
         return MENU_CLICK_ACTION_ID;
     }
 
+    @NotNull
+    public static String getCosmeticsListProviderId() {
+        return COSMETICS_LIST_PROVIDER_ID;
+    }
+
+    @NotNull
+    public static String getCosmeticsPageKey() {
+        return COSMETICS_PAGE_KEY;
+    }
+
     @Nullable
     public static MenuKey getMenuKey(@NotNull Menu menu) {
-        return COMMAND_PANELS_KEYS.get(menu.getId().toUpperCase(Locale.ROOT));
+        return MASIVO_GUI_KEYS.get(menu.getId().toUpperCase(Locale.ROOT));
     }
 
     public static boolean refresh(@NotNull Player viewer, @NotNull MenuSession session) {
         if (SESSIONS.get(viewer.getUniqueId()) != session) return false;
 
-        CommandPanelsApi api = commandPanelsApi;
+        MenuActionContext actionContext = ACTION_CONTEXT.get();
+        if (actionContext != null && actionContext.player() != null
+                && viewer.getUniqueId().equals(actionContext.player().getUniqueId())) {
+            actionContext.setSessionValue(COSMETICS_PAGE_KEY, String.valueOf(session.getPage()));
+            boolean refreshed = actionContext.refresh();
+            if (refreshed) {
+                markRefreshRequested();
+            }
+            return refreshed;
+        }
+
+        MasivoGUIApi api = masivoGUIApi;
         if (api == null) return false;
 
         boolean refreshed = api.refresh(viewer);
@@ -202,13 +235,13 @@ public final class Menus {
     }
 
     public static void setup() {
-        unregisterCommandPanelsMenus();
+        unregisterMasivoGUIMenus();
 
         MENUS.clear();
         COOLDOWNS.clear();
         SESSIONS.clear();
-        COMMAND_PANELS_REGISTRATIONS.clear();
-        COMMAND_PANELS_KEYS.clear();
+        MASIVO_GUI_REGISTRATIONS.clear();
+        MASIVO_GUI_KEYS.clear();
 
         File menuFolder = new File(HMCCosmeticsPlugin.getInstance().getDataFolder() + "/menus");
         if (!menuFolder.exists()) menuFolder.mkdir();
@@ -216,6 +249,7 @@ public final class Menus {
         try (Stream<Path> walkStream = Files.walk(menuFolder.toPath())) {
             walkStream.filter(p -> p.toFile().isFile()).forEach(child -> {
                 if (!child.toString().endsWith("yml") && !child.toString().endsWith("yaml")) return;
+                if (isFunctionalMenuFile(menuFolder.toPath(), child)) return;
 
                 MessagesUtil.sendDebugMessages("Scanning " + child);
                 YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(child).build();
@@ -237,63 +271,118 @@ public final class Menus {
             throw new RuntimeException("Failed to scan menu files", e);
         }
 
-        setupCommandPanels();
+        setupMasivoGUI();
     }
 
-    private static void setupCommandPanels() {
+    private static boolean isFunctionalMenuFile(@NotNull Path menuFolder, @NotNull Path child) {
+        Path relative = menuFolder.relativize(child);
+        return relative.getNameCount() > 1 && "functional".equalsIgnoreCase(relative.getName(0).toString());
+    }
+
+    private static void setupMasivoGUI() {
         HMCCosmeticsPlugin plugin = HMCCosmeticsPlugin.getInstance();
-        CommandPanelsApi api = Bukkit.getServicesManager().load(CommandPanelsApi.class);
+        MasivoGUIApi api = Bukkit.getServicesManager().load(MasivoGUIApi.class);
         if (api == null) {
-            throw new IllegalStateException("CommandPanels API service is unavailable. Ensure CommandPanels is installed and enabled.");
+            throw new IllegalStateException("MasivoGUI API service is unavailable. Ensure MasivoGUI is installed and enabled.");
         }
 
-        commandPanelsApi = api;
-        commandPanelsNamespace = normalizeNamespace(plugin.getName());
+        masivoGUIApi = api;
+        masivoGUINamespace = normalizeNamespace(plugin.getName());
         api.unregisterMenus(plugin);
 
-        var actionRegistration = api.registerActionHandler(plugin, MENU_CLICK_ACTION_ID, Menus::handleMenuClickAction);
-        if (!actionRegistration.successful()) {
-            throw new IllegalStateException("Failed to register CommandPanels action handler '" + MENU_CLICK_ACTION_ID + "': " + actionRegistration.errors());
+        menuClickActionRegistration = api.registerActionHandler(plugin, MENU_CLICK_ACTION_ID, Menus::handleMenuClickAction);
+        if (!menuClickActionRegistration.successful()) {
+            throw new IllegalStateException("Failed to register MasivoGUI action handler '" + MENU_CLICK_ACTION_ID + "': " + menuClickActionRegistration.errors());
+        }
+
+        cosmeticsListProviderRegistration = api.registerListProvider(plugin, COSMETICS_LIST_PROVIDER_ID, new gg.masivo.masivogui.api.MenuListProvider() {
+            @Override
+            public int size(MenuListContext context) {
+                Player player = context.player();
+                if (player == null) return 0;
+
+                Menu menu = getMenu(context.session().key().menuId());
+                if (menu == null) return 0;
+                return menu.getVisibleCosmeticItemCount(player);
+            }
+
+            @Override
+            public ItemStack create(MenuListItemContext context) {
+                Player player = context.player();
+                if (player == null) return null;
+
+                Menu menu = getMenu(context.session().key().menuId());
+                if (menu == null) return null;
+
+                MenuSession session = SESSIONS.get(player.getUniqueId());
+                if (session == null || session.getMenu() != menu) {
+                    CosmeticUser user = CosmeticUsers.getUser(player);
+                    if (user == null) return null;
+                    session = new MenuSession(menu, user);
+                    setSession(player.getUniqueId(), session);
+                }
+
+                session.setPage(context.page(), session.getTotalPages(player));
+                return menu.createCosmeticListItem(player, session.getCosmeticHolder(), context.absoluteIndex(), context.slot());
+            }
+        });
+        if (!cosmeticsListProviderRegistration.successful()) {
+            throw new IllegalStateException("Failed to register MasivoGUI list provider '" + COSMETICS_LIST_PROVIDER_ID + "': " + cosmeticsListProviderRegistration.errors());
         }
 
         for (Menu menu : MENUS.values()) {
             MenuRegistration registration = api.registerMenu(
                     plugin,
-                    MenuDefinitionSource.dynamic(menu.getId(), menu::buildCommandPanelsConfiguration),
+                    MenuDefinitionSource.dynamic(menu.getId(), menu::buildMasivoGUIConfiguration),
                     MenuRegistrationOptions.defaults()
             );
 
             if (!registration.successful()) {
-                MessagesUtil.sendDebugMessages("Failed to register CommandPanels menu '" + menu.getId() + "': " + registration.errors(), Level.WARNING);
+                MessagesUtil.sendDebugMessages("Failed to register MasivoGUI menu '" + menu.getId() + "': " + registration.errors(), Level.WARNING);
                 continue;
             }
 
             for (String warning : registration.warnings()) {
-                MessagesUtil.sendDebugMessages("CommandPanels registration warning for '" + menu.getId() + "': " + warning, Level.WARNING);
+                MessagesUtil.sendDebugMessages("MasivoGUI registration warning for '" + menu.getId() + "': " + warning, Level.WARNING);
             }
 
-            menu.setCommandPanelsKey(registration.key());
-            COMMAND_PANELS_REGISTRATIONS.put(menu.getId().toUpperCase(Locale.ROOT), registration);
-            COMMAND_PANELS_KEYS.put(menu.getId().toUpperCase(Locale.ROOT), registration.key());
+            menu.setMasivoGUIKey(registration.key());
+            MASIVO_GUI_REGISTRATIONS.put(menu.getId().toUpperCase(Locale.ROOT), registration);
+            MASIVO_GUI_KEYS.put(menu.getId().toUpperCase(Locale.ROOT), registration.key());
         }
     }
 
-    private static void unregisterCommandPanelsMenus() {
-        CommandPanelsApi api = commandPanelsApi;
+    private static void unregisterMasivoGUIMenus() {
+        if (menuClickActionRegistration != null) {
+            try {
+                menuClickActionRegistration.unregister();
+            } catch (Exception ignored) {
+            }
+        }
+        if (cosmeticsListProviderRegistration != null) {
+            try {
+                cosmeticsListProviderRegistration.unregister();
+            } catch (Exception ignored) {
+            }
+        }
+
+        MasivoGUIApi api = masivoGUIApi;
         if (api != null) {
             try {
                 api.unregisterMenus(HMCCosmeticsPlugin.getInstance());
             } catch (Exception ignored) {
             }
         }
+        menuClickActionRegistration = null;
+        cosmeticsListProviderRegistration = null;
     }
 
-    private static ActionResult handleMenuClickAction(@NotNull MenuActionContext context, @NotNull String argument) {
+    private static ActionResult handleMenuClickAction(@NotNull MenuActionContext context, @NotNull MenuArguments arguments) {
         Player viewer = context.player();
         if (viewer == null) return ActionResult.failure("Viewer is unavailable");
 
-        ParsedClickAction parsedClick = parseClickAction(argument);
-        if (parsedClick == null) return ActionResult.failure("Unable to parse click action argument: " + argument);
+        ParsedClickAction parsedClick = parseClickAction(arguments);
+        if (parsedClick == null) return ActionResult.failure("Unable to parse click action argument: " + context.argument());
 
         Menu menu = getMenu(context.session().key().menuId());
         if (menu == null) return ActionResult.failure("Unknown HMCC menu: " + context.session().key().menuId());
@@ -362,59 +451,16 @@ public final class Menus {
     }
 
     @Nullable
-    private static ParsedClickAction parseClickAction(@NotNull String argument) {
-        if (argument.isBlank()) return null;
-
-        int slot = -1;
-        ClickType clickType = ClickType.LEFT;
-
-        String[] tokens = argument.trim().split("\\s+");
-        for (String token : tokens) {
-            if (token.isBlank()) continue;
-
-            String key = null;
-            String value = null;
-            if (token.contains("=")) {
-                String[] split = token.split("=", 2);
-                key = split[0].toLowerCase(Locale.ROOT);
-                value = split.length > 1 ? split[1] : "";
-            }
-
-            if ("slot".equals(key)) {
-                try {
-                    slot = Integer.parseInt(value);
-                } catch (NumberFormatException ignored) {
-                    return null;
-                }
-                continue;
-            }
-
-            if ("click".equals(key)) {
-                try {
-                    clickType = ClickType.valueOf(value.toUpperCase(Locale.ROOT));
-                } catch (IllegalArgumentException ignored) {
-                    return null;
-                }
-                continue;
-            }
-
-            if (slot == -1) {
-                try {
-                    slot = Integer.parseInt(token);
-                    continue;
-                } catch (NumberFormatException ignored) {
-                }
-            }
-
-            try {
-                clickType = ClickType.valueOf(token.toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException ignored) {
-                return null;
-            }
-        }
-
+    private static ParsedClickAction parseClickAction(@NotNull MenuArguments arguments) {
+        int slot = arguments.optionInt("slot", arguments.positionalInt(0, -1));
         if (slot < 0) return null;
-        return new ParsedClickAction(slot, clickType);
+
+        String rawClick = arguments.optionOrDefault("click", arguments.positionalOrDefault(1, ClickType.LEFT.name()));
+        try {
+            return new ParsedClickAction(slot, ClickType.valueOf(rawClick.toUpperCase(Locale.ROOT)));
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 
     @NotNull
