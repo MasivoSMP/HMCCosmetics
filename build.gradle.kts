@@ -180,7 +180,7 @@ bukkit {
     foliaSupported = true
     authors = listOf("LoJoSho")
     depend = listOf("HibiscusCommons", "MasivoGUI")
-    softDepend = listOf("Vault", "Nexo", "BetterHud", "ModelEngine", "Oraxen", "ItemsAdder", "Geary", "HMCColor", "WorldGuard", "MythicMobs", "PlaceholderAPI", "SuperVanish", "PremiumVanish", "LibsDisguises", "Denizen", "MMOItems", "Eco")
+    softDepend = listOf("Vault", "MasivoEconomy", "Nexo", "BetterHud", "ModelEngine", "Oraxen", "ItemsAdder", "Geary", "HMCColor", "WorldGuard", "MythicMobs", "PlaceholderAPI", "SuperVanish", "PremiumVanish", "LibsDisguises", "Denizen", "MMOItems", "Eco")
     version = "${project.version}"
     loadBefore = listOf(
         "Cosmin" // Prevents Cosmin from taking /cosmetic first.

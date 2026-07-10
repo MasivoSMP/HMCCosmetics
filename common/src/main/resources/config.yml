@@ -3,6 +3,11 @@
 #
 config-version: 1
 
+economy:
+  counterparty:
+    display-name: "Cosméticos"
+    legacy-source-aliases: []
+
 default-menu: defaultmenu_hats
 debug-mode: false
 database-settings:

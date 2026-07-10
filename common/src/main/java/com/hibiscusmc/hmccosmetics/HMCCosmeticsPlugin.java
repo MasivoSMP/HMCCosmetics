@@ -165,6 +165,7 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
 
     @Override
     public void onEnd() {
+        EconomyUtil.close();
         // Plugin shutdown logic
         BalloonPhysicsTask.INSTANCE.stop();
         for (Player player : Bukkit.getOnlinePlayers()) {

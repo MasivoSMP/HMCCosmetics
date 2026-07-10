@@ -34,7 +34,6 @@ import me.lojosho.hibiscuscommons.scheduler.TaskHandle;
 import me.lojosho.hibiscuscommons.util.InventoryUtils;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -869,8 +868,7 @@ public class CosmeticUser implements CosmeticHolder {
             return false;
         }
 
-        EconomyResponse response = EconomyUtil.withdraw(player, cosmetic.getPrice());
-        if (response == null || !response.transactionSuccess()) {
+        if (!EconomyUtil.withdraw(player, cosmetic.getPrice())) {
             MessagesUtil.sendMessage(player, "purchase-cosmetic-economy-unavailable");
             return false;
         }
