@@ -20,7 +20,6 @@ import lombok.Setter;
 import me.lojosho.hibiscuscommons.scheduler.TaskHandle;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -47,6 +46,8 @@ public class UserWardrobeManager {
     private String npcName;
     @Getter
     private GameMode originalGamemode;
+    private boolean originalAllowFlight;
+    private boolean originalFlying;
     @Getter
     private final CosmeticUser user;
     @Getter
@@ -98,12 +99,14 @@ public class UserWardrobeManager {
         Player player = user.getPlayer();
 
         this.originalGamemode = player.getGameMode();
+        this.originalAllowFlight = player.getAllowFlight();
+        this.originalFlying = player.isFlying();
         if (WardrobeSettings.isReturnLastLocation()) {
             this.exitLocation = player.getLocation().clone();
         }
 
         user.hidePlayer();
-        if (!Bukkit.getServer().getAllowFlight()) player.setAllowFlight(true);
+        player.setAllowFlight(true);
         List<Player> viewer = Collections.singletonList(player);
         List<Player> outsideViewers = HMCCPacketManager.getViewers(viewingLocation);
         outsideViewers.remove(player);
@@ -244,7 +247,6 @@ public class UserWardrobeManager {
         outsideViewers.remove(player);
 
         if (player == null) return;
-        if (!Bukkit.getServer().getAllowFlight()) player.setAllowFlight(false);
         MessagesUtil.sendMessage(player, "closed-wardrobe");
 
         Runnable run = () -> {
@@ -272,15 +274,28 @@ public class UserWardrobeManager {
             HMCCPacketManager.sendEntityDestroyPacket(ARMORSTAND_ID, viewer); // Sucess
 
             //PacketManager.sendEntityDestroyPacket(player.getEntityId(), viewer); // Success
+            GameMode exitGamemode;
+            boolean exitAllowFlight;
+            boolean exitFlying;
             if (WardrobeSettings.isForceExitGamemode()) {
-                MessagesUtil.sendDebugMessages("Force Exit Gamemode " + WardrobeSettings.getExitGamemode());
-                player.setGameMode(WardrobeSettings.getExitGamemode());
-                HMCCPacketManager.gamemodeChangePacket(player, WardrobeSettings.getExitGamemode()); // Success
+                exitGamemode = WardrobeSettings.getExitGamemode();
+                exitAllowFlight = exitGamemode == GameMode.CREATIVE || exitGamemode == GameMode.SPECTATOR;
+                exitFlying = false;
+                MessagesUtil.sendDebugMessages("Force Exit Gamemode " + exitGamemode);
             } else {
-                MessagesUtil.sendDebugMessages("Original Gamemode " + this.originalGamemode);
-                player.setGameMode(this.originalGamemode);
-                HMCCPacketManager.gamemodeChangePacket(player, this.originalGamemode); // Success
+                exitGamemode = this.originalGamemode;
+                exitAllowFlight = this.originalAllowFlight;
+                exitFlying = this.originalFlying;
+                MessagesUtil.sendDebugMessages("Original Gamemode " + exitGamemode);
             }
+
+            player.setGameMode(exitGamemode);
+            HMCCPacketManager.gamemodeChangePacket(player, exitGamemode); // Success
+
+            // Send the authoritative abilities state after the client-only gamemode reset. This is
+            // especially important for Bedrock clients, which can otherwise retain spectator flight.
+            player.setAllowFlight(exitAllowFlight);
+            player.setFlying(exitAllowFlight && exitFlying);
             user.showPlayer();
 
             if (user.hasCosmeticInSlot(CosmeticSlot.BACKPACK)) {
