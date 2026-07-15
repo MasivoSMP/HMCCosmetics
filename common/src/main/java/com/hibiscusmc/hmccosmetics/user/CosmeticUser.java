@@ -868,7 +868,9 @@ public class CosmeticUser implements CosmeticHolder {
             return false;
         }
 
-        if (!EconomyUtil.withdraw(player, cosmetic.getPrice())) {
+        String operationId = UUID.randomUUID().toString();
+        if (!EconomyUtil.withdraw(player, cosmetic.getPrice(), operationId, cosmetic.getId(),
+                cosmetic.getSlot().getName().toLowerCase(Locale.ROOT), cosmeticName)) {
             MessagesUtil.sendMessage(player, "purchase-cosmetic-economy-unavailable");
             return false;
         }
