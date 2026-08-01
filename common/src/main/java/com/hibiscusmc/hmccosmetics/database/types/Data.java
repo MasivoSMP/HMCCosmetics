@@ -21,6 +21,11 @@ public abstract class Data {
 
     public abstract void save(CosmeticUser user);
 
+    public CompletableFuture<Void> saveAsync(CosmeticUser user) {
+        save(user);
+        return CompletableFuture.completedFuture(null);
+    }
+
     @Nullable
     public abstract CompletableFuture<UserData> get(UUID uniqueId);
 

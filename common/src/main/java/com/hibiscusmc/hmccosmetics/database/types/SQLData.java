@@ -35,8 +35,20 @@ public abstract class SQLData extends Data {
     @Override
     @SuppressWarnings("resource")
     public void save(CosmeticUser user) {
+        saveAsync(user).exceptionally(failure -> {
+            HMCCosmeticsPlugin.getInstance().getLogger().log(
+                    java.util.logging.Level.SEVERE,
+                    "Unable to save cosmetic profile for " + user.getUniqueId(),
+                    failure);
+            return null;
+        });
+    }
+
+    @Override
+    @SuppressWarnings("resource")
+    public CompletableFuture<Void> saveAsync(CosmeticUser user) {
         if (user == null) {
-            return;
+            return CompletableFuture.completedFuture(null);
         }
         String serialized = serializeData(user);
         UUID userId = user.getUniqueId();
@@ -51,9 +63,14 @@ public abstract class SQLData extends Data {
             }
         };
         if (!HMCCosmeticsPlugin.getInstance().isDisabled()) {
-            HMCCosmeticsPlugin.getInstance().getScheduler().runAsync(run);
+            return CompletableFuture.runAsync(run);
         } else {
-            run.run();
+            try {
+                run.run();
+                return CompletableFuture.completedFuture(null);
+            } catch (RuntimeException failure) {
+                return CompletableFuture.failedFuture(failure);
+            }
         }
     }
 

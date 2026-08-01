@@ -101,6 +101,8 @@ allprojects {
 
         compileOnly("gg.masivo:MasivoGUI:4.2.5")
         compileOnly("gg.masivo:MasivoEconomy:0.1.9")
+        compileOnly(platform("gg.masivo.sharding:masivo-sharding-bom:0.1.5"))
+        compileOnly("gg.masivo.sharding:masivo-sharding-paper-api")
         implementation("dev.triumphteam:triumph-gui:3.2.0-SNAPSHOT") {
             exclude("net.kyori")
         }
@@ -180,7 +182,7 @@ bukkit {
     apiVersion = "1.20"
     foliaSupported = true
     authors = listOf("LoJoSho")
-    depend = listOf("HibiscusCommons", "MasivoGUI", "MasivoEconomy")
+    depend = listOf("HibiscusCommons", "MasivoGUI", "MasivoEconomy", "MasivoSharding")
     softDepend = listOf("Vault", "Nexo", "BetterHud", "ModelEngine", "Oraxen", "ItemsAdder", "Geary", "HMCColor", "WorldGuard", "MythicMobs", "PlaceholderAPI", "SuperVanish", "PremiumVanish", "LibsDisguises", "Denizen", "MMOItems", "Eco")
     version = "${project.version}"
     loadBefore = listOf(

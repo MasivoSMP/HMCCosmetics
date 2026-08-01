@@ -11,8 +11,8 @@ economy:
 default-menu: defaultmenu_hats
 debug-mode: false
 database-settings:
-  # SQLite (Default), MYSQL, NONE
-  type: sqlite
+  # Shared MySQL is required when running HMCCosmetics on sharded survival.
+  type: mysql
   mysql:
     database: "database"
     password: "cherryBomb"
