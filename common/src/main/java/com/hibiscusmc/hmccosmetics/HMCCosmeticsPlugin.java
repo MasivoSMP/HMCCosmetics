@@ -24,6 +24,7 @@ import com.hibiscusmc.hmccosmetics.hooks.worldguard.WGListener;
 import com.hibiscusmc.hmccosmetics.listener.*;
 import com.hibiscusmc.hmccosmetics.packets.CosmeticPacketInterface;
 import com.hibiscusmc.hmccosmetics.sharding.CosmeticsTransferGuard;
+import com.hibiscusmc.hmccosmetics.sharding.ShardingServiceAwaiter;
 import com.hibiscusmc.hmccosmetics.task.BalloonPhysicsTask;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
@@ -59,6 +60,8 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
 
     private static HMCCosmeticsPlugin instance;
     private static YamlConfigurationLoader configLoader;
+    private MasivoShardingPaperService sharding;
+    private ShardingServiceAwaiter shardingAwaiter;
     private TransferGuardRegistration transferGuardRegistration;
 
     @Getter
@@ -140,7 +143,8 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
         }
         // Database
         new Database();
-        registerTransferGuard();
+        shardingAwaiter = new ShardingServiceAwaiter(this, this::registerTransferGuard);
+        shardingAwaiter.start();
 
         // HMCColor
         try {
@@ -170,6 +174,10 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
 
     @Override
     public void onEnd() {
+        if (shardingAwaiter != null) {
+            shardingAwaiter.close();
+            shardingAwaiter = null;
+        }
         unregisterTransferGuard();
         EconomyUtil.close();
         // Plugin shutdown logic
@@ -190,25 +198,23 @@ public final class HMCCosmeticsPlugin extends HibiscusPlugin {
         return instance;
     }
 
-    private void registerTransferGuard() {
-        var registration = getServer().getServicesManager()
-                .getRegistration(MasivoShardingPaperService.class);
-        if (registration == null) {
-            throw new IllegalStateException("MasivoSharding Paper service is unavailable");
-        }
-        transferGuardRegistration = registration.getProvider()
+    private boolean registerTransferGuard(
+            MasivoShardingPaperService sharding,
+            gg.masivo.sharding.api.bus.CrossShardBus ignored) {
+        this.sharding = sharding;
+        transferGuardRegistration = sharding
                 .transferGuards()
                 .register(new CosmeticsTransferGuard());
+        return true;
     }
 
     private void unregisterTransferGuard() {
         if (transferGuardRegistration == null) return;
-        var registration = getServer().getServicesManager()
-                .getRegistration(MasivoShardingPaperService.class);
-        if (registration != null) {
-            registration.getProvider().transferGuards().unregister(transferGuardRegistration);
+        if (sharding != null) {
+            sharding.transferGuards().unregister(transferGuardRegistration);
         }
         transferGuardRegistration = null;
+        sharding = null;
     }
 
     public static void setup() {
