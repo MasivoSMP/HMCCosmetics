@@ -20,7 +20,7 @@ public final class CosmeticsTransferGuard implements PlayerTransferGuard {
     public TransferGuardResult evaluate(Player player, TransferIntent intent) {
         CosmeticUser user = CosmeticUsers.getUser(player);
         if (user == null) {
-            return TransferGuardResult.rejected("hmccosmetics:profile_unavailable");
+            return TransferGuardResult.deferred("hmccosmetics:profile_unavailable");
         }
         if (user.isInWardrobe()) {
             return TransferGuardResult.rejected("hmccosmetics:wardrobe_active");
