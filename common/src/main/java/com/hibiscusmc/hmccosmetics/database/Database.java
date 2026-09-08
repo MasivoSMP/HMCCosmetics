@@ -24,7 +24,7 @@ public class Database {
                             + databaseType);
         }
         data = MYSQL_DATA;
-        MessagesUtil.sendDebugMessages("Database is " + data);
+        com.hibiscusmc.hmccosmetics.util.MessagesUtil.sendDebugMessages("Database is " + data);
 
         setup();
     }

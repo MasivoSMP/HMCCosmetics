@@ -1,8 +1,10 @@
+import java.util.zip.ZipFile
+import java.security.MessageDigest
 import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
 
 plugins {
     id("java")
-    id("com.gradleup.shadow") version "8.3.2"
+    id("com.gradleup.shadow") version "9.2.1"
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
 }
@@ -68,25 +70,25 @@ allprojects {
     dependencies {
         compileOnly(fileTree("${project.rootDir}/lib") { include("*.jar") })
         compileOnly("com.mojang:authlib:1.5.25")
-        compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+        compileOnly("io.canvasmc.pinac:pinac-api:26.2-local")
         compileOnly("org.jetbrains:annotations:24.1.0")
         compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
         compileOnly("me.clip:placeholderapi:2.11.6")
         compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.6")
-        compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.12") {
+        compileOnly(files(
+            acceptedJar("../../Masivo/WorldGuard/worldguard-bukkit/build/libs/worldguard-bukkit-7.0.18-SNAPSHOT.jar", "0f3d2e90f8191e7b14ddf6593e269b38a15581968e214980c83ae3b02c0c1bed"),
+            acceptedJar("../../Masivo/WorldGuard/worldguard-core/build/libs/worldguard-core-7.0.18-SNAPSHOT.jar", "53ffd4370c215022aa71bbf990a03e6e4258213e071885479af8659059610119")
+        ))
+        compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.4") {
             exclude(group = "org.bukkit")
-            exclude(group = "com.google.guava")
-            exclude(group = "com.google.code.gson")
-            exclude(group = "it.unimi.dsi")
-            exclude(group = "com.sk89q.jnbt")
-            exclude(group = "org.enginehub.lin-bus.format")
+            exclude(group = "io.papermc.paper")
         }
         compileOnly("io.github.toxicity188:BetterHud-standard-api:1.12") //Standard api
         compileOnly("io.github.toxicity188:BetterHud-bukkit-api:1.12") //Platform api
         compileOnly("io.github.toxicity188:BetterCommand:1.3") //BetterCommand library
         //compileOnly("it.unimi.dsi:fastutil:8.5.14")
-        compileOnly("org.projectlombok:lombok:1.18.34")
-        compileOnly("me.lojosho:HibiscusCommons:0.9.1-8523cbe")
+        compileOnly("org.projectlombok:lombok:1.18.40")
+        compileOnly(files(acceptedJar("../../Masivo/Cosmetics/HibiscusCommons/output/HibiscusCommons-0.9.1.jar", "bf5e810696b7622c3dc9c5376be16881971e04079ddd35b18acded79f5ae642e")))
 
         // Handled by Spigot Library Loader ~ Deprecated as of Dec 16, 2025
         /*
@@ -95,18 +97,17 @@ allprojects {
         compileOnly("net.kyori:adventure-platform-bukkit:4.4.1")
          */
 
-        annotationProcessor("org.projectlombok:lombok:1.18.36")
-        testCompileOnly("org.projectlombok:lombok:1.18.36")
-        testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
+        annotationProcessor("org.projectlombok:lombok:1.18.40")
+        testCompileOnly("org.projectlombok:lombok:1.18.40")
+        testAnnotationProcessor("org.projectlombok:lombok:1.18.40")
 
-        compileOnly("gg.masivo:MasivoGUI:4.2.5")
-        compileOnly("gg.masivo:MasivoEconomy:0.1.9")
-        compileOnly(platform("gg.masivo.sharding:masivo-sharding-bom:0.4.7"))
+        compileOnly(files(acceptedJar("../MasivoGUI/build/libs/MasivoGUI-api.jar", "a65df5ca5a0e5ca0753eb11ca4279d6d785c3516446d864f237dba7d732f4824")))
+        compileOnly(files(acceptedJar("../MasivoEconomy/build/libs/MasivoEconomy-0.2.3-plain.jar", "d5ba6617bde60fdd7468633ea9af7731d3244f817637696afb749768ab445331")))
+        compileOnly(platform("gg.masivo.sharding:masivo-sharding-bom:0.6.58"))
         compileOnly("gg.masivo.sharding:masivo-sharding-paper-api")
         implementation("dev.triumphteam:triumph-gui:3.2.0-SNAPSHOT") {
             exclude("net.kyori")
         }
-        implementation("com.owen1212055:particlehelper:1.0.0-SNAPSHOT")
     }
 
     tasks {
@@ -126,7 +127,7 @@ tasks {
 
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(21)
+        options.release.set(25)
     }
 
     javadoc {
@@ -153,7 +154,6 @@ tasks {
     shadowJar {
         mergeServiceFiles()
 
-        relocate("com.owen1212055.particlehelper", "com.hibiscusmc.hmccosmetics.shaded.particlehelper")
         relocate("dev.triumphteam.gui", "com.hibiscusmc.hmccosmetics.shaded.gui")
         archiveFileName.set("HMCCosmeticsRemapped-${project.version}.jar")
 
@@ -179,7 +179,7 @@ tasks {
 bukkit {
     load = BukkitPluginDescription.PluginLoadOrder.POSTWORLD
     main = "com.hibiscusmc.hmccosmetics.HMCCosmeticsPlugin"
-    apiVersion = "1.20"
+    apiVersion = "26.2"
     foliaSupported = true
     authors = listOf("LoJoSho")
     depend = listOf("HibiscusCommons", "MasivoGUI", "MasivoEconomy", "MasivoSharding")
@@ -287,7 +287,7 @@ bukkit {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 
     withJavadocJar()
     withSourcesJar()
@@ -312,3 +312,38 @@ fun getGitCommitHash(): String {
     }
     return ""
 }
+
+// Accepted provider handoffs are read-only; never build or publish sibling projects here.
+fun acceptedJar(path: String, sha256: String): File {
+    val jar = rootProject.file(path)
+    require(jar.isFile) { "Missing accepted provider JAR: $jar (see MIGRATION_26_2.md)" }
+    val actual = MessageDigest.getInstance("SHA-256").digest(jar.readBytes())
+        .joinToString("") { "%02x".format(it) }
+    require(actual == sha256) { "Accepted provider JAR hash mismatch: $jar" }
+    return jar
+}
+
+
+tasks.register("migrationCheck") {
+    dependsOn(tasks.shadowJar)
+    doLast {
+        val probe = layout.buildDirectory.file("migration-check/provider.jar").get().asFile
+        probe.parentFile.mkdirs()
+        probe.writeText("abc")
+        check(acceptedJar(probe.path, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad") == probe)
+        check(runCatching { acceptedJar(probe.path, "wrong") }.exceptionOrNull() is IllegalArgumentException)
+        check(runCatching { acceptedJar(probe.path + ".missing", "wrong") }.exceptionOrNull() is IllegalArgumentException)
+        ZipFile(tasks.shadowJar.get().archiveFile.get().asFile).use { jar ->
+            val descriptor = jar.getInputStream(jar.getEntry("plugin.yml")).bufferedReader().readText()
+            check(descriptor.contains("api-version: \"26.2\""))
+            check(descriptor.contains("folia-supported: true"))
+            check(jar.getEntry("com/hibiscusmc/hmccosmetics/HMCCosmeticsPlugin.class") != null)
+            check(jar.entries().asSequence().none { entry ->
+                listOf("org/bukkit/", "net/minecraft/", "net/kyori/", "gg/masivo/", "me/lojosho/", "com/sk89q/", "com/hibiscusmc/hmccosmetics/shaded/particlehelper/")
+                    .any { entry.name.startsWith(it) }
+            })
+        }
+        println("Migration check passed: accepted JAR hashes/rejection and target plugin packaging")
+    }
+}
+tasks.check { dependsOn("migrationCheck") }
