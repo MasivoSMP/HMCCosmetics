@@ -20,7 +20,8 @@ public final class CosmeticsTransferGuard implements PlayerTransferGuard {
     public TransferGuardResult evaluate(Player player, TransferIntent intent) {
         CosmeticUser user = CosmeticUsers.getUser(player);
         if (user == null) {
-            return TransferGuardResult.deferred("hmccosmetics:profile_unavailable");
+            // No local profile means no unsaved purchases/preferences; destination join rebuilds it.
+            return TransferGuardResult.allowed();
         }
         if (user.isInWardrobe()) {
             return TransferGuardResult.rejected("hmccosmetics:wardrobe_active");
@@ -32,12 +33,15 @@ public final class CosmeticsTransferGuard implements PlayerTransferGuard {
     public CompletionStage<OutgoingPreparationResult> prepareOutgoing(
             Player player, TransferIntent intent) {
         CosmeticUser user = CosmeticUsers.getUser(player);
-        if (user == null || user.isInWardrobe()) {
+        if (user == null) {
+            return java.util.concurrent.CompletableFuture.completedFuture(OutgoingPreparationResult.ready());
+        }
+        if (user.isInWardrobe()) {
             return java.util.concurrent.CompletableFuture.completedFuture(
                     OutgoingPreparationResult.rejected("hmccosmetics:profile_changed"));
         }
         return Database.saveAsync(user).handle((ignored, failure) -> failure == null
                 ? OutgoingPreparationResult.ready()
-                : OutgoingPreparationResult.rejected("hmccosmetics:profile_save_failed"));
+                : OutgoingPreparationResult.retryable("hmccosmetics:profile_save_failed"));
     }
 }

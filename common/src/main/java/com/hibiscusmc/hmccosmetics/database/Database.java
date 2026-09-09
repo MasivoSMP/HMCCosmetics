@@ -5,6 +5,7 @@ import com.hibiscusmc.hmccosmetics.database.types.Data;
 import com.hibiscusmc.hmccosmetics.database.types.MySQLData;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUser;
 import com.hibiscusmc.hmccosmetics.user.CosmeticUsers;
+import com.hibiscusmc.hmccosmetics.util.MessagesUtil;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 
