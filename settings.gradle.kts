@@ -9,4 +9,3 @@ rootProject.name = "HMCCosmetics"
 include(
     "common"
 )
-includeBuild("../../MasivoEconomy")
