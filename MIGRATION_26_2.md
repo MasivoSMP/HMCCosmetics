@@ -77,3 +77,22 @@ Development build/check/package acceptance PASS; no remaining build blocker. All
 Git review checkpoint15d72cc7 was committed/pushed before implementation. Implementation/validation checkpoint follows this report update; all owned changes are staged explicitly and pushed only with git push -u origin HEAD:refs/heads/dev-26.2. Final handoff verifies clean status and git ls-remote origin refs/heads/dev-26.2 equals local HEAD; original Database.java hash is rechecked separately.
 
 Verified implementation checkpoint: cf81ef2d1b9ce372f013b019f40f9acf72432bd3 equals origin/dev-26.2 after explicit push; isolated worktree clean. Original remapped checkout still has exactly its pre-existing Database.java import change, SHA2565c69b0d38a0fa0ed13f6d5ebed9e021e4349f9c7f7360fcf485dc7de8490044d unchanged. Final documentation-only checkpoint adds this observation; artifact inputs/hashes above are unchanged and its final remote equality is checked in the owner handoff.
+
+## 2026-09-17 default-branch reconciliation
+
+Fetched remapped 8a24fecd08ebbc4ebb154f0ca665c28d827c9bfb and dev-26.2 58521d78890327cc1cda9cd0bd5b851bbc1d5258; no pre-existing open PRs in MasivoSMP/HMCCosmetics. Merged the profile-recovery/transfer-preparation commit. The original remapped checkout was not edited.
+
+Retained Java25/Pinac26.2/Commons target implementation and packaging checks. Main now uses OutgoingPreparationResult.retryable(), which javap proved absent from the original Sharding0.6.58 API. Compile BOM updated to the locally validated/published Sharding0.6.62 provider. Economy handoff updated to reconciled 0.3.3 plain JAR, verified SHA256 fd9fc8bbd6af2aecbd2b11c413b08aa23d0d1d6a6b891aaec2b8c5864957d895. Other provider hashes unchanged.
+
+Wired the main branch's existing standalone CosmeticsTransferGuardCheck into normal check through an isolated guardCheck source set, enabling assertions and supplying actual compile APIs at runtime. Kept ordinary test discovery intact; placing an assertion-main class in JUnit test sources initially caused Gradle's no-tests-discovered failure, corrected by moving that class to src/check/java. The check confirms a missing profile permits transfer and outgoing preparation without a server. Migration package/hash/rejection checks also pass.
+
+Validation: JAVA_HOME=Temurin25, HMCC_INCLUDE_HASH=false, gradlew.bat build --no-configuration-cache --console=plain PASS, including common compilation, test-source compilation, transferGuardCheck, migrationCheck, root/common packages. Existing Javadoc/deprecation warnings remain. No live SQL/wardrobe/client/Pinac/optional-hook session was run; runtime gates in the original report remain open. git diff --check passes.
+
+Final artifact SHA256:
+- HMCCosmetics-2.9.1-javadoc.jar: c6deada2fac53b8ea6523dbda77597b128006674616f140f04df23264c6d1aa3
+- HMCCosmetics-2.9.1-sources.jar: 5b14b0842e643deed461525b5c561f174a267d4598e79db4ee53f961df2ddc8b
+- HMCCosmetics-2.9.1.jar: 5b14b0842e643deed461525b5c561f174a267d4598e79db4ee53f961df2ddc8b
+- HMCCosmeticsRemapped-2.9.1.jar: 4593a607cf21dfd8fe4e646891497b8f610ce77d2c1365869ca8aed11a83d6ba
+- common-javadoc.jar: 1d8886fbafa3a949d3a38b6a8da7097826283b9b712f3203fbcab4812301025d
+- common-sources.jar: c64cdb43e31b5212e54f83b6619a3c3c0c549e0bddbf9eaffb114dd197db5cf4
+- common.jar: 54af83f1a4f0b04b86519200cf128748d2a670f8f2068e16ac37e6e7350cc046

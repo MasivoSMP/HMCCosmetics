@@ -75,3 +75,17 @@ class PublishData(private val project: Project) {
             name.plus(append).plus(if (appendCommit && addCommit) "-".plus(commitHash) else "")
     }
 }
+
+val guardCheck by sourceSets.creating {
+    java.srcDir("src/check/java")
+    compileClasspath += sourceSets.main.get().output + sourceSets.main.get().compileClasspath
+    runtimeClasspath += compileClasspath
+}
+
+val transferGuardCheck by tasks.registering(JavaExec::class) {
+    dependsOn(tasks.named(guardCheck.classesTaskName))
+    classpath = guardCheck.runtimeClasspath
+    mainClass.set("com.hibiscusmc.hmccosmetics.sharding.CosmeticsTransferGuardCheck")
+    enableAssertions = true
+}
+tasks.check { dependsOn(transferGuardCheck) }

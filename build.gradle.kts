@@ -102,8 +102,8 @@ allprojects {
         testAnnotationProcessor("org.projectlombok:lombok:1.18.40")
 
         compileOnly(files(acceptedJar("../MasivoGUI/build/libs/MasivoGUI-api.jar", "a65df5ca5a0e5ca0753eb11ca4279d6d785c3516446d864f237dba7d732f4824")))
-        compileOnly(files(acceptedJar("../MasivoEconomy/build/libs/MasivoEconomy-0.2.3-plain.jar", "d5ba6617bde60fdd7468633ea9af7731d3244f817637696afb749768ab445331")))
-        compileOnly(platform("gg.masivo.sharding:masivo-sharding-bom:0.6.58"))
+        compileOnly(files(acceptedJar("../MasivoEconomy/build/libs/MasivoEconomy-0.3.3-plain.jar", "fd9fc8bbd6af2aecbd2b11c413b08aa23d0d1d6a6b891aaec2b8c5864957d895")))
+        compileOnly(platform("gg.masivo.sharding:masivo-sharding-bom:0.6.62"))
         compileOnly("gg.masivo.sharding:masivo-sharding-paper-api")
         implementation("dev.triumphteam:triumph-gui:3.2.0-SNAPSHOT") {
             exclude("net.kyori")
